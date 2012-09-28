@@ -45,7 +45,7 @@ Class Core {
 				include "../tests/".$classname.".php";
 				return;
 			}else {
-				include "../controller/".$classname.".php";
+				include "../controllers/".$classname.".php";
 				return;
 			}
 
@@ -53,7 +53,7 @@ Class Core {
 
 		// else instantiate a model
 		else {
-			include "../model/".$classname.".php";
+			include "../models/".$classname.".php";
 			return;
 		}
 
@@ -326,7 +326,7 @@ Class Core {
 				$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
 
 				// path to view
-				$path_to_view = Settings::$pathToApp."view/$controller_name/{$controller::$viewname}.php";
+				$path_to_view = Settings::$pathToApp."views/$controller_name/{$controller::$viewname}.php";
 
 				// render out the view and set it equal to to content_for_layout
 				$content_for_layout = self::_get_contents($path_to_view,$controller::$view_info,$root);
@@ -336,7 +336,7 @@ Class Core {
 				{
 
 					// set the template path
-					$path_to_template = Settings::$pathToApp."view/templates/{$controller::$template}.php";
+					$path_to_template = Settings::$pathToApp."views/templates/{$controller::$template}.php";
 				}
 				// if templating is not on
 				else {
