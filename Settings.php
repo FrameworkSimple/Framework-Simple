@@ -4,25 +4,28 @@ class Settings {
 	// default title
 	static public $title = "Film Hubble";
 
-	// default database information
-	//static public $db = array('DSN' => 'mysql:hostname=74.53.119.203;dbname=rhigley_Filmhubble','table' => 'filmHubble','username' => 'rhigley','password' => 'r110492');
-	static public $db = array('DSN' => 'mysql:hostname=localhost;dbname=filmHubble','table' => 'filmHubble','username' => 'root','password' => 'root');
-	// default controller when there isn't on avaliable
-	public static $defaultController = 'Home';
+	// database information
+	static public $db = array('DSN' => 'mysql:hostname=localhost;dbname=simple','username' => 'root','password' => 'root');
 
-	// default action when there isn't one avaliable
+	// default controller when there isn't on available
+	public static $defaultController = 'Hello';
+
+	// default action when there isn't one available
 	public static $defaultAction = 'index';
 
-	// default action when there isn't one avaliable
+	// default action when there isn't one available
 	public static $defaultTemplate = 'default';
+
+	// the default for how you want views to output when no extension is specified 
+	public static $defaultViewType = 'html';
 
 	// if you want to use templates
 	public static $templates = false;
 
-	// if you would like to see the debug outout
+	// if you would like to see the debug output
 	public static $debug = true;
 
-	// salt to use for any encripytion
+	// salt to use for any encryption
 	public static $salt = "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p";
 
 	// url to the app relative to the index.php inside webroot
@@ -30,7 +33,7 @@ class Settings {
 
 	// if you would like the REST API Settings turned on
 		// All calls will be processed based on the type of HTTP Request
-		// Any calls made with ajax will automaticly return JSON and not render a view
+		// Any calls made with ajax will automatically return JSON and not render a view
 	public static $rest = true;
 
 	// return this type to an ajax request

@@ -1,7 +1,7 @@
 <?php
 
 Class Core {
-	// holds all the classes that have been instatiated
+	// holds all the classes that have been instantiated
 	private static $instantiated = array();
 
 	// variable for all the debug information
@@ -10,7 +10,7 @@ Class Core {
 									"instantiated" =>array()
 								);
 
-	// loads all the classes automaticly
+	// loads all the classes automatically
 	public static function autoloader($classname)
 	{
 
@@ -76,6 +76,13 @@ Class Core {
 		// removes the get variables
 		$url = preg_split("/[?]/", $url);
 
+		// split on the period
+		// get the extension
+		$url = preg_split("/[.]/", $url[0]);
+
+		// set the extension to the second half of the split so that we can use it later
+		$extension = $url[1];
+
 		// put into an array all the pieces
 		$url = explode("/",$url[0]);
 
@@ -114,11 +121,18 @@ Class Core {
 
 		}
 		// check if controller exists
-		if(is_file(Settings::$pathToApp."controller/".ucfirst($request[0])."Controller.php"))
+		if(is_file(Settings::$pathToApp."controllers/".ucfirst($request[0])."Controller.php"))
 		{
 
 			// set the controller
 			$info_of_url['controller'] = ucfirst($request[0]).'Controller';
+
+			// if there is an extension 
+			if($extension)
+
+			{
+				$info_of_url['ext'] = $extension;
+			}
 
 			// if there is an second value
 			if (isset($request[1]))
@@ -203,7 +217,6 @@ Class Core {
 			}
 
 		}
-
 		// return the information
 		return $info_of_url;
 
@@ -274,7 +287,7 @@ Class Core {
 				$controller->reqest[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
 
 			}
-			//TODO: Add XML and other formart support
+			//TODO: Add XML and other format support
 
 			// call the before action method
 			$controller->beforeAction();
@@ -304,32 +317,25 @@ Class Core {
 			// run the after action method
 			$controller->afterAction();
 
-			// if it was an ajax request and the return type was json
-			if($controller->request['AJAX'] && Settings::$ajaxReturnType === 'json')
+			
+			// set the root variable for use within views
+			$root = Asset::get_base();
+
+			// name of the controller
+			$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
+
+			// extension
+			$extension = isset($info_of_url['ext'])?$info_of_url['ext'].".php":Settings::$defaultViewType.".php";
+
+			// path to view
+			$path_to_view = Settings::$pathToApp."views/$controller_name/{$controller::$viewname}.$extension";
+
+			// render out the view and set it equal to to content_for_layout
+			$content_for_layout = self::_get_contents($path_to_view,$controller::$view_info,$root);
+
+			// if it is not ajax
+			if(!$controller->request['AJAX'])
 			{
-
-				// encode all the view date
-				$json = json_encode($info::$view_info);
-
-				// print out the json
-				echo $json;
-
-				// TODO: Add more return types
-			}
-			// if the request is not ajax
-			else
-			{
-				// set the root variable for use within views
-				$root = Asset::get_base();
-
-				// name of the controller
-				$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
-
-				// path to view
-				$path_to_view = Settings::$pathToApp."views/$controller_name/{$controller::$viewname}.php";
-
-				// render out the view and set it equal to to content_for_layout
-				$content_for_layout = self::_get_contents($path_to_view,$controller::$view_info,$root);
 
 				// check if templates are being used
 				if(Settings::$templates)
@@ -337,10 +343,11 @@ Class Core {
 
 					// set the template path
 					$path_to_template = Settings::$pathToApp."views/templates/{$controller::$template}.php";
+
 				}
 				// if templating is not on
-				else {
-
+				else 
+				{
 					// render out default framework template
 					$path_to_template = Settings::$pathToApp."core/Template.php";
 				}
@@ -380,11 +387,18 @@ Class Core {
 
 				}
 			}
+			// if it is ajax
+			else 
+			{
+				// render out just the view content
+				echo $content_for_layout;
+
+			}
 
 
 		}
 
-		// if there isnt' a controller or action doing the following
+		// if there isn't' a controller or action doing the following
 		else
 		{
 
@@ -411,7 +425,7 @@ Class Core {
     	return strtolower($string);
 	}
 
-	// replace underscores with spaces and caplize first letter
+	// replace underscores with spaces and capitalize first letter
 	static function toNorm($string) {
 		$string = str_replace("_", " ", $string);
 		return ucfirst($string);
