@@ -333,6 +333,24 @@ Class Core {
 			// render out the view and set it equal to to content_for_layout
 			$content_for_layout = self::_get_contents($path_to_view,$controller::$view_info,$root);
 
+			// if there wasn't a view
+			if(!$content_for_layout)
+			{
+				// if the extention is json
+				if($info_of_url['ext'] === "json")
+				{
+					// use the view_info as the object
+					Asset::json($controller::$view_info);
+				}
+				else
+				{
+
+					// TODO: put 404 error saying page view wasn't found
+
+				}
+			}
+
+
 			// if it is not ajax
 			if(!$controller->request['AJAX'])
 			{
@@ -402,7 +420,7 @@ Class Core {
 		else
 		{
 
-			// ERROR HANDLING HERE
+			// TODO: Put 404 Page saying not controller/action
 
 		}
 
