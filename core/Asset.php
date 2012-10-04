@@ -218,4 +218,11 @@ Class Asset {
 		// trim off extra space
 		return trim($attr_str);
 	}
+	
+	// json encode and echo out object for json view
+	public static function json($object)
+	{
+		// echo out the json object encoded
+		echo json_encode($object);
+	}
 }
