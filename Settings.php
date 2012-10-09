@@ -17,7 +17,7 @@ class Settings {
 	public static $defaultTemplate = 'default';
 
 	// the default for how you want views to output when no extension is specified 
-	public static $defaultViewType = 'html';
+	public static $defaultViewType = '';
 
 	// if you want to use templates
 	public static $templates = false;

@@ -5,7 +5,7 @@ Class Core {
 	private static $instantiated = array();
 
 	// variable for all the debug information
-	private static $debug = array(
+	public static $debug = array(
 									"statements"=>array(),
 									"instantiated" =>array()
 								);
@@ -26,7 +26,8 @@ Class Core {
 				"Validation"=>"Validation.php",
 				"Authorization"=>"Authorization.php",
 				"Asset"=>"Asset.php",
-				"Database"=>"Database.php")
+				"Database"=>"Database.php",
+				"View"=>"View.php")
 		);
 
 		// includes framework specific files
@@ -317,102 +318,29 @@ Class Core {
 			// run the after action method
 			$controller->afterAction();
 
-			
-			// set the root variable for use within views
-			$root = Asset::get_base();
-
 			// name of the controller
 			$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
 
 			// extension
-			$extension = isset($info_of_url['ext'])?$info_of_url['ext'].".php":Settings::$defaultViewType.".php";
+			$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:Settings::$defaultViewType;
 
 			// path to view
-			$path_to_view = Settings::$pathToApp."views/$controller_name/{$controller::$viewname}.$extension";
-
-			// render out the view and set it equal to to content_for_layout
-			$content_for_layout = self::_get_contents($path_to_view,$controller::$view_info,$root);
-
-			// if there wasn't a view
-			if(!$content_for_layout)
-			{
-				// if the extention is json
-				if($info_of_url['ext'] === "json")
-				{
-					// use the view_info as the object
-					Asset::json($controller::$view_info);
-				}
-				else
-				{
-
-					// TODO: put 404 error saying page view wasn't found
-
-				}
-			}
-
+			$file_name= "$controller_name/{$controller::$viewname}$extension";
+			
+			// set the template to false
+			$template = false;
 
 			// if it is not ajax
 			if(!$controller->request['AJAX'])
 			{
 
-				// check if templates are being used
-				if(Settings::$templates)
-				{
-
-					// set the template path
-					$path_to_template = Settings::$pathToApp."views/templates/{$controller::$template}.php";
-
-				}
-				// if templating is not on
-				else 
-				{
-					// render out default framework template
-					$path_to_template = Settings::$pathToApp."core/Template.php";
-				}
-
-				// render out the template with the view content
-				echo self::_get_contents($path_to_template,$controller::$layout_info,$root,$content_for_layout);
-
-				// if debug is on
-				if(Settings::$debug)
-				{
-					// render the debug stylesheet
-					echo "<style type='text/css'>".self::_get_contents(Settings::$pathToApp."core/debug.css")."</style>";
-
-					// create div to hold information
-					echo "<div id='debuger'>";
-
-					// loop through all the different key values in debug
-					foreach(self::$debug as $title=>$info)
-					{
-
-						// set the key (title) to an h2
-						echo "<h2>".$title."</h2>";
-
-						// loop through the value (info)
-						foreach ($info as $num => $para)
-						{
-
-							// echo out the index number and the value
-							echo "<p><span>".$num."</span>".$para."</p>";
-
-						}
-
-					}
-
-					// close the div
-					echo "</div>";
-
-				}
-			}
-			// if it is ajax
-			else 
-			{
-				// render out just the view content
-				echo $content_for_layout;
+				// the template to be rendered
+				$template = $controller::$template;
 
 			}
-
+			
+			// render the page
+			View::render($file_name,$controller::$view_info,$template,$controller::$layout_info);
 
 		}
 
@@ -426,15 +354,7 @@ Class Core {
 
 	}
 
-	// get the contents of a file
-	private static function _get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
-	    if (is_file($filename)) {
-	        ob_start();
-	        include $filename;
-	        return ob_get_clean();
-	    }
-	    return false;
-	}
+	
 
 	// split on caps, add underscores and then convert it to lowercase
 	static function toDB($string){
