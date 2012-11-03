@@ -61,6 +61,6 @@ class Settings {
 
 	public static $routes = array(
 		// route name => controller to go to, action, params to pass
-		"test" =>array('home','index')
+		"/" =>array('hello','route')
 	);
 }

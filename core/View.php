@@ -129,7 +129,9 @@ Class View
 			{
 
 				// TODO: Add 404 Error Handling
-				echo "404 Error";
+				echo "404 Error: View File Didn't Exist <br />";
+				echo $file_path;
+				
 			}
 
 		}

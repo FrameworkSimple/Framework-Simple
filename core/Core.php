@@ -114,11 +114,27 @@ Class Core {
 		// url : /
 		if(count($request) === 0) {
 
-			// set the controller to the default
-			$info_of_url['controller'] = Settings::$defaultController.'Controller';
+			// if the routes has the root in it
+			if(isset(Settings::$routes['/'])) {
 
-			// set the action to the default
-			$info_of_url['action'] = Settings::$defaultAction;
+				// set the controller to the one in the route
+				$info_of_url['controller'] = Settings::$routes['/'][0].'Controller';
+
+				// set the action to the one in the route
+				$info_of_url['action'] = Settings::$routes['/'][1];
+
+				// if there are params
+				if(isset(Settings::$routes['/'][2]))$info_of_url['params'] = Settings::$routes['/'][2];
+			}
+			else {
+
+				// set the controller to the default
+				$info_of_url['controller'] = Settings::$defaultController.'Controller';
+
+				// set the action to the default
+				$info_of_url['action'] = Settings::$defaultAction;
+
+			}
 
 		}
 		// check if controller exists
