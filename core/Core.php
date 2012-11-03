@@ -137,8 +137,23 @@ Class Core {
 			}
 
 		}
+		// check if request is in the routes
+		else if(isset(Settings::$routes[strtolower($request[0]."/".$request[1])])) {
+
+
+			// set the controller to the one in the route
+			$info_of_url['controller'] = Settings::$routes[strtolower(implode("/", $request))][0].'Controller';
+
+			// set the action to the one in the route
+			$info_of_url['action'] = Settings::$routes[strtolower(implode("/", $request))][1];
+
+			// if there are params
+			if(isset(Settings::$routes[strtolower(implode("/", $request))][2]))$info_of_url['params'] = Settings::$routes[strtolower(implode("/", $request))][2];
+
+
+		}
 		// check if controller exists
-		if(is_file(Settings::$pathToApp."controllers/".ucfirst($request[0])."Controller.php"))
+		else if(is_file(Settings::$pathToApp."controllers/".ucfirst($request[0])."Controller.php"))
 		{
 
 			// set the controller
