@@ -14,6 +14,10 @@ Class View
 		// set the file path of the view
 		$file_path = Settings::$pathToApp."views/".$file.".php";
 
+		if(Settings::$debug) {
+
+			array_push(Core::$debug['views'],$file_path);
+		}
 		// set the root url
 		$root = Asset::get_base();
 
@@ -28,7 +32,7 @@ Class View
 			{
 
 				// render the content for this piece
-				$view_data = self::_get_contents($file_path,$snippet,$root);
+				$view_data = self::get_contents($file_path,$snippet,$root);
 
 				// if the file exists then add it to the string
 				$view .= $view_data?$view_data:'';
@@ -41,7 +45,7 @@ Class View
 		else
 		{
 			// get the content
-			$view = self::_get_contents($file_path,$data,$root);
+			$view = self::get_contents($file_path,$data,$root);
 		}
 	
 		// if we got a view
@@ -55,8 +59,13 @@ Class View
 				// template file path
 				$template_path = Settings::$pathToApp."views/templates/".$template.".php";
 
+				if(Settings::$debug) {
+
+					array_push(Core::$debug['views'],$template_path);
+				}
+
 				// get the whole page including template
-				$template = self::_get_contents($template_path,$templateInfo,$root,$view);
+				$template = self::get_contents($template_path,$templateInfo,$root,$view);
 
 				// render out the template
 				echo $template;
@@ -71,40 +80,6 @@ Class View
 				echo $view;
 
 			}
-
-			// if debug is on
-			if(Settings::$debug)
-			{
-				// render the debug stylesheet
-				echo "<style type='text/css'>".self::_get_contents(Settings::$pathToApp."core/debug.css")."</style>";
-
-				// create div to hold information
-				echo "<div id='debuger'>";
-
-				// loop through all the different key values in debug
-				foreach(Core::$debug as $title=>$info)
-				{
-
-					// set the key (title) to an h2
-					echo "<h2>".$title."</h2>";
-
-					// loop through the value (info)
-					foreach ($info as $num => $para)
-					{
-
-						// echo out the index number and the value
-						echo "<p><span>".$num."</span>".$para."</p>";
-
-					}
-
-				}
-
-				// close the div
-				echo "</div>";
-			}
-
-			// end the function
-			return;
 
 		}
 		// if a view file didn't exist
@@ -144,7 +119,7 @@ Class View
 	}
 
 	// get the contents of a file
-	private static function _get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
+	public static function get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
 	    if (is_file($filename)) {
 	        ob_start();
 	        include $filename;

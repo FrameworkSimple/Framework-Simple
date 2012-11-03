@@ -7,7 +7,9 @@ Class Core {
 	// variable for all the debug information
 	public static $debug = array(
 									"statements"=>array(),
-									"instantiated" =>array()
+									"instantiated" =>array(),
+									"url"=>array(),
+									"views"=>array()
 								);
 
 	// loads all the classes automatically
@@ -249,6 +251,10 @@ Class Core {
 			}
 
 		}
+		if(Settings::$debug) {
+
+			Core::$debug['url'] = $info_of_url;
+		}
 		// return the information
 		return $info_of_url;
 
@@ -381,6 +387,37 @@ Class Core {
 
 			// TODO: Put 404 Page saying not controller/action
 
+		}
+
+		// if debug is on
+		if(Settings::$debug)
+		{
+			// render the debug stylesheet
+			echo "<style type='text/css'>".View::get_contents(Settings::$pathToApp."core/debug.css")."</style>";
+
+			// create div to hold information
+			echo "<div id='debuger'>";
+
+			// loop through all the different key values in debug
+			foreach(self::$debug as $title=>$info)
+			{
+
+				// set the key (title) to an h2
+				echo "<h2>".$title."</h2>";
+
+				// loop through the value (info)
+				foreach ($info as $num => $para)
+				{
+
+					// echo out the index number and the value
+					echo "<p><span>".$num."</span>".$para."</p>";
+
+				}
+
+			}
+
+			// close the div
+			echo "</div>";
 		}
 
 	}
