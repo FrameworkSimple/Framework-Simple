@@ -53,7 +53,7 @@ Class View
 			{
 
 				// template file path
-				$template_path = Settings::$pathToApp."views/templates".$template."php";
+				$template_path = Settings::$pathToApp."views/templates/".$template.".php";
 
 				// get the whole page including template
 				$template = self::_get_contents($template_path,$templateInfo,$root,$view);
