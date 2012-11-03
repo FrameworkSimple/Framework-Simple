@@ -129,7 +129,7 @@ Class Core {
 			else {
 
 				// set the controller to the default
-				$info_of_url['controller'] = Settings::$defaultController.'Controller';
+				$info_of_url['controller'] = ucfirst(Settings::$defaultController).'Controller';
 
 				// set the action to the default
 				$info_of_url['action'] = Settings::$defaultAction;
@@ -142,13 +142,13 @@ Class Core {
 
 
 			// set the controller to the one in the route
-			$info_of_url['controller'] = Settings::$routes[strtolower(implode("/", $request))][0].'Controller';
+			$info_of_url['controller'] = ucfirst(Settings::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
 
 			// set the action to the one in the route
-			$info_of_url['action'] = Settings::$routes[strtolower(implode("/", $request))][1];
+			$info_of_url['action'] = Settings::$routes[strtolower($request[0]."/".$request[1])][1];
 
 			// if there are params
-			if(isset(Settings::$routes[strtolower(implode("/", $request))][2]))$info_of_url['params'] = Settings::$routes[strtolower(implode("/", $request))][2];
+			if(isset(Settings::$routes[strtolower($request[0]."/".$request[1])][2]))$info_of_url['params'] = Settings::$routes[strtolower($request[0]."/".$request[1])][2];
 
 
 		}
