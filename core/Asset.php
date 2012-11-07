@@ -183,7 +183,7 @@ Class Asset {
 	}
 
 	// create an html tag
-	private function _html_tag($tag, $attr = array(), $content = false)
+	private static function _html_tag($tag, $attr = array(), $content = false)
 	{
 		// if the tag has content or if it is self closing
 		$has_content = (bool) ($content !== false and $content !== null);
@@ -202,7 +202,7 @@ Class Asset {
 	}
 
 	// convert and array of attributes to a string
-	private function _array_to_attr($attr) 
+	private static function _array_to_attr($attr) 
 	{
 		// string for the attribute
 		$attr_str = '';
