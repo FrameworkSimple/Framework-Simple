@@ -287,11 +287,17 @@ Class Core {
 
 
 	// redirect to pages
-	public static function redirect($var)
+	public static function redirect($controller,$action,$params=NULL)
 	{
-
-		// TODO: CREATE FUNCTION
+		$url = Asset::get_base().$controller."/".$action;
+		if($params!=NULL) {
+			foreach($params as $param) {
+				$url = $url."/".$param;
+			}
+		}
+		 header( "Location: $url" ) ;
 	}
+	
 	// run the function
 	public static function run()
 	{
