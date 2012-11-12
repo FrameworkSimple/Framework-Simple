@@ -5,7 +5,7 @@ class Settings {
 	static public $title = "Film Hubble";
 
 	// database information
-	static public $db = array('DSN' => 'mysql:hostname=localhost;dbname=simple','username' => 'root','password' => 'root');
+	static public $db = array('DSN' => 'mysql:hostname=localhost;dbname=Store_Manager','username' => 'root','password' => 'root');
 
 	// default controller when there isn't on available
 	public static $defaultController = 'Hello';
@@ -14,13 +14,13 @@ class Settings {
 	public static $defaultAction = 'index';
 
 	// default action when there isn't one available
-	public static $defaultTemplate = 'default';
+	public static $defaultTemplate = false;
 
 	// the default for how you want views to output when no extension is specified 
 	public static $defaultViewType = '';
 
 	// if you want to use templates
-	public static $templates = false;
+	public static $templates = true;
 
 	// if you would like to see the debug output
 	public static $debug = true;
@@ -42,7 +42,7 @@ class Settings {
 	// settings for authentication
 	public static $auth = array(
 		// is authentication on?
-		"on"=>true,
+		"on"=>false,
 		// always allow the following action in every controller
 		"alwaysAllowActions"=> array(),
 		// the table to use for authentication
@@ -56,11 +56,20 @@ class Settings {
 		// the action to go to on failure to authenticate
 		"redirectAction"=>"index",
 		// the params to pass on failure to login
-		"redirectParams"=>""
+		"redirectParams"=>array()
 	);
 
 	public static $routes = array(
 		// route name => controller to go to, action, params to pass
-		"/" =>array('hello','route')
+		"/" =>array('store','index'),
+		"admin/"=>array('user','login'),
+		"admin/dashboard"=>array('admin','index'),
+		"logout/"=>array('user','logout'),
+		"admin/settings"=>array('user','settings'),
+		"admin/products"=>array('products','admin'),
+		"admin/orders"=>array('order','admin'),
+		"admin/store"=>array('store','admin'),
+		"admin/submit"=>array('order','submit'),
+		"review/"=>array('order','review')
 	);
 }
