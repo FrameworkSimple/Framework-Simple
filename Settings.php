@@ -56,7 +56,7 @@ class Settings {
 		// the action to go to on failure to authenticate
 		"redirectAction"=>"index",
 		// the params to pass on failure to login
-		"redirectParams"=>""
+		"redirectParams"=>array()
 	);
 
 	public static $routes = array(
