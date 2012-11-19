@@ -44,3 +44,6 @@ org.eclipse.*
 *.swc
 *.swf
 *.exe
+
+# Framework Simple
+Settings.php
