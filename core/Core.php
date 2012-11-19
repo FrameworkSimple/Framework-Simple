@@ -423,7 +423,17 @@ Class Core {
 
 	}
 
-	
+	static public function encript($value) {
+
+		if(Settings::$salt == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
+
+			echo "Please change the salt in your settings to a unique set of characters";
+
+		}else {
+
+			return md5($value.Settings::$salt);
+		}
+	}
 
 	// split on caps, add underscores and then convert it to lowercase
 	static function toDB($string){
