@@ -1,3 +1,4 @@
+
 <?php
 
 Class Core {
@@ -26,10 +27,11 @@ Class Core {
 				"Model"=>"Model.php",
 				"ORM"=>"ORM.php",
 				"Validation"=>"Validation.php",
-				"Authorization"=>"Authorization.php",
+				"Auth"=>"Auth.php",
 				"Asset"=>"Asset.php",
 				"Database"=>"Database.php",
-				"View"=>"View.php")
+				"View"=>"View.php",
+				"Session"=>"Session.php")
 		);
 
 		// includes framework specific files
@@ -297,9 +299,6 @@ Class Core {
 	public static function run()
 	{
 
-		// start the session variables
-		self::instantiate("Authorization");
-
 		// get all the information
 		$info_of_url = self::getURL();
 
@@ -423,7 +422,7 @@ Class Core {
 
 	}
 
-	static public function encript($value) {
+	static public function encrypt($value) {
 
 		if(Settings::$salt == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
 

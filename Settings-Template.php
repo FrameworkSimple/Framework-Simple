@@ -39,24 +39,42 @@ class Settings {
 	// return this type to an ajax request
 	public static $ajaxReturnType = 'json';
 
+	// settings for session
+	public static $session = array(
+
+		// do you want session on?
+		"on" => false
+	);
+
 	// settings for authentication
 	public static $auth = array(
+		
 		// is authentication on?
 		"on"=>false,
-		// always allow the following action in every controller
-		"alwaysAllowActions"=> array(),
+		
+		//always allow these controllers
+		"controllers"=>array(),
+		
+		//always allow these actions
+		"actions"=>array(),
+		
 		// the table to use for authentication
 		"table"=>"user",
+		
 		// the field for the username
-		"usernameField"=>"email",
+		"username_field"=>"email",
+		
 		// the field for the password
-		"passwordField"=>"password",
+		"password_field"=>"password",
+		
 		// the controller to go to on failure to authenticate
-		"redirectController"=>"home",
+		"redirect_controller"=>"home",
+		
 		// the action to go to on failure to authenticate
-		"redirectAction"=>"index",
+		"redirect_action"=>"index",
+		
 		// the params to pass on failure to login
-		"redirectParams"=>array()
+		"redirect_params"=>array()
 	);
 
 	public static $routes = array(
