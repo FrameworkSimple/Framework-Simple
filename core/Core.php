@@ -464,6 +464,6 @@ Class Core {
 	public static function addClasses($folder,$files)
 	{
 		// add the files to that folder
-		self::$files['extenstions/'.$folder] = $files;
+		self::$files['extensions/'.$folder] = $files;
 	}
 }
