@@ -299,9 +299,9 @@ Class Core {
 	{
 
 		// so we can instatinate
-		foreach(Settings::$extensions as $file) {
+		foreach(Settings::$extensions as $folder) {
 		
-			self::$files['extensions'][$file] = $file.".php";
+			include "../extensions/$folder/bootstrap.php";
 		
 		}
 
@@ -460,4 +460,10 @@ Class Core {
 		return ucfirst($string);
 	}
 
+	// add classes to be autoloaded
+	public static function addClasses($folder,$files)
+	{
+		// add the files to that folder
+		self::$files['extenstions/'.$folder] = $files;
+	}
 }
