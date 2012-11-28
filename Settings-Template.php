@@ -77,6 +77,11 @@ class Settings {
 		"redirect_params"=>array()
 	);
 
+	// an array list of extensions you are using
+		// hint: list should be file names without the .php
+	public static $extensions = array();
+
+	// set up custom page routes
 	public static $routes = array(
 		// route name => array(controller to go to, action, params to pass)
 		"/" =>array('hello','index'),

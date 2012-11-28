@@ -6,36 +6,35 @@ Class Core {
 	private static $instantiated = array();
 
 	// variable for all the debug information
-	public static $debug = array(
-									"statements"=>array(),
+	public static $debug = array(	"statements"   =>array(),
 									"instantiated" =>array(),
-									"url"=>array(),
-									"views"=>array()
+									"url"          =>array(),
+									"views"        =>array()
 								);
+
+	private static $files = array(
+			"core" =>array(
+				"Core"       =>"Core.php",
+				"Controller" =>"Controller.php",
+				"CFDump"     =>"CFDump.php",
+				"FormHelper" =>"FormHelper.php",
+				"Model"      =>"Model.php",
+				"ORM"        =>"ORM.php",
+				"Validation" =>"Validation.php",
+				"Auth"       =>"Auth.php",
+				"Asset"      =>"Asset.php",
+				"Database"   =>"Database.php",
+				"View"       =>"View.php",
+				"Session"    =>"Session.php"),
+			"extensions" => array()
+		);
 
 	// loads all the classes automatically
 	public static function autoloader($classname)
 	{
 
-		// framework specific files
-		$files = array(
-			"core" =>array(
-				"Core"=>"Core.php",
-				"Controller"=>"Controller.php",
-				"CFDump"=>"CFDump.php",
-				"FormHelper"=>"FormHelper.php",
-				"Model"=>"Model.php",
-				"ORM"=>"ORM.php",
-				"Validation"=>"Validation.php",
-				"Auth"=>"Auth.php",
-				"Asset"=>"Asset.php",
-				"Database"=>"Database.php",
-				"View"=>"View.php",
-				"Session"=>"Session.php")
-		);
-
 		// includes framework specific files
-		foreach($files as $folder=>$file) {
+		foreach(self::$files as $folder=>$file) {
 			foreach($file as $name=>$filePath) {
 				if($classname == $name) {
 					include_once '../'.$folder."/".$filePath;
@@ -298,6 +297,13 @@ Class Core {
 	// run the function
 	public static function run()
 	{
+
+		// so we can instatinate
+		foreach(Settings::$extensions as $file) {
+		
+			self::$files['extensions'][$file] = $file.".php";
+		
+		}
 
 		// get all the information
 		$info_of_url = self::getURL();
