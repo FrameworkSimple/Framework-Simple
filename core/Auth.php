@@ -6,6 +6,10 @@ Class Auth {
 
 	public static $allowed = array();
 
+	public static $controllers = array();
+
+	public static $actions = array();
+
 	// check if you are authorized to be here
 	public static function isAuthorized()
 	{
@@ -14,7 +18,7 @@ Class Auth {
 		$url = Core::getURL();
 
 		// check if controller is in allowed controllers
-		if(in_array($url['controller'], Settings::$auth['controllers']))
+		if(in_array($url['controller'], self::$controllers))
 		{
 
 			// return true because it is allowed
@@ -23,7 +27,7 @@ Class Auth {
 		}
 
 		// cehck if the action is an allowed actions
-		else if(in_array($url['action'],Settings::$auth['actions']))
+		else if(in_array($url['action'], self::$actions))
 		{
 
 			// return true because it is allowed
@@ -53,7 +57,7 @@ Class Auth {
 			{
 
 				// redirect to a new page
-				Core::redirect(Settings::$auth['redirect_controller'],Settings::$auth['redirect_action'],Settings::$auth['redirect_params']);
+				Core::redirect(AUTH_REDIRECT_CONTROLLER,AUTH_REDIRECT_ACTION,array());
 			
 			}
 
@@ -66,26 +70,26 @@ Class Auth {
 	{
 
 		// if there is user information
-		if(!empty($user) && isset($user[Settings::$auth['username_field']]) && isset($user[Settings::$auth['password_field']]))
+		if(!empty($user) && isset($user[AUTH_USERNAME_FIELD]) && isset($user[AUTH_PASSWORD_FIELD]))
 		{
 
 			// load the model
-			$model = Core::instantiate(Settings::$auth['table']);
+			$model = Core::instantiate(AUTH_TABLE);
 
 			// we only want the user table nothing associatied to it
 			$model->options = array("recursive"=>0);
 
 			// create the method name using the username field
-			$method = "findBy".ucfirst(Settings::$auth['username_field'])."And".ucfirst(Settings::$auth['password_field']);
+			$method = "findBy".ucfirst(AUTH_USERNAME_FIELD)."And".ucfirst(AUTH_PASSWORD_FIELD);
 
 			// the user returned from the database
-			$user_returned = $model->$method($user[Settings::$auth['username_field']],Core::encrypt($user[Settings::$auth['password_field']]))[0];
+			$user_returned = $model->$method($user[AUTH_USERNAME_FIELD],Core::encrypt($user[AUTH_PASSWORD_FIELD]))[0];
 
 			// if successfull, user is not empty, password returned equals the password passed
 			if($model->success && !empty($user_returned)) {
 
 				// get rie of the password field out of the user_returned
-				unset($user_returned['User'][Settings::$auth['password_field']]);
+				unset($user_returned['User'][AUTH_PASSWORD_FIELD]);
 
 				// set the session user
 				Session::set('user',$user_returned['User']);

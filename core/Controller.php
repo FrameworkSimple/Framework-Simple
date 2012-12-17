@@ -47,7 +47,7 @@ class Controller {
 	{
 		
 		// if auth is turned on
-		if(Settings::$auth['on'])
+		if(AUTH)
 		{
 
 			// run the authorization

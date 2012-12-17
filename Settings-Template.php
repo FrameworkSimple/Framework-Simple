@@ -1,84 +1,79 @@
 <?php
-class Settings {
 
 	// default title
-	static public $title = "Framework Simple";
+	const TITLE = "Framework Simple";
 
 	// database information
-	static public $db = array('DSN' => 'mysql:hostname=localhost;dbname=simple','username' => 'root','password' => 'root');
+
+		// dsn information
+		const DB_DSN = 'mysql:hostname=localhost;dbname=simple';
+
+		// database username
+		const DB_USERNAME = 'root';
+
+		// database password
+		const DB_PASSWORD = 'root';
 
 	// default controller when there isn't on available
-	public static $defaultController = 'Hello';
+	const DEFAULT_CONTROLLER = 'Hello';
 
 	// default action when there isn't one available
-	public static $defaultAction = 'index';
+	const DEFAULT_ACTION = 'index';
 
 	// default action when there isn't one available
-	public static $defaultTemplate = false;
+	const DEFAULT_TEMPLATE = false;
 
 	// the default for how you want views to output when no extension is specified 
-	public static $defaultViewType = '';
+	const DEFAULT_VIEW_TYPE = '';
 
 	// if you want to use templates
-	public static $templates = true;
+	const TEMPLATES = true;
 
 	// if you would like to see the debug output
-	public static $debug = true;
+	const DEBUG = true;
 
 	// salt to use for any encryption
-	public static $salt = "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p";
+	const SALT = "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p";
 
 	// url to the app relative to the index.php inside webroot
-	public static $pathToApp = "../";
+	const PATH_TO_APP = "../";
 
 	// if you would like the REST API Settings turned on
 		// All calls will be processed based on the type of HTTP Request
 		// Any calls made with ajax will automatically return JSON and not render a view
-	public static $rest = true;
+	const REST = true;
+
+	// if you want the pages to auto render out views
+	const AUTO_RENDER = true;
 
 	// return this type to an ajax request
-	public static $ajaxReturnType = 'json';
+	const AJAX_RETURN_TYPE = 'json';
 
-	// settings for session
-	public static $session = array(
-
-		// do you want session on?
-		"on" => false
-	);
+	// is the session is use
+	const SESSION = false;
 
 	// settings for authentication
-	public static $auth = array(
-		
-		// is authentication on?
-		"on"=>false,
-		
-		//always allow these controllers
-		"controllers"=>array(),
-		
-		//always allow these actions
-		"actions"=>array(),
-		
-		// the table to use for authentication
-		"table"=>"user",
-		
-		// the field for the username
-		"username_field"=>"email",
-		
-		// the field for the password
-		"password_field"=>"password",
-		
-		// the controller to go to on failure to authenticate
-		"redirect_controller"=>"home",
-		
-		// the action to go to on failure to authenticate
-		"redirect_action"=>"index",
-		
-		// the params to pass on failure to login
-		"redirect_params"=>array()
-	);
 
-	public static $routes = array(
+		// do you want to use authentication
+		const AUTH = false;
+
+		// the table to use for authentication
+		const AUTH_TABLE = "user";
+
+		// the field for the username
+		const AUTH_USERNAME_FIELD = "email";
+
+		// the field for the password
+		const AUTH_PASSWORD_FIELD = "password";
+
+		// the controller to go to on failure to authenticate
+		const AUTH_REDIRECT_CONTROLLER = "home";
+
+		// the action to go to on failure to authenticate
+		const AUTH_REDIRECT_ACTION = "index";
+
+	// set up custom page routes
+	Core::$routes = array(
 		// route name => array(controller to go to, action, params to pass)
 		"/" =>array('hello','index'),
 	);
-}
