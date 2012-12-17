@@ -12,9 +12,9 @@ Class View
 		$indexed = !self::_is_assoc($data);
 
 		// set the file path of the view
-		$file_path = Settings::$pathToApp."views/".$file.".php";
+		$file_path = PATH_TO_APP."views/".$file.".php";
 
-		if(Settings::$debug) {
+		if(DEBUG) {
 
 			array_push(Core::$debug['views'],$file_path);
 		}
@@ -53,13 +53,13 @@ Class View
 		{
 
 			// if there is a template file and templates are on
-			if($template && Settings::$templates)
+			if($template && TEMPLATES)
 			{
 
 				// template file path
-				$template_path = Settings::$pathToApp."views/templates/".$template.".php";
+				$template_path = PATH_TO_APP."views/templates/".$template.".php";
 
-				if(Settings::$debug) {
+				if(DEBUG) {
 
 					array_push(Core::$debug['views'],$template_path);
 				}

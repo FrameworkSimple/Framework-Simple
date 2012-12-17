@@ -19,7 +19,7 @@ Class Asset {
 		$base_url = '';
 		
 		// see if host name is in the server variable
-		if($_SERVER['HTTP_HOST'] && !$rel) {
+		if($_SERVER['HTTP_HOST']) {
 
 			// add the protocol and the host name to the base url
 			// TODO: make HTTP dynamic so it checks for https
@@ -68,10 +68,10 @@ Class Asset {
 		empty($params)?"":$array[2] = $params;
 
 		// if the array is in the routes
-		if(in_array($array, Settings::$routes)) {
+		if(in_array($array, Core::$routes)) {
 
 			// loop through the routes 
-			foreach (Settings::$routes as $key => $value) {
+			foreach (Core::$routes as $key => $value) {
 
 				// if the array equals the value
   				if($array == $value){

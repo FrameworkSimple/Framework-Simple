@@ -6,7 +6,7 @@ class Database {
 	public static $tables;	
 	// set up PDO
 	public function __construct() {
-		$this -> db = new \PDO(Settings::$db['DSN'],Settings::$db['username'],Settings::$db['password']);
+		$this -> db = new \PDO(DB_DSN,DB_USERNAME,DB_PASSWORD);
 		$this -> db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 		$this -> db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 

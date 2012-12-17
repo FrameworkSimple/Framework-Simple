@@ -29,6 +29,12 @@ Class Core {
 			"extensions" => array()
 		);
 
+	// what extensions to include
+	public static $extenstions = array();
+
+	// auto routes
+	public static $routes = array();
+
 	// loads all the classes automatically
 	public static function autoloader($classname)
 	{
@@ -118,45 +124,45 @@ Class Core {
 		if(count($request) === 0) {
 
 			// if the routes has the root in it
-			if(isset(Settings::$routes['/'])) {
+			if(isset(Core::$routes['/'])) {
 
 				// set the controller to the one in the route
-				$info_of_url['controller'] = Settings::$routes['/'][0].'Controller';
+				$info_of_url['controller'] = Core::$routes['/'][0].'Controller';
 
 				// set the action to the one in the route
-				$info_of_url['action'] = Settings::$routes['/'][1];
+				$info_of_url['action'] = Core::$routes['/'][1];
 
 				// if there are params
-				if(isset(Settings::$routes['/'][2]))$info_of_url['params'] = Settings::$routes['/'][2];
+				if(isset(Core::$routes['/'][2]))$info_of_url['params'] = Core::$routes['/'][2];
 			}
 			else {
 
 				// set the controller to the default
-				$info_of_url['controller'] = ucfirst(Settings::$defaultController).'Controller';
+				$info_of_url['controller'] = ucfirst(Core::$defaultController).'Controller';
 
 				// set the action to the default
-				$info_of_url['action'] = Settings::$defaultAction;
+				$info_of_url['action'] = Core::$defaultAction;
 
 			}
 
 		}
 		// check if request is in the routes
-		else if(isset(Settings::$routes[strtolower($request[0]."/".$request[1])])) {
+		else if(isset(Core::$routes[strtolower($request[0]."/".$request[1])])) {
 
 
 			// set the controller to the one in the route
-			$info_of_url['controller'] = ucfirst(Settings::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
+			$info_of_url['controller'] = ucfirst(Core::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
 
 			// set the action to the one in the route
-			$info_of_url['action'] = Settings::$routes[strtolower($request[0]."/".$request[1])][1];
+			$info_of_url['action'] = Core::$routes[strtolower($request[0]."/".$request[1])][1];
 
 			// if there are params
-			if(isset(Settings::$routes[strtolower($request[0]."/".$request[1])][2]))$info_of_url['params'] = Settings::$routes[strtolower($request[0]."/".$request[1])][2];
+			if(isset(Core::$routes[strtolower($request[0]."/".$request[1])][2]))$info_of_url['params'] = Core::$routes[strtolower($request[0]."/".$request[1])][2];
 
 
 		}
 		// check if controller exists
-		else if(is_file(Settings::$pathToApp."controllers/".ucfirst($request[0])."Controller.php"))
+		else if(is_file(PATH_TO_APP."controllers/".ucfirst($request[0])."Controller.php"))
 		{
 
 			// set the controller
@@ -199,7 +205,7 @@ Class Core {
 
 					// if rest is turned on and method is a method inside controller
 					// url: /controller/param with request
-					if(Settings::$rest && method_exists($info_of_url['controller'], $method))
+					if(REST && method_exists($info_of_url['controller'], $method))
 					{
 
 						// set the action to the method
@@ -209,11 +215,11 @@ Class Core {
 
 					// if rest isn't on and default action is a method
 					// url: /controller/param without request
-					else if(method_exists($info_of_url['controller'], Settings::$defaultAction))
+					else if(method_exists($info_of_url['controller'], DEFAULT_ACTION))
 					{
 
 						// set the action to the default
-						$info_of_url['action'] = Settings::$defaultAction;
+						$info_of_url['action'] = DEFAULT_ACTION;
 
 					}
 
@@ -231,7 +237,7 @@ Class Core {
 
 				// if rest is turned on and method is a method inside controller
 				// url: /controller with request
-				if(Settings::$rest && method_exists($info_of_url['controller'], $method))
+				if(REST && method_exists($info_of_url['controller'], $method))
 				{
 
 					// set the action to the method
@@ -241,18 +247,18 @@ Class Core {
 
 				// if rest isn't on and default action is a method
 				// url: /controller without request
-				else if(method_exists($info_of_url['controller'], Settings::$defaultAction))
+				else if(method_exists($info_of_url['controller'], DEFAULT_ACTION))
 				{
 
 					// set the action to the default
-					$info_of_url['action'] = Settings::$defaultAction;
+					$info_of_url['action'] = DEFAULT_ACTION;
 
 				}
 
 			}
 
 		}
-		if(Settings::$debug) {
+		if(DEBUG) {
 
 			Core::$debug['url'] = $info_of_url;
 		}
@@ -324,7 +330,7 @@ Class Core {
 										);
 
 			// if rest is on and the request type was json
-			if(Settings::$rest && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
+			if(REST && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
 			{
 
 				// set the request type's data to the php input stream
@@ -340,7 +346,7 @@ Class Core {
 			$controller::$viewname = $info_of_url['action'];
 
 			// set the template if one is not set already
-			$controller::$template = empty($controller::$template)?Settings::$defaultTemplate:$controller::$template;
+			$controller::$template = empty($controller::$template)?DEFAULT_TEMPLATE:$controller::$template;
 
 			// if there are params
 			if(isset($info_of_url['params']))
@@ -365,7 +371,7 @@ Class Core {
 			$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
 
 			// extension
-			$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:Settings::$defaultViewType;
+			$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
 			// path to view
 			$file_name= "$controller_name/{$controller::$viewname}$extension";
@@ -396,10 +402,10 @@ Class Core {
 		}
 
 		// if debug is on
-		if(Settings::$debug)
+		if(DEBUG)
 		{
 			// render the debug stylesheet
-			echo "<style type='text/css'>".View::get_contents(Settings::$pathToApp."core/debug.css")."</style>";
+			echo "<style type='text/css'>".View::get_contents(PATH_TO_APP."core/debug.css")."</style>";
 
 			// create div to hold information
 			echo "<div id='debuger'>";
@@ -430,13 +436,13 @@ Class Core {
 
 	static public function encrypt($value) {
 
-		if(Settings::$salt == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
+		if(SALT == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
 
 			echo "Please change the salt in your settings to a unique set of characters";
 
 		}else {
 
-			return md5($value.Settings::$salt);
+			return md5($value.SALT);
 		}
 	}
 
