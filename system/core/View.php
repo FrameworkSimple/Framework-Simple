@@ -1,7 +1,7 @@
 <?php
 
 // class for helping render views
-Class View 
+Class View
 {
 
 	// render a view
@@ -12,7 +12,7 @@ Class View
 		$indexed = !self::_is_assoc($data);
 
 		// set the file path of the view
-		$file_path = PATH_TO_APP."views/".$file.".php";
+		$file_path = SYSTEM_PATH."/views/".$file.".php";
 
 		if(DEBUG) {
 
@@ -38,7 +38,7 @@ Class View
 				$view .= $view_data?$view_data:'';
 			}
 
-			
+
 
 		}
 		// if the data is not an indexed array
@@ -47,7 +47,7 @@ Class View
 			// get the content
 			$view = self::get_contents($file_path,$data,$root);
 		}
-	
+
 		// if we got a view
 		if($view)
 		{
@@ -57,7 +57,7 @@ Class View
 			{
 
 				// template file path
-				$template_path = PATH_TO_APP."views/templates/".$template.".php";
+				$template_path = SYSTEM_PATH."/views/templates/".$template.".php";
 
 				if(DEBUG) {
 
@@ -72,7 +72,7 @@ Class View
 
 			}
 			// if there isn't a template
-			else 
+			else
 			{
 
 
@@ -86,7 +86,7 @@ Class View
 		else
 		{
 
-			//split the name 
+			//split the name
 			$split = preg_split("/[.]/", $file);
 
 			// if there is an extension
@@ -106,7 +106,7 @@ Class View
 				// TODO: Add 404 Error Handling
 				echo "404 Error: View File Didn't Exist <br />";
 				echo $file_path;
-				
+
 			}
 
 		}
