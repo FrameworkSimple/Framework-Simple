@@ -2,7 +2,7 @@
 
 include ('core/Core.php');
 include ('Settings.php');
-
+define(SYSTEM_PATH,__DIR__);
 
 // if auth is on or session is on
 if(AUTH || SESSION)
@@ -17,9 +17,11 @@ spl_autoload_register('Core::autoloader');
 
 ignore_user_abort(true);
 
+
+
 if(DEBUG) {
-	ini_set( "display_errors", "1" );
-	error_reporting( E_ALL & ~E_NOTICE );
+	ini_set( "display_errors", "On" );
+	error_reporting( 6135);
 }else {
 	error_reporting( 0 );
 }

@@ -12,7 +12,7 @@ Class View
 		$indexed = !self::_is_assoc($data);
 
 		// set the file path of the view
-		$file_path = PATH_TO_APP."views/".$file.".php";
+		$file_path = SYSTEM_PATH."/views/".$file.".php";
 
 		if(DEBUG) {
 
@@ -57,7 +57,7 @@ Class View
 			{
 
 				// template file path
-				$template_path = PATH_TO_APP."views/templates/".$template.".php";
+				$template_path = SYSTEM_PATH."/views/templates/".$template.".php";
 
 				if(DEBUG) {
 
@@ -111,8 +111,6 @@ Class View
 				// TODO: Add 404 Error Handling
 				echo "404 Error: View File Didn't Exist <br />";
 				echo $file_path;
-
-				return false;
 
 			}
 

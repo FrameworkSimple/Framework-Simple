@@ -30,7 +30,7 @@ Class Core {
 		);
 
 	// what extensions to include
-	public static $extenstions = array();
+	public static $extensions = array();
 
 	// auto routes
 	public static $routes = array();
@@ -43,7 +43,7 @@ Class Core {
 		foreach(self::$files as $folder=>$file) {
 			foreach($file as $name=>$filePath) {
 				if($classname == $name) {
-					include_once '../'.$folder."/".$filePath;
+					include_once SYSTEM_PATH."/".$folder."/".$filePath;
 					return ;
 				}
 			}
@@ -52,10 +52,10 @@ Class Core {
 		// if not in the framework list and includes the word controller instantiate a controller file
 		if(strstr($classname,"Controller")) {
 			if(strstr($classname,"Test")) {
-				include "../tests/".$classname.".php";
+				include SYSTEM_PATH."/tests/".$classname.".php";
 				return;
 			}else {
-				include "../controllers/".$classname.".php";
+				include SYSTEM_PATH."/controllers/".$classname.".php";
 				return;
 			}
 
@@ -63,7 +63,7 @@ Class Core {
 
 		// else instantiate a model
 		else {
-			include "../models/".$classname.".php";
+			include SYSTEM_PATH."/models/".$classname.".php";
 			return;
 		}
 
@@ -79,9 +79,6 @@ Class Core {
 		// the url that was called
 		$url = $_SERVER["REQUEST_URI"];
 
-		// remove leading slash
-		$url = substr($url, 1);
-
 		// split on the the question mark if there is one
 		// removes the get variables
 		$url = preg_split("/[?]/", $url);
@@ -93,28 +90,11 @@ Class Core {
 		// set the extension to the second half of the split so that we can use it later
 		$extension = $url[1];
 
-		// put into an array all the pieces
-		$url = explode("/",$url[0]);
-
-		// get the base directory and put into an array
-		$baseDir = preg_split("[/]", Asset::get_base());
+		// set the uri
+		$uri = $url[0];
 
 		// variable for the request that was made
-		$request = array();
-
-		// compare the base and the url
-		foreach($url as $string)
-		{
-
-			// check if the string is in the base, if not
-			if(!in_array($string,$baseDir))
-			{
-
-				// push the string in the request
-				array_push($request, $string);
-
-			}
-		}
+		$request = explode('/',str_replace(dirname($_SERVER['SCRIPT_NAME'])."/",'',$uri));
 
 		// variable for all the information of the url
 		$info_of_url = array();
@@ -162,13 +142,13 @@ Class Core {
 
 		}
 		// check if controller exists
-		else if(is_file(PATH_TO_APP."controllers/".ucfirst($request[0])."Controller.php"))
+		else if(is_file(SYSTEM_PATH."/controllers/".ucfirst($request[0])."Controller.php"))
 		{
 
 			// set the controller
 			$info_of_url['controller'] = ucfirst($request[0]).'Controller';
 
-			// if there is an extension 
+			// if there is an extension
 			if($extension)
 
 			{
@@ -299,7 +279,7 @@ Class Core {
 		$url = Asset::create_url($controller,$action,$params);
 		header( "Location: $url" ) ;
 	}
-	
+
 	// run the function
 	public static function run()
 	{
@@ -375,7 +355,7 @@ Class Core {
 
 			// path to view
 			$file_name= "$controller_name/{$controller::$viewname}$extension";
-			
+
 			// set the template to false
 			$template = false;
 
@@ -387,7 +367,7 @@ Class Core {
 				$template = $controller::$template;
 
 			}
-			
+
 			// render the page
 			View::render($file_name,$controller::$view_info,$template,$controller::$layout_info);
 
@@ -405,7 +385,7 @@ Class Core {
 		if(DEBUG)
 		{
 			// render the debug stylesheet
-			echo "<style type='text/css'>".View::get_contents(PATH_TO_APP."core/debug.css")."</style>";
+			echo "<style type='text/css'>".View::get_contents(SYSTEM_PATH."/core/debug.css")."</style>";
 
 			// create div to hold information
 			echo "<div id='debuger'>";

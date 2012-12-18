@@ -1,3 +1,3 @@
 <?php
 //instantiate the serverside code
-include ("../bootstrap.php");
+include ("../system/bootstrap.php");
