@@ -1,7 +1,7 @@
 <?php
 
 // class for helping render views
-Class View 
+Class View
 {
 
 	// render a view
@@ -38,7 +38,7 @@ Class View
 				$view .= $view_data?$view_data:'';
 			}
 
-			
+
 
 		}
 		// if the data is not an indexed array
@@ -47,7 +47,7 @@ Class View
 			// get the content
 			$view = self::get_contents($file_path,$data,$root);
 		}
-	
+
 		// if we got a view
 		if($view)
 		{
@@ -70,14 +70,19 @@ Class View
 				// render out the template
 				echo $template;
 
+				// return the text
+				return $template;
+
 			}
 			// if there isn't a template
-			else 
+			else
 			{
-
 
 				// render out the view
 				echo $view;
+
+				// return the text
+				return $view;
 
 			}
 
@@ -86,7 +91,7 @@ Class View
 		else
 		{
 
-			//split the name 
+			//split the name
 			$split = preg_split("/[.]/", $file);
 
 			// if there is an extension
@@ -106,13 +111,15 @@ Class View
 				// TODO: Add 404 Error Handling
 				echo "404 Error: View File Didn't Exist <br />";
 				echo $file_path;
-				
+
+				return false;
+
 			}
 
 		}
 	}
 
-	// check to see if array is assocative or indexed
+	// check to see if array is associative or indexed
 	private static function _is_assoc($array)
 	{
 		return array_keys($array) !== range(0, count($array) - 1);
@@ -120,11 +127,29 @@ Class View
 
 	// get the contents of a file
 	public static function get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
+
+		// if there is data
+		if($data) {
+
+			// set the key value pairs to variables with the name of the key
+			extract($data);
+
+		}
+
+		// if the file is a file
 	    if (is_file($filename)) {
+
+	    	// start the output buffer
 	        ob_start();
+
+	        // include the file
 	        include $filename;
+
+	        // return a clean stream
 	        return ob_get_clean();
 	    }
+
+	    // if the file doesn't exist return false
 	    return false;
 	}
 }
