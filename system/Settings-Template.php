@@ -23,7 +23,7 @@
 	// default action when there isn't one available
 	const DEFAULT_TEMPLATE = false;
 
-	// the default for how you want views to output when no extension is specified 
+	// the default for how you want views to output when no extension is specified
 	const DEFAULT_VIEW_TYPE = '';
 
 	// if you want to use templates
@@ -72,14 +72,12 @@
 		// the action to go to on failure to authenticate
 		const AUTH_REDIRECT_ACTION = "index";
 
-
 	// an array list of extensions you are using
 		// hint: list should be file names without the .php
 	Core::$extensions = array();
 
 	// set up custom page routes
 	Core::$routes = array(
-
 		// route name => array(controller to go to, action, params to pass)
 		"/" =>array('hello','index'),
 	);
