@@ -8,6 +8,12 @@ Class View
 	public static function render($file,$data=array(),$template=FALSE,$templateInfo=array())
 	{
 
+		// call the before_render hook and if it returns false then stop the function
+		if(!Hooks::call("before_render")) {
+
+			return;
+		}
+
 		// check to see if it is an index array
 		$indexed = !self::_is_assoc($data);
 
@@ -36,9 +42,16 @@ Class View
 
 				// if the file exists then add it to the string
 				$view .= $view_data?$view_data:'';
+
+				$id = isset($snippet['id'])?$snippet['id']:'';
+
+				Hooks::call("after_render",$view_data,$file,$id);
+
 			}
 
+			echo $view;
 
+			return $view;
 
 		}
 		// if the data is not an indexed array
@@ -46,73 +59,72 @@ Class View
 		{
 			// get the content
 			$view = self::get_contents($file_path,$data,$root);
-		}
 
-		// if we got a view
-		if($view)
-		{
-
-			// if there is a template file and templates are on
-			if($template && TEMPLATES)
+			// if we got a view
+			if($view)
 			{
 
-				// template file path
-				$template_path = SYSTEM_PATH."/views/templates/".$template.".php";
+				// if there is a template file and templates are on
+				if($template && TEMPLATES)
+				{
 
-				if(DEBUG) {
+					// template file path
+					$template_path = SYSTEM_PATH."/views/templates/".$template.".php";
 
-					array_push(Core::$debug['views'],$template_path);
+					if(DEBUG) {
+
+						array_push(Core::$debug['views'],$template_path);
+					}
+
+					// get the whole page including template
+					$view = self::get_contents($template_path,$templateInfo,$root,$view);
+
+
 				}
 
-				// get the whole page including template
-				$template = self::get_contents($template_path,$templateInfo,$root,$view);
+				$id = isset($data['id'])?$data['id']:'';
 
-				// render out the template
-				echo $template;
-
-			}
-			// if there isn't a template
-			else
-			{
-
+				Hooks::call("after_render",$view,$file);
 
 				// render out the view
 				echo $view;
 
-			}
-
-		}
-		// if a view file didn't exist
-		else
-		{
-
-			//split the name
-			$split = preg_split("/[.]/", $file);
-
-			// if there is an extension
-			$ext = isset($filename[1]);
-
-			// if there is an extension like json or xml
-			if($ext && $filename[1] === 'json')
-			{
-
-				// render the json object using the data
-				Asset::json($data);
+				// return the text
+				return $view;
 
 			}
+			// if a view file didn't exist
 			else
 			{
 
-				// TODO: Add 404 Error Handling
-				echo "404 Error: View File Didn't Exist <br />";
-				echo $file_path;
+				//split the name
+				$split = preg_split("/[.]/", $file);
+
+				// if there is an extension
+				$ext = isset($filename[1]);
+
+				// if there is an extension like json or xml
+				if($ext && $filename[1] === 'json')
+				{
+
+					// render the json object using the data
+					Asset::json($data);
+
+				}
+				else
+				{
+
+					// TODO: Add 404 Error Handling
+					echo "404 Error: View File Didn't Exist <br />";
+					echo $file_path;
+
+				}
 
 			}
-
 		}
 	}
 
-	// check to see if array is assocative or indexed
+	// check to see if array is associative or indexed
 	private static function _is_assoc($array)
 	{
 		return array_keys($array) !== range(0, count($array) - 1);
@@ -120,11 +132,30 @@ Class View
 
 	// get the contents of a file
 	public static function get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
+
+		// if there is data
+		if(is_array($data) && self::_is_assoc($data)) {
+
+			// set the key value pairs to variables with the name of the key
+			extract($data);
+
+		}
+
+
+		// if the file is a file
 	    if (is_file($filename)) {
+
+	    	// start the output buffer
 	        ob_start();
+
+	        // include the file
 	        include $filename;
+
+	        // return a clean stream
 	        return ob_get_clean();
 	    }
+
+	    // if the file doesn't exist return false
 	    return false;
 	}
 }

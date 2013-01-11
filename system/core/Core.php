@@ -6,12 +6,29 @@ Class Core {
 	private static $instantiated = array();
 
 	// variable for all the debug information
-	public static $debug = array(
-									"statements"=>array(),
+	public static $debug = array(	"statements"   =>array(),
 									"instantiated" =>array(),
-									"url"=>array(),
-									"views"=>array()
+									"url"          =>array(),
+									"views"        =>array()
 								);
+
+	private static $files = array(
+			"core" =>array(
+				"Core"       =>"Core.php",
+				"Controller" =>"Controller.php",
+				"CFDump"     =>"CFDump.php",
+				"FormHelper" =>"FormHelper.php",
+				"Model"      =>"Model.php",
+				"ORM"        =>"ORM.php",
+				"Validation" =>"Validation.php",
+				"Auth"       =>"Auth.php",
+				"Asset"      =>"Asset.php",
+				"Database"   =>"Database.php",
+				"View"       =>"View.php",
+				"Session"    =>"Session.php",
+				"Hooks"		 =>"Hooks.php"),
+			"extensions" => array()
+		);
 
 	// what extensions to include
 	public static $extensions = array();
@@ -23,25 +40,8 @@ Class Core {
 	public static function autoloader($classname)
 	{
 
-		// framework specific files
-		$files = array(
-			"core" =>array(
-				"Core"=>"Core.php",
-				"Controller"=>"Controller.php",
-				"CFDump"=>"CFDump.php",
-				"FormHelper"=>"FormHelper.php",
-				"Model"=>"Model.php",
-				"ORM"=>"ORM.php",
-				"Validation"=>"Validation.php",
-				"Auth"=>"Auth.php",
-				"Asset"=>"Asset.php",
-				"Database"=>"Database.php",
-				"View"=>"View.php",
-				"Session"=>"Session.php")
-		);
-
 		// includes framework specific files
-		foreach($files as $folder=>$file) {
+		foreach(self::$files as $folder=>$file) {
 			foreach($file as $name=>$filePath) {
 				if($classname == $name) {
 					include_once SYSTEM_PATH."/".$folder."/".$filePath;
@@ -89,13 +89,13 @@ Class Core {
 		$url = preg_split("/[.]/", $url[0]);
 
 		// set the extension to the second half of the split so that we can use it later
-		$extension = $url[1];
-
-		// set the uri
-		$uri = $url[0];
+		$extension = isset($url[1])?$url[1]:'';
 
 		// variable for the request that was made
-		$request = explode('/',str_replace(dirname($_SERVER['SCRIPT_NAME'])."/",'',$uri));
+		$uri = str_replace(dirname($_SERVER['SCRIPT_NAME'])."/",'',$url[0]);
+
+		// if the uri is just a blank string use an array if it has length then break it into pieces
+		$request = !empty($uri)?explode("/", $uri):array();
 
 		// variable for all the information of the url
 		$info_of_url = array();
@@ -285,14 +285,22 @@ Class Core {
 	public static function run()
 	{
 
+		// so we can instatinate
+		foreach(self::$extensions as $folder) {
+
+			include SYSTEM_PATH."/extensions/$folder/bootstrap.php";
+
+		}
+
 		// get all the information
 		$info_of_url = self::getURL();
 
 		// only do this if there is a controller and an action
 		if(isset($info_of_url['controller']) && isset($info_of_url['action']))
 		{
+
 			// create the controller
-			$controller = self::instantiate($info_of_url['controller']);
+			$controller = self::instantiate(ucfirst($info_of_url['controller']));
 
 			// set up the request on the controller for later use
 			$controller->request = array(
@@ -304,7 +312,7 @@ Class Core {
 										);
 
 			// if rest is on and the request type was json
-			if(REST && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
+			if(REST && isset($controller->request['SERVER']['CONTENT_TYPE']) && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
 			{
 
 				// set the request type's data to the php input stream
@@ -313,57 +321,56 @@ Class Core {
 			}
 			//TODO: Add XML and other format support
 
-			// call the before action method
-			$controller->beforeAction();
-
 			// set the view
-			$controller::$viewname = $info_of_url['action'];
+			$controller::$view_name = $info_of_url['action'];
 
-			// set the template if one is not set already
-			$controller::$template = empty($controller::$template)?DEFAULT_TEMPLATE:$controller::$template;
+			// call the before action method and see if we should continue
+			if(Hooks::call("before_action",$controller)) {
 
-			// if there are params
-			if(isset($info_of_url['params']))
-			{
-				// pass them to the action
-				$controller->$info_of_url['action'](implode(",", $data['params']));
+				// if there are params
+				if(isset($info_of_url['params']))
+				{
+					// pass them to the action
+					$controller->$info_of_url['action'](implode(",", $data['params']));
 
-			}
+				}
 
-			// else pass any information that came through the request
-			else
-			{
+				// else pass any information that came through the request
+				else
+				{
 
-				$controller->$info_of_url['action']($controller->request[$controller->request['TYPE']]);
+					$controller->$info_of_url['action']($controller->request[$controller->request['TYPE']]);
 
-			}
+				}
 
-			// run the after action method
-			$controller->afterAction();
+				// run the after action method
+				$controller->afterAction();
 
-			// name of the controller
-			$controller_name = strtolower(str_replace("Controller", "", $info_of_url['controller']));
+				// extension
+				$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
-			// extension
-			$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:DEFAULT_VIEW_TYPE;
+				// path to view
+				$file_name= "{$controller::$controller_name}/{$controller::$view_name}$extension";
 
-			// path to view
-			$file_name= "$controller_name/{$controller::$viewname}$extension";
-
-			// set the template to false
-			$template = false;
-
-			// if it is not ajax
-			if(!$controller->request['AJAX'])
-			{
-
-				// the template to be rendered
+				// set the template to be rendered
 				$template = $controller::$template;
 
-			}
+				// if it is ajax
+				if($controller->request['AJAX'])
+				{
 
-			// render the page
-			View::render($file_name,$controller::$view_info,$template,$controller::$layout_info);
+					// we don't want to render a template
+					$template = false;
+
+				}
+
+				if(AUTO_RENDER) {
+
+					// render the page
+					View::render($file_name,$controller::$view_info,$template,$controller::$layout_info);
+
+				}
+			}
 
 		}
 
@@ -440,4 +447,10 @@ Class Core {
 		return ucfirst($string);
 	}
 
+	// add classes to be autoloaded
+	public static function addClasses($folder,$files)
+	{
+		// add the files to that folder
+		self::$files['extensions/'.$folder] = $files;
+	}
 }

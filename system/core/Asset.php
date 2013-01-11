@@ -1,7 +1,7 @@
 <?php
 
 Class Asset {
-	
+
 	// used to set file paths for assets
 	public static $paths;
 
@@ -17,7 +17,7 @@ Class Asset {
 	{
 		// create base url variable
 		$base_url = '';
-		
+
 		// see if host name is in the server variable
 		if($_SERVER['HTTP_HOST']) {
 
@@ -25,23 +25,23 @@ Class Asset {
 			// TODO: make HTTP dynamic so it checks for https
 			$base_url .= "http://".$_SERVER['HTTP_HOST'];
 		}
-		
+
 		// see if script name is in the server variable
 		if($_SERVER['SCRIPT_NAME']) {
-			
+
 			// add the directory to the base url
 			$base_url .= str_replace('\\', '/', dirname($_SERVER["SCRIPT_NAME"]));
 		}
-		
+
 		// make sure there is an ending slash and then return it
-		return rtrim($base_url, '/').'/'; 
+		return rtrim($base_url, '/').'/';
 	}
 
 	// used for routing to create urls to content dynamically
 	// @controller = the controller you want to target
 	// @action = the action you want to target
 	// @params = the params you may want to pass
-	public static function create_url($controller,$action='index',$params=array()) 
+	public static function create_url($controller,$action='index',$params=array())
 	{
 		// split the url base on the "/"
 		$urlArray = preg_split("/\//", self::get_base());
@@ -64,13 +64,13 @@ Class Asset {
 		// create an array with the controller and action
 		$array = array($controller,$action);
 
-		// if the params is empty then do nothing if there is something then set it to the third index in the array 
+		// if the params is empty then do nothing if there is something then set it to the third index in the array
 		empty($params)?"":$array[2] = $params;
 
 		// if the array is in the routes
 		if(in_array($array, Core::$routes)) {
 
-			// loop through the routes 
+			// loop through the routes
 			foreach (Core::$routes as $key => $value) {
 
 				// if the array equals the value
@@ -89,9 +89,9 @@ Class Asset {
 		return $url."/".$controller."/".$action."/".$paramsURL;
 	}
 
-	public static function css($stylesheets,$attr=array()) 
+	public static function css($stylesheets,$attr=array())
 	{
-		// create a tag with a css type, the files and the global attributes 
+		// create a tag with a css type, the files and the global attributes
 		return self::create('css',$stylesheets,$attr);
 	}
 
@@ -100,15 +100,15 @@ Class Asset {
 		// create a tag with a js type, the files and the global attributes
 		return self::create('js',$scripts,$attr);
 	}
-	
-	public static function img($imgs,$attr=array()) 
+
+	public static function img($imgs,$attr=array())
 	{
 		// create a tag with a img type, the files and the global attributes
 		return self::create('img',$imgs,$attr);
 	}
-	
+
 	// create a tag for each of the three types
-	private static function create($type,$items,$attrs=array()) 
+	private static function create($type,$items,$attrs=array())
 	{
 		// empty string to hold the html string
 		$html = '';
@@ -128,7 +128,7 @@ Class Asset {
 			// if this item is an array then merge the second index with the attrs param if not then just use the attrs param
 			$attr = is_array($item)?array_merge($attrs,$item[1]):$attrs;
 
-			// if this item is an array then use the first index as the file name if isn't then just use the index 
+			// if this item is an array then use the first index as the file name if isn't then just use the index
 			$file = is_array($item)?$item[0]:$item;
 
 			// do different things based on the type
@@ -202,11 +202,11 @@ Class Asset {
 	}
 
 	// convert and array of attributes to a string
-	private static function _array_to_attr($attr) 
+	private static function _array_to_attr($attr)
 	{
 		// string for the attribute
 		$attr_str = '';
-		
+
 		// for each attr get the property and the value
 		foreach($attr as $property=>$value) {
 
@@ -218,7 +218,7 @@ Class Asset {
 		// trim off extra space
 		return trim($attr_str);
 	}
-	
+
 	// json encode and echo out object for json view
 	public static function json($object)
 	{
