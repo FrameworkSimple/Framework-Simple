@@ -10,10 +10,10 @@ class Controller {
 	// the name of the view to show
 	static public $view_name;
 
-	// template to use
-	static public $template = DEFAULT_TEMPLATE;
+	// layout to use
+	static public $layout = DEFAULT_LAYOUT;
 
-	// information to pass to the template
+	// information to pass to the layout
 	static public $layout_info = array();
 
 	// information to pass to the view
@@ -39,10 +39,11 @@ class Controller {
 		Hooks::register("before_render",array(get_called_class(),"before_render"));
 
 	}
-	public function content_for_layout($name, $data)
+	public function layout_data($name, $data)
 	{
 
 		self::$layout_info[$name] = $data;
+
 	}
 	// add information to the view_info
 	public function view_data($name, $data) {
@@ -69,6 +70,8 @@ class Controller {
 			Auth::isAuthorized();
 
 		}
+
+		return true;
 
 	}
 	public function afterAction() {

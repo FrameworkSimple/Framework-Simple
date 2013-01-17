@@ -36,6 +36,9 @@ Class Core {
 	// auto routes
 	public static $routes = array();
 
+	//info of url
+	public static $info_of_url = "";
+
 	// loads all the classes automatically
 	public static function autoloader($classname)
 	{
@@ -119,10 +122,10 @@ Class Core {
 			else {
 
 				// set the controller to the default
-				$info_of_url['controller'] = ucfirst(Core::$defaultController).'Controller';
+				$info_of_url['controller'] = ucfirst(DEFAULT_CONTROLLER).'Controller';
 
 				// set the action to the default
-				$info_of_url['action'] = Core::$defaultAction;
+				$info_of_url['action'] = DEFAULT_ACTION;
 
 			}
 
@@ -241,10 +244,10 @@ Class Core {
 		}
 		if(DEBUG) {
 
-			Core::$debug['url'] = $info_of_url;
+			self::$debug['url'] = $info_of_url;
 		}
 		// return the information
-		return $info_of_url;
+		self::$info_of_url = $info_of_url;
 
 	}
 
@@ -288,19 +291,20 @@ Class Core {
 		// so we can instatinate
 		foreach(self::$extensions as $folder) {
 
+			// include the bootstrap file from the extenstion
 			include SYSTEM_PATH."/extensions/$folder/bootstrap.php";
 
 		}
 
 		// get all the information
-		$info_of_url = self::getURL();
+		self::$info_of_url = self::getURL();
 
 		// only do this if there is a controller and an action
-		if(isset($info_of_url['controller']) && isset($info_of_url['action']))
+		if(isset(self::$info_of_url['controller']) && isset(self::$info_of_url['action']))
 		{
 
 			// create the controller
-			$controller = self::instantiate(ucfirst($info_of_url['controller']));
+			$controller = self::instantiate(ucfirst(self::$info_of_url['controller']));
 
 			// set up the request on the controller for later use
 			$controller->request = array(
@@ -316,61 +320,42 @@ Class Core {
 			{
 
 				// set the request type's data to the php input stream
-				$controller->reqest[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
+				$controller->request[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
+
+				// if params are empty put the variable we got as them
+				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = json_decode(file_get_contents("php://input"));
 
 			}
+
 			//TODO: Add XML and other format support
 
 			// set the view
-			$controller::$view_name = $info_of_url['action'];
+			$controller::$view_name = self::$info_of_url['action'];
 
 			// call the before action method and see if we should continue
-			if(Hooks::call("before_action",$controller)) {
+			// if it comes back false stop running
+			if(!Hooks::call("before_action")) return;
 
-				// if there are params
-				if(isset($info_of_url['params']))
-				{
-					// pass them to the action
-					$controller->$info_of_url['action'](implode(",", $data['params']));
+			// call the action
+			call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
 
-				}
+			// run the after action method
+			if(!Hooks::call("after_action")) return;
 
-				// else pass any information that came through the request
-				else
-				{
+			// extension
+			$extension = isset(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
-					$controller->$info_of_url['action']($controller->request[$controller->request['TYPE']]);
+			// path to view
+			$file_name= "{$controller::$controller_name}/{$controller::$view_name}$extension";
 
-				}
+			// set the layout to be rendered
+			$layout = $controller::$layout;
 
-				// run the after action method
-				$controller->afterAction();
+			// if it is ajax we don't want to render a layout
+			if($controller->request['AJAX']) $layout = false;
 
-				// extension
-				$extension = isset($info_of_url['ext'])?".".$info_of_url['ext']:DEFAULT_VIEW_TYPE;
-
-				// path to view
-				$file_name= "{$controller::$controller_name}/{$controller::$view_name}$extension";
-
-				// set the template to be rendered
-				$template = $controller::$template;
-
-				// if it is ajax
-				if($controller->request['AJAX'])
-				{
-
-					// we don't want to render a template
-					$template = false;
-
-				}
-
-				if(AUTO_RENDER) {
-
-					// render the page
-					View::render($file_name,$controller::$view_info,$template,$controller::$layout_info);
-
-				}
-			}
+			// render the page
+			if(AUTO_RENDER) View::render($file_name,$controller::$view_info,$layout,$controller::$layout_info);
 
 		}
 
