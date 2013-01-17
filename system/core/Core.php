@@ -37,7 +37,7 @@ Class Core {
 	public static $routes = array();
 
 	//info of url
-	public static $info_of_url = "";
+	public static $info_of_url = array("controller"=>"","action"=>"","params"=>array(),"ext"=>"");
 
 	// loads all the classes automatically
 	public static function autoloader($classname)
@@ -100,9 +100,6 @@ Class Core {
 		// if the uri is just a blank string use an array if it has length then break it into pieces
 		$request = !empty($uri)?explode("/", $uri):array();
 
-		// variable for all the information of the url
-		$info_of_url = array();
-
 		// check if it is the root url
 		// url : /
 		if(count($request) === 0) {
@@ -111,21 +108,21 @@ Class Core {
 			if(isset(Core::$routes['/'])) {
 
 				// set the controller to the one in the route
-				$info_of_url['controller'] = Core::$routes['/'][0].'Controller';
+				self::$info_of_url['controller'] = Core::$routes['/'][0].'Controller';
 
 				// set the action to the one in the route
-				$info_of_url['action'] = Core::$routes['/'][1];
+				self::$info_of_url['action'] = Core::$routes['/'][1];
 
 				// if there are params
-				if(isset(Core::$routes['/'][2]))$info_of_url['params'] = Core::$routes['/'][2];
+				if(isset(Core::$routes['/'][2]))self::$info_of_url['params'] = Core::$routes['/'][2];
 			}
 			else {
 
 				// set the controller to the default
-				$info_of_url['controller'] = ucfirst(DEFAULT_CONTROLLER).'Controller';
+				self::$info_of_url['controller'] = ucfirst(DEFAULT_CONTROLLER).'Controller';
 
 				// set the action to the default
-				$info_of_url['action'] = DEFAULT_ACTION;
+				self::$info_of_url['action'] = DEFAULT_ACTION;
 
 			}
 
@@ -135,13 +132,13 @@ Class Core {
 
 
 			// set the controller to the one in the route
-			$info_of_url['controller'] = ucfirst(Core::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
+			self::$info_of_url['controller'] = ucfirst(Core::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
 
 			// set the action to the one in the route
-			$info_of_url['action'] = Core::$routes[strtolower($request[0]."/".$request[1])][1];
+			self::$info_of_url['action'] = Core::$routes[strtolower($request[0]."/".$request[1])][1];
 
 			// if there are params
-			if(isset(Core::$routes[strtolower($request[0]."/".$request[1])][2]))$info_of_url['params'] = Core::$routes[strtolower($request[0]."/".$request[1])][2];
+			if(isset(Core::$routes[strtolower($request[0]."/".$request[1])][2]))self::$info_of_url['params'] = Core::$routes[strtolower($request[0]."/".$request[1])][2];
 
 
 		}
@@ -150,13 +147,13 @@ Class Core {
 		{
 
 			// set the controller
-			$info_of_url['controller'] = ucfirst($request[0]).'Controller';
+			self::$info_of_url['controller'] = ucfirst($request[0]).'Controller';
 
 			// if there is an extension
 			if($extension)
 
 			{
-				$info_of_url['ext'] = $extension;
+				self::$info_of_url['ext'] = $extension;
 			}
 
 			// if there is an second value
@@ -164,11 +161,11 @@ Class Core {
 			{
 
 				// check if the action exists, if it does
-				if(method_exists($info_of_url['controller'], $request[1]))
+				if(method_exists(self::$info_of_url['controller'], $request[1]))
 				{
 					// set the action
 					// url: /controller/action
-					$info_of_url['action'] = $request[1];
+					self::$info_of_url['action'] = $request[1];
 
 					// if there is a third value
 					if(isset($request[2]))
@@ -176,7 +173,7 @@ Class Core {
 
 						// set the params
 						// url: /controller/action/param
-						$info_of_url['params'] = $request[2];
+						self::$info_of_url['params'] = $request[2];
 
 					}
 
@@ -189,27 +186,27 @@ Class Core {
 
 					// if rest is turned on and method is a method inside controller
 					// url: /controller/param with request
-					if(REST && method_exists($info_of_url['controller'], $method))
+					if(REST && method_exists(self::$info_of_url['controller'], $method))
 					{
 
 						// set the action to the method
-						$info_of_url['action'] = $method;
+						self::$info_of_url['action'] = $method;
 
 					}
 
 					// if rest isn't on and default action is a method
 					// url: /controller/param without request
-					else if(method_exists($info_of_url['controller'], DEFAULT_ACTION))
+					else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
 					{
 
 						// set the action to the default
-						$info_of_url['action'] = DEFAULT_ACTION;
+						self::$info_of_url['action'] = DEFAULT_ACTION;
 
 					}
 
 
 					// set the params to the  second value
-					$info_of_url['params'] = $request[1];
+					self::$info_of_url['params'] = $request[1];
 
 				}
 
@@ -221,21 +218,21 @@ Class Core {
 
 				// if rest is turned on and method is a method inside controller
 				// url: /controller with request
-				if(REST && method_exists($info_of_url['controller'], $method))
+				if(REST && method_exists(self::$info_of_url['controller'], $method))
 				{
 
 					// set the action to the method
-					$info_of_url['action'] = $method;
+					self::$info_of_url['action'] = $method;
 
 				}
 
 				// if rest isn't on and default action is a method
 				// url: /controller without request
-				else if(method_exists($info_of_url['controller'], DEFAULT_ACTION))
+				else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
 				{
 
 					// set the action to the default
-					$info_of_url['action'] = DEFAULT_ACTION;
+					self::$info_of_url['action'] = DEFAULT_ACTION;
 
 				}
 
@@ -244,10 +241,8 @@ Class Core {
 		}
 		if(DEBUG) {
 
-			self::$debug['url'] = $info_of_url;
+			self::$debug['url'] = self::$info_of_url;
 		}
-		// return the information
-		self::$info_of_url = $info_of_url;
 
 	}
 
@@ -297,7 +292,7 @@ Class Core {
 		}
 
 		// get all the information
-		self::$info_of_url = self::getURL();
+		self::getURL();
 
 		// only do this if there is a controller and an action
 		if(isset(self::$info_of_url['controller']) && isset(self::$info_of_url['action']))
@@ -343,7 +338,7 @@ Class Core {
 			if(!Hooks::call("after_action")) return;
 
 			// extension
-			$extension = isset(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
+			$extension = !empty(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
 			// path to view
 			$file_name= "{$controller::$controller_name}/{$controller::$view_name}$extension";
@@ -386,6 +381,9 @@ Class Core {
 				// loop through the value (info)
 				foreach ($info as $num => $para)
 				{
+
+					// if it is an array then implode it to a string
+					if(is_array($para)) $para = implode(",", $para);
 
 					// echo out the index number and the value
 					echo "<p><span>".$num."</span>".$para."</p>";
