@@ -5,7 +5,7 @@ Class View
 {
 
 	// render a view
-	public static function render($file,$data=array(),$template=FALSE,$templateInfo=array())
+	public static function render($file,$data=array(),$layout=FALSE,$layoutInfo=array())
 	{
 
 		// call the before_render hook and if it returns false then stop the function
@@ -64,27 +64,27 @@ Class View
 			if($view)
 			{
 
-				// if there is a template file and templates are on
-				if($template && TEMPLATES)
+				// if there is a layout file and layouts are on
+				if($layout && LAYOUTS)
 				{
 
-					// template file path
-					$template_path = SYSTEM_PATH."/views/templates/".$template.".php";
+					// layout file path
+					$layout_path = SYSTEM_PATH."/views/layouts/".$layout.".php";
 
 					if(DEBUG) {
 
-						array_push(Core::$debug['views'],$template_path);
+						array_push(Core::$debug['views'],$layout_path);
 					}
 
-					// get the whole page including template
-					$view = self::get_contents($template_path,$templateInfo,$root,$view);
+					// get the whole page including layout
+					$view = self::get_contents($layout_path,$layoutInfo,$root,$view);
 
 
 				}
 
 				$id = isset($data['id'])?$data['id']:'';
 
-				Hooks::call("after_render",$view,$file);
+				Hooks::call("after_render",$view,$file,$data);
 
 				// render out the view
 				echo $view;

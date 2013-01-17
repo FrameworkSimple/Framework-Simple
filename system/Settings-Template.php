@@ -21,13 +21,13 @@
 	const DEFAULT_ACTION = 'index';
 
 	// default action when there isn't one available
-	const DEFAULT_TEMPLATE = false;
+	const DEFAULT_LAYOUT = false;
 
 	// the default for how you want views to output when no extension is specified
 	const DEFAULT_VIEW_TYPE = '';
 
-	// if you want to use templates
-	const TEMPLATES = true;
+	// if you want to use layouts
+	const LAYOUTS = true;
 
 	// if you would like to see the debug output
 	const DEBUG = true;
