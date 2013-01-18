@@ -28,7 +28,6 @@ Class Core {
 				"Hooks"		 =>"Hooks.php"),
 			"extensions" => array()
 		);
-
 	// what extensions to include
 	public static $extensions = array();
 
@@ -151,7 +150,7 @@ Class Core {
 			}
 
 			// check if controller exists
-			else if(is_file(SYSTEM_PATH."/controllers/".ucfirst($request[0])."Controller.php"))
+			else
 			{
 
 				// if there is an extension
@@ -249,13 +248,6 @@ Class Core {
 					self::$info_of_url['params'] = $request;
 
 				}
-
-			}
-
-			else {
-
-				//TODO: CONTROLLER DOESN"T EXIST THROW ERROR
-				echo ucfirst($request[0])."Controller does not exist";
 
 			}
 
