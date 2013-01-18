@@ -337,7 +337,7 @@ Class Core {
 				}
 
 				// if params are empty put the variable we got as them
-				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = $controller->request[$controller->request['TYPE']];
+				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = array($controller->request[$controller->request['TYPE']]);
 
 			}
 
