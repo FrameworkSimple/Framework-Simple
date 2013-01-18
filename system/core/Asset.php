@@ -41,25 +41,15 @@ Class Asset {
 	// @controller = the controller you want to target
 	// @action = the action you want to target
 	// @params = the params you may want to pass
-	public static function create_url($controller,$action='index',$params=array())
+	public static function create_url($controller,$action='',$params=array())
 	{
-		// split the url base on the "/"
-		$urlArray = preg_split("/\//", self::get_base());
 
-		// what is the length of the url array
-		$length = count($urlArray);
 
-		// remove the last section
-		unset($urlArray[$length-1]);
-
-		// remove the second to last section
-		unset($urlArray[$length-2]);
-
-		// put the url back together
-		$url = implode("/", $urlArray);
+		// get the url
+		$url = self::get_base();
 
 		// create a string from the params separated by /
-		$paramsURL = implode("/", $params);
+		$paramsURL = is_array($params)?implode("/", $params):$params;
 
 		// create an array with the controller and action
 		$array = array($controller,$action);
@@ -76,17 +66,29 @@ Class Asset {
 				// if the array equals the value
   				if($array == $value){
 
-  					// set the controller to the key
-     				$controller = $key;
+  					// set the url to the key
+     				$route_url = $key;
+
+     				// if the route is the root return the url
+     				if($route_url == "/") return $url;
 
      				// return the url plus "/" plus the controller
-     				return $url."/".$controller;
+     				return $url.$route_url;
   				}
   			}
 		}
 
+		// add the controller
+		$url .= $controller;
+
+		// add the action if there is one
+		if($action) $url .= "/".$action;
+
+		// ad the params if there is any
+		if($paramsURL) $url .= "/".$paramsURL;
+
 		// return the url all the information
-		return $url."/".$controller."/".$action."/".$paramsURL;
+		return $url;
 	}
 
 	public static function css($stylesheets,$attr=array())

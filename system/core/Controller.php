@@ -36,6 +36,7 @@ class Controller {
 		self::$controller_name = strtolower(str_replace("Controller", "", self::$controller));
 
 		Hooks::register("before_action",array(get_called_class(),"before_action"));
+		Hooks::register("after_action",array(get_called_class(),"after_action"));
 		Hooks::register("before_render",array(get_called_class(),"before_render"));
 
 	}
@@ -74,14 +75,18 @@ class Controller {
 		return true;
 
 	}
-	public function afterAction() {
+	public function after_action() {
 
 		if(!self::$success && $this->request['AJAX'])
 		{
 
 			header("HTTP/1.1 400 Bad Request");
 
+			return false;
+
 		}
+
+		return true;
 	}
 
 	// do this before view is rendered

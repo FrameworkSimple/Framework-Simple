@@ -65,7 +65,7 @@ Class ORM extends Database {
 		else if(strstr($method,"save"))
 		{
 			// data to save
-			$this->data = $value[0];
+			$this->_data = $value[0];
 
 			// set the call to "_save"
 			$call = "_".$method;
@@ -73,21 +73,21 @@ Class ORM extends Database {
 		else if(strstr($method,"delete"))
 		{
 			// id to delete
-			$this->data = $value[0];
+			$this->_data = $value[0];
 
 			// set tthe call to "_delete"
 			$call = "_".$method;
 		}
 
 		// make the call to the function passing the data and save it to the response
-		$response = $this->$call($this->data);
+		$response = $this->$call($this->_data);
 
 
 		// reset all the options to the default
 		$this->options = array_merge($this->options,$this->_defaultOptions);
 
 		// clear all the data
-		$this->data = array();
+		$this->_data = array();
 
 		// clear all the hasManyTables
 		$this->_hasManyTables = array();
@@ -127,7 +127,7 @@ Class ORM extends Database {
 		$stmt = $this->db->prepare($statement);
 
 		// run the statement
-		if($stmt->execute($this->data))
+		if($stmt->execute($this->_data))
 		{
 
 			// get all the results
@@ -144,7 +144,7 @@ Class ORM extends Database {
 			foreach($results as $i=>$result)
 			{
 				// set up the return array for one result
-				$returnResult == array();
+				$returnResult = array();
 
 				// loop throught this result
 				foreach($result as $col=>$val)
@@ -299,7 +299,7 @@ Class ORM extends Database {
 	private function _save() {
 
 		// insert or update
-		$insert = isset($this->data['id'])?false:true;
+		$insert = isset($this->_data['id'])?false:true;
 
 		// valid is true by default
 		$valid = true;
@@ -308,7 +308,7 @@ Class ORM extends Database {
 		if($insert) {
 
 			// before validation run this function
-			$this->data = $this->beforeValidation($this->data);
+			$this->_data = $this->beforeValidation($this->_data);
 
 			// create the validtor
 			$validator = new Validation();
@@ -317,13 +317,13 @@ Class ORM extends Database {
 			$validator->db = $this->db;
 
 			// validate information
-			$valid = $validator->validate($this->_name,$this->data,$this->required,$this->rules);
+			$valid = $validator->validate($this->_name,$this->_data,$this->required,$this->rules);
 
 		}
 		if($valid === true) {
 
 			// run the before save function
-			$this->data = $this->beforeSave($this->data);
+			$this->_data = $this->beforeSave($this->_data);
 
 			// set the database name
 			$dbName = Core::toDB($this->_name);
@@ -347,7 +347,7 @@ Class ORM extends Database {
 			$updateStmt2 = " WHERE id=:id";
 
 			// loop throught the data and make sure it belongs in this table and then add it to the statement
-			foreach($this->data as $col=>$val) {
+			foreach($this->_data as $col=>$val) {
 
 				// check if the column is in this table
 				if(isset(parent::$tables[$dbName][$col]))
@@ -737,7 +737,7 @@ Class ORM extends Database {
 	 		foreach($this->options['where'] as $col=>$val)
 	 		{
 	 			// set the column equal to the value for the excute
-				$this->data[$col] = $val[0];
+				$this->_data[$col] = $val[0];
 
 	 			// set the col equal to the value
 	 			$where .= "$val[1].$col = :$col AND ";

@@ -1,4 +1,3 @@
-
 <?php
 
 Class Core {
@@ -115,6 +114,7 @@ Class Core {
 
 				// if there are params
 				if(isset(Core::$routes['/'][2]))self::$info_of_url['params'] = Core::$routes['/'][2];
+
 			}
 			else {
 
@@ -126,66 +126,107 @@ Class Core {
 
 			}
 
-		}
-		// check if request is in the routes
-		else if(isset(Core::$routes[strtolower($request[0]."/".$request[1])])) {
-
-
-			// set the controller to the one in the route
-			self::$info_of_url['controller'] = ucfirst(Core::$routes[strtolower($request[0]."/".$request[1])][0]).'Controller';
-
-			// set the action to the one in the route
-			self::$info_of_url['action'] = Core::$routes[strtolower($request[0]."/".$request[1])][1];
-
-			// if there are params
-			if(isset(Core::$routes[strtolower($request[0]."/".$request[1])][2]))self::$info_of_url['params'] = Core::$routes[strtolower($request[0]."/".$request[1])][2];
-
+			return;
 
 		}
-		// check if controller exists
-		else if(is_file(SYSTEM_PATH."/controllers/".ucfirst($request[0])."Controller.php"))
-		{
+		else {
 
 			// set the controller
 			self::$info_of_url['controller'] = ucfirst($request[0]).'Controller';
 
-			// if there is an extension
-			if($extension)
-
+			// check if request is in the routes
+			if( isset( Core::$routes[ strtolower($uri) ] ) )
 			{
-				self::$info_of_url['ext'] = $extension;
+
+				// set the controller to the one in the route
+				self::$info_of_url['controller'] = Core::$routes[ strtolower($uri) ][0]."Controller";
+
+
+				// set the action to the one in the route
+				self::$info_of_url['action'] = Core::$routes[ strtolower($uri) ][1];
+
+				// if there are params
+				if(isset(Core::$routes[ strtolower( $uri ) ][ 2 ]))self::$info_of_url['params'] = Core::$routes[ strtolower( $uri ) ][2];
+
 			}
 
-			// if there is an second value
-			if (isset($request[1]))
+			// check if controller exists
+			else if(is_file(SYSTEM_PATH."/controllers/".ucfirst($request[0])."Controller.php"))
 			{
 
-				// check if the action exists, if it does
-				if(method_exists(self::$info_of_url['controller'], $request[1]))
-				{
-					// set the action
-					// url: /controller/action
-					self::$info_of_url['action'] = $request[1];
+				// if there is an extension
+				if($extension)
 
-					// if there is a third value
-					if(isset($request[2]))
+				{
+					self::$info_of_url['ext'] = $extension;
+				}
+
+				// if there is an second value
+				if (isset($request[1]))
+				{
+
+					// check if the action exists, if it does
+					if(method_exists(self::$info_of_url['controller'], $request[1]))
+					{
+						// set the action
+						// url: /controller/action
+						self::$info_of_url['action'] = $request[1];
+
+						// if there is a third value
+						if(isset($request[2]))
+						{
+
+							unset($request[0]);
+							unset($request[1]);
+
+							// set the params
+							// url: /controller/action/param
+							self::$info_of_url['params'] = $request;
+
+						}
+
+					}
+
+					// if the second argument is numeric
+					// url: /controller/param
+					else if(is_numeric($request[1]))
 					{
 
+						// if rest is turned on and method is a method inside controller
+						// url: /controller/param with request
+						if(REST && method_exists(self::$info_of_url['controller'], $method))
+						{
+
+							// set the action to the method
+							self::$info_of_url['action'] = $method;
+
+						}
+
+						// if rest isn't on and default action is a method
+						// url: /controller/param without request
+						else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
+						{
+
+							// set the action to the default
+							self::$info_of_url['action'] = DEFAULT_ACTION;
+						}
+
+						unset($request[0]);
+
 						// set the params
-						// url: /controller/action/param
-						self::$info_of_url['params'] = $request[2];
+						// url: /controller/param
+						self::$info_of_url['params'] = $request;
 
 					}
 
 				}
 
-				// if the second argument is numeric
-				// url: /controller/param
-				else if(is_numeric($request[1]))
+				// if there is no second value
+				else
 				{
 
 					// if rest is turned on and method is a method inside controller
-					// url: /controller/param with request
+					// url: /controller with request
 					if(REST && method_exists(self::$info_of_url['controller'], $method))
 					{
 
@@ -195,7 +236,7 @@ Class Core {
 					}
 
 					// if rest isn't on and default action is a method
-					// url: /controller/param without request
+					// url: /controller without request
 					else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
 					{
 
@@ -203,42 +244,23 @@ Class Core {
 						self::$info_of_url['action'] = DEFAULT_ACTION;
 
 					}
-
-
+					unset($request[0]);
 					// set the params to the  second value
-					self::$info_of_url['params'] = $request[1];
+					self::$info_of_url['params'] = $request;
 
 				}
 
 			}
 
-			// if there is no second value
-			else
-			{
+			else {
 
-				// if rest is turned on and method is a method inside controller
-				// url: /controller with request
-				if(REST && method_exists(self::$info_of_url['controller'], $method))
-				{
-
-					// set the action to the method
-					self::$info_of_url['action'] = $method;
-
-				}
-
-				// if rest isn't on and default action is a method
-				// url: /controller without request
-				else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
-				{
-
-					// set the action to the default
-					self::$info_of_url['action'] = DEFAULT_ACTION;
-
-				}
+				//TODO: CONTROLLER DOESN"T EXIST THROW ERROR
+				echo ucfirst($request[0])."Controller does not exist";
 
 			}
 
 		}
+
 		if(DEBUG) {
 
 			self::$debug['url'] = self::$info_of_url;
@@ -295,7 +317,7 @@ Class Core {
 		self::getURL();
 
 		// only do this if there is a controller and an action
-		if(isset(self::$info_of_url['controller']) && isset(self::$info_of_url['action']))
+		if(!empty(self::$info_of_url['controller']) && !empty(self::$info_of_url['action']))
 		{
 
 			// create the controller
@@ -311,16 +333,22 @@ Class Core {
 										);
 
 			// if rest is on and the request type was json
-			if(REST && isset($controller->request['SERVER']['CONTENT_TYPE']) && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
+			if(REST)
 			{
 
-				// set the request type's data to the php input stream
-				$controller->request[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
+				if(isset($controller->request['SERVER']['CONTENT_TYPE']) && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
+				{
+
+					// set the request type's data to the php input stream
+					$controller->request[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
+
+				}
 
 				// if params are empty put the variable we got as them
-				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = json_decode(file_get_contents("php://input"));
+				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = $controller->request[$controller->request['TYPE']];
 
 			}
+
 
 			//TODO: Add XML and other format support
 
@@ -329,13 +357,22 @@ Class Core {
 
 			// call the before action method and see if we should continue
 			// if it comes back false stop running
-			if(!Hooks::call("before_action")) return;
+			if(!Hooks::call("before_action"))
+			{
+				self::_output_debug();
+				return;
+			}
 
 			// call the action
 			call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
 
 			// run the after action method
-			if(!Hooks::call("after_action")) return;
+			if(!Hooks::call("after_action"))
+			{
+				self::_output_debug();
+				return;
+			}
+
 
 			// extension
 			$extension = !empty(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
@@ -362,6 +399,12 @@ Class Core {
 
 		}
 
+		self::_output_debug();
+
+	}
+
+	private static function _output_debug()
+	{
 		// if debug is on
 		if(DEBUG)
 		{

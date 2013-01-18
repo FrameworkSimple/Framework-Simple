@@ -1,7 +1,5 @@
 <?php
 
-session_start();
-
 Class Auth {
 
 	public static $allowed = array();
@@ -15,7 +13,7 @@ Class Auth {
 	{
 
 		// get the controller and action
-		$url = Core::getURL();
+		$url = Core::$info_of_url;
 
 		// check if controller is in allowed controllers
 		if(in_array($url['controller'], self::$controllers))
@@ -46,9 +44,9 @@ Class Auth {
 		else
 		{
 
-			if(Session::check('logged_in'))
+			if(Session::get('logged_in'))
 			{
-				
+
 				// return true because user is logged in
 				return true;
 
@@ -57,8 +55,8 @@ Class Auth {
 			{
 
 				// redirect to a new page
-				Core::redirect(AUTH_REDIRECT_CONTROLLER,AUTH_REDIRECT_ACTION,array());
-			
+				Core::redirect(AUTH_REDIRECT_CONTROLLER,AUTH_REDIRECT_ACTION);
+
 			}
 
 		}
@@ -106,7 +104,7 @@ Class Auth {
 
 		// return false because it isn't a correct user
 		return false;
-	
+
 	}
 
 	// log out a user

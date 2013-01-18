@@ -15,7 +15,7 @@ class Validation {
 		$this->errors = array();
 		$this->required = $required;
 		$this->validate = $rules;
-		if(!empty($this->required)) {	
+		if(!empty($this->required)) {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
 					unset($this->data[$col]);
@@ -52,7 +52,7 @@ class Validation {
 						}
 					}
 				}
-				
+
 			}
 		}
 		if(!empty($this->errors)) {
@@ -83,7 +83,7 @@ class Validation {
 		}
 		return true;
 	}
-	
+
 	// "field" => array("regex"=>array("//","error"=>"this is an error"));
 	private function _regex($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"did not meet requirement";
@@ -184,7 +184,7 @@ class Validation {
 		}
 		return false;
 	}
-	
+
 	// "field"=>array("decimal"=>{places});
 	private function _decimal($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"must be a decimal";
@@ -291,7 +291,7 @@ class Validation {
 			$regex = '/^(?!\x{00a2})\p{Sc}?' . $money . '$/u';
 		} else {
 			$regex = '/^' . $money . '(?<!\x{00a2})\p{Sc}?$/u';
-			
+
 		}
 		return $this->_check($val,$regex,$col,$errorString);
 
@@ -401,7 +401,7 @@ class Validation {
 		$regex = "/^http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?$/";
 		return $this->_check($val,$col,$col,$errorString);
 	}
-	
+
 	// "field"=>array("unique");
 	private function _unique($val,$col,$value=NULL) {
 		if(!empty($this->required)) {
@@ -417,5 +417,5 @@ class Validation {
 		}
 		return true;
 	}
-	
+
 }

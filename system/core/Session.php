@@ -1,12 +1,12 @@
 <?php
 
 class Session {
-	
+
 
 	public static function set($key,$value)
 	{
 
-		// set a session variable 
+		// set a session variable
 		$_SESSION[$key] = $value;
 
 	}
