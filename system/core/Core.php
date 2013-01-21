@@ -349,7 +349,7 @@ Class Core {
 
 			// call the before action method and see if we should continue
 			// if it comes back false stop running
-			if(!Hooks::call("before_action"))
+			if(Hooks::call("before_action") === false)
 			{
 				self::_output_debug();
 				return;
@@ -359,7 +359,7 @@ Class Core {
 			call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
 
 			// run the after action method
-			if(!Hooks::call("after_action"))
+			if(Hooks::call("after_action") === false)
 			{
 				self::_output_debug();
 				return;

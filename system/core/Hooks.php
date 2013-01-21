@@ -30,7 +30,14 @@ Class Hooks {
 				{
 
 					// remove the first argument
-					$args = array_slice(func_get_args(), 1);
+					$args = array_slice(func_get_args(),1);
+
+					// loop through the array of arguments and set them equal to their reference
+					foreach($args as $k => &$arg){
+
+						$args[$k] = &$arg;
+
+					}
 
 				}
 

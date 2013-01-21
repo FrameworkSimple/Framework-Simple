@@ -9,10 +9,7 @@ Class View
 	{
 
 		// call the before_render hook and if it returns false then stop the function
-		if(!Hooks::call("before_render")) {
-
-			return;
-		}
+		if(Hooks::call("before_render") === false) return;
 
 		// check to see if it is an index array
 		$indexed = !self::_is_assoc($data);

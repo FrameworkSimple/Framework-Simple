@@ -1,9 +1,9 @@
 <?php
 class Database {
 	// the database
-	protected $db = NULL;
+	public $db = NULL;
 	// the tables that are in the database
-	public static $tables;	
+	public static $tables;
 	// set up PDO
 	public function __construct() {
 		$this -> db = new \PDO(DB_DSN,DB_USERNAME,DB_PASSWORD);
