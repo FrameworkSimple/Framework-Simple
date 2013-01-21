@@ -72,8 +72,6 @@ class Controller {
 
 		}
 
-		return true;
-
 	}
 	public function after_action() {
 
@@ -86,13 +84,11 @@ class Controller {
 
 		}
 
-		return true;
 	}
 
 	// do this before view is rendered
 	public function before_render() {
 
-		// if auto render should run
-		return true;
+
 	}
 }
