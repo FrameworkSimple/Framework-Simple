@@ -18,7 +18,7 @@ Class ORM extends Database {
 			"orderBy"=> ""
 			);
 	// the name of this model
-	private $_name = "";
+	public $_name = "";
 
 	// the tables that we are using
 	private $_tables = array();
@@ -82,7 +82,6 @@ Class ORM extends Database {
 		// make the call to the function passing the data and save it to the response
 		$response = $this->$call($this->_data);
 
-
 		// reset all the options to the default
 		$this->options = array_merge($this->options,$this->_defaultOptions);
 
@@ -99,6 +98,9 @@ Class ORM extends Database {
 	// searchs the database for information
 	private function _find()
 	{
+
+		if(Hooks::call("before_find", $this) === false) return;
+
 		// set all the joins to be added
 		$joins = $this->_setJoins();
 
@@ -308,7 +310,7 @@ Class ORM extends Database {
 		if($insert) {
 
 			// before validation run this function
-			$this->_data = $this->beforeValidation($this->_data);
+			if(Hooks::call("before_validation", $this->data) === false) return;
 
 			// create the validtor
 			$validator = new Validation();
@@ -323,7 +325,7 @@ Class ORM extends Database {
 		if($valid === true) {
 
 			// run the before save function
-			$this->_data = $this->beforeSave($this->_data);
+			if(Hooks::call("before_save",$this->data) === false) return;
 
 			// set the database name
 			$dbName = Core::toDB($this->_name);
@@ -466,8 +468,12 @@ Class ORM extends Database {
 	// delete from database by id
 	private function _delete($id)
 	{
+
 		// set the database name
 		$dbName = Core::toDB($this->_name);
+
+		// call the before delete function
+		if(Hooks::call("before_delete",$id, $dbName, $this) === false) return;
 
 		// create the delete statement
 		$statement = "DELETE FROM $dbName where id = :id";
@@ -736,11 +742,27 @@ Class ORM extends Database {
 	 		// loop through the where options
 	 		foreach($this->options['where'] as $col=>$val)
 	 		{
-	 			// set the column equal to the value for the excute
-				$this->_data[$col] = $val[0];
 
-	 			// set the col equal to the value
-	 			$where .= "$val[1].$col = :$col AND ";
+	 			// if there is no column name
+	 			if(is_int($col)) {
+
+	 				$where .= $val." AND ";
+
+	 			}
+	 			else {
+
+	 				// set the column equal to the value for the excute
+					$this->_data[$col] = $val[0];
+
+					// if there is a table name
+					if(isset($val[1])) $where .= $val[1].".";
+
+	 				// set the col equal to the value
+	 				$where .= "$col = :$col AND ";
+
+	 			}
+
+
 
 	 		}
 
