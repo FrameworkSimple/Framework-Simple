@@ -128,104 +128,53 @@ Class Core {
 			return;
 
 		}
-		else {
+		// if the uri is not in the routes
+		else if(!self::_check_routes($request, $method))
+		{
 
 			// set the controller
 			self::$info_of_url['controller'] = ucfirst($request[0]).'Controller';
 
-			// check if request is in the routes
-			if( isset( Core::$routes[ strtolower($uri) ] ) )
+			// if there is an extension
+			if($extension)
+
 			{
-
-				// set the controller to the one in the route
-				self::$info_of_url['controller'] = Core::$routes[ strtolower($uri) ][0]."Controller";
-
-
-				// set the action to the one in the route
-				self::$info_of_url['action'] = Core::$routes[ strtolower($uri) ][1];
-
-				// if there are params
-				if(isset(Core::$routes[ strtolower( $uri ) ][ 2 ]))self::$info_of_url['params'] = Core::$routes[ strtolower( $uri ) ][2];
-
+				self::$info_of_url['ext'] = $extension;
 			}
 
-			// check if controller exists
-			else
+			// if there is an second value
+			if (isset($request[1]))
 			{
 
-				// if there is an extension
-				if($extension)
-
+				// check if the action exists, if it does
+				if(method_exists(self::$info_of_url['controller'], $request[1]))
 				{
-					self::$info_of_url['ext'] = $extension;
-				}
+					// set the action
+					// url: /controller/action
+					self::$info_of_url['action'] = $request[1];
 
-				// if there is an second value
-				if (isset($request[1]))
-				{
-
-					// check if the action exists, if it does
-					if(method_exists(self::$info_of_url['controller'], $request[1]))
+					// if there is a third value
+					if(isset($request[2]))
 					{
-						// set the action
-						// url: /controller/action
-						self::$info_of_url['action'] = $request[1];
-
-						// if there is a third value
-						if(isset($request[2]))
-						{
-
-							unset($request[0]);
-							unset($request[1]);
-
-							// set the params
-							// url: /controller/action/param
-							self::$info_of_url['params'] = $request;
-
-						}
-
-					}
-
-					// if the second argument is numeric
-					// url: /controller/param
-					else if(is_numeric($request[1]))
-					{
-
-						// if rest is turned on and method is a method inside controller
-						// url: /controller/param with request
-						if(REST && method_exists(self::$info_of_url['controller'], $method))
-						{
-
-							// set the action to the method
-							self::$info_of_url['action'] = $method;
-
-						}
-
-						// if rest isn't on and default action is a method
-						// url: /controller/param without request
-						else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
-						{
-
-							// set the action to the default
-							self::$info_of_url['action'] = DEFAULT_ACTION;
-						}
 
 						unset($request[0]);
+						unset($request[1]);
 
 						// set the params
-						// url: /controller/param
+						// url: /controller/action/param
 						self::$info_of_url['params'] = $request;
 
 					}
 
 				}
 
-				// if there is no second value
-				else
+				// if the second argument is numeric
+				// url: /controller/param
+				else if(is_numeric($request[1]))
 				{
 
 					// if rest is turned on and method is a method inside controller
-					// url: /controller with request
+					// url: /controller/param with request
 					if(REST && method_exists(self::$info_of_url['controller'], $method))
 					{
 
@@ -235,19 +184,32 @@ Class Core {
 					}
 
 					// if rest isn't on and default action is a method
-					// url: /controller without request
+					// url: /controller/param without request
 					else if(method_exists(self::$info_of_url['controller'], DEFAULT_ACTION))
 					{
 
 						// set the action to the default
 						self::$info_of_url['action'] = DEFAULT_ACTION;
-
 					}
+
 					unset($request[0]);
-					// set the params to the  second value
+
+					// set the params
+					// url: /controller/param
 					self::$info_of_url['params'] = $request;
 
 				}
+
+			}
+
+			// if there is no second value
+			else
+			{
+
+				self::_set_action($method);
+				unset($request[0]);
+				// set the params to the  second value
+				self::$info_of_url['params'] = $request;
 
 			}
 
@@ -285,12 +247,12 @@ Class Core {
 
 	}
 
-
 	// redirect to pages
 	public static function redirect($controller,$action,$params=array())
 	{
 		$url = Asset::create_url($controller,$action,$params);
 		header( "Location: $url" ) ;
+
 	}
 
 	// run the function
@@ -355,8 +317,17 @@ Class Core {
 				return;
 			}
 
-			// call the action
-			call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
+			// if params is not an array
+			if(!empty(self::$info_of_url['params']))
+			{
+				// call the action
+				call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
+			}
+			else
+			{
+				call_user_func(array($controller,self::$info_of_url['action']));
+			}
+
 
 			// run the after action method
 			if(Hooks::call("after_action") === false)
@@ -369,8 +340,11 @@ Class Core {
 			// extension
 			$extension = !empty(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
+			// the name of the controller with out Controller
+			$controller_name = strtolower(str_replace("Controller", "", self::$info_of_url['controller']));
+
 			// path to view
-			$file_name= "{$controller::$controller_name}/{$controller::$view_name}$extension";
+			$file_name= "{$controller_name}/{$controller::$view_name}$extension";
 
 			// set the layout to be rendered
 			$layout = $controller::$layout;
@@ -433,6 +407,81 @@ Class Core {
 
 	}
 
+	private static function _check_routes($request,$method)
+	{
+		// loop through the routes
+		foreach(Core::$routes as $route=>$info)
+		{
+
+			// put the route into an array
+			$route_array = explode("/", $route);
+
+			$params = array();
+			$route_string = "";
+
+			foreach($route_array as $index=>$string)
+			{
+
+				if(isset($request[$index]))
+				{
+
+					if(($string == ":num" && is_numeric($request[$index])) || $string == ":any")
+					{
+
+						array_push($params,$request[$index]);
+
+					}
+					else if($string == $request[$index])
+					{
+						$route_string .= "/".$request[$index];
+
+					}
+
+				}
+
+			}
+
+			$route = str_replace("/:num", "", $route);
+			$route = str_replace("/:any", "", $route);
+
+			if("/".$route === $route_string)
+			{
+				self::$info_of_url['controller'] = ucfirst($info[0])."Controller";
+				self::$info_of_url['action'] = $info[1];
+				self::$info_of_url['params'] = $params;
+				return true;
+			}
+
+		}
+
+		return false;
+
+	}
+
+	private static function _set_action($method)
+	{
+
+		// if rest is turned on and method is a method inside controller
+		// url: /controller with request
+		if(REST)
+		{
+
+			// set the action to the method
+			self::$info_of_url['action'] = $method;
+
+		}
+
+		// if rest isn't on and default action is a method
+		// url: /controller without request
+		else
+		{
+
+			// set the action to the default
+			self::$info_of_url['action'] = DEFAULT_ACTION;
+
+		}
+
+	}
 	static public function encrypt($value) {
 
 		if(SALT == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
