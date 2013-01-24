@@ -99,7 +99,7 @@ Class ORM extends Database {
 	private function _find()
 	{
 
-		if(Hooks::call("before_find", $this) === false) return;
+		if(Hooks::call("before_find", array(&$this)) === false) return;
 
 		// set all the joins to be added
 		$joins = $this->_setJoins();
@@ -310,7 +310,7 @@ Class ORM extends Database {
 		if($insert) {
 
 			// before validation run this function
-			if(Hooks::call("before_validation", $this->data) === false) return;
+			if(Hooks::call("before_validation", array(&$this->data)) === false) return;
 
 			// create the validtor
 			$validator = new Validation();
@@ -325,7 +325,7 @@ Class ORM extends Database {
 		if($valid === true) {
 
 			// run the before save function
-			if(Hooks::call("before_save",$this->data) === false) return;
+			if(Hooks::call("before_save",array(&$this->data)) === false) return;
 
 			// set the database name
 			$dbName = Core::toDB($this->_name);

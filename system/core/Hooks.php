@@ -6,7 +6,7 @@ Class Hooks {
 	private static $hooks = array();
 
 	// call a hook
-	public static function call($hook)
+	public static function call($hook, $args = array())
 	{
 
 		// if the hook is in the hooks array
@@ -21,25 +21,6 @@ Class Hooks {
 
 				// create a new instance of the class
 				$class = Core::instantiate($fun[0]);
-
-				// create a blank array of arguments
-				$args = array();
-
-				// if there are more then one argument
-				if(func_num_args() >= 2)
-				{
-
-					// remove the first argument
-					$args = array_slice(func_get_args(),1);
-
-					// loop through the array of arguments and set them equal to their reference
-					foreach($args as $k => &$arg){
-
-						$args[$k] = &$arg;
-
-					}
-
-				}
 
 				// call the function inside the class with the arguments
 				$return = call_user_func_array(array($class,$fun[1]),$args);
