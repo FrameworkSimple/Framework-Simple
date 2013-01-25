@@ -318,7 +318,7 @@ Class Core {
 			}
 
 			// if params is not an array
-			if(!empty(self::$info_of_url['params']))
+			if(!empty(self::$info_of_url['params'][0]))
 			{
 				// call the action
 				call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
