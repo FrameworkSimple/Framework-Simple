@@ -15,8 +15,7 @@ class Session {
 	{
 
 		// get a session variable
-		return $_SESSION[$key];
-
+		return isset($_SESSION[$key])?$_SESSION[$key]:false;
 	}
 
 	public static function remove($key)
