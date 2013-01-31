@@ -142,7 +142,7 @@ Class Auth {
 		{
 
 			// return the value of the key
-			return Session::get('user')[$key];
+			return isset(Session::get('user')[$key])?Session::get('user')[$key]:false;
 
 		}
 		// if there is no key or value
