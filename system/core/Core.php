@@ -431,10 +431,14 @@ Class Core {
 						array_push($params,$request[$index]);
 
 					}
-					else if($string == $request[$index])
+					else if(strtolower($string) == strtolower($request[$index]))
 					{
 						$route_string .= "/".$request[$index];
 
+					}
+					else
+					{
+						$route_string .="/additional";
 					}
 
 				}
@@ -444,7 +448,7 @@ Class Core {
 			$route = str_replace("/:num", "", $route);
 			$route = str_replace("/:any", "", $route);
 
-			if("/".$route === $route_string)
+			if(strtolower("/".$route) === strtolower($route_string))
 			{
 				self::$info_of_url['controller'] = ucfirst($info[0])."Controller";
 				self::$info_of_url['action'] = $info[1];
