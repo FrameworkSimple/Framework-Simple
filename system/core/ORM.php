@@ -142,6 +142,20 @@ Class ORM extends Database {
 
 			$currentQuery = array();
 
+			// if there were no results
+			if(count($results) == 0){
+
+				// set success to false
+				$this->success = false;
+
+				// set the error
+				$this->error = array("msg"=>"No Results found","code"=>3);
+
+				return;
+
+
+			}
+
 			// loop through the resuts
 			foreach($results as $i=>$result)
 			{
@@ -237,9 +251,6 @@ Class ORM extends Database {
 
 				}
 
-
-
-
 			}
 			// if the by column is set
 			if($this->options['byCol'])
@@ -310,7 +321,7 @@ Class ORM extends Database {
 		if($insert) {
 
 			// before validation run this function
-			if(Hooks::call("before_validation", array(&$this->data)) === false) return;
+			if(Hooks::call("before_validation", array(&$this->_data)) === false) return;
 
 			// create the validtor
 			$validator = new Validation();
@@ -325,7 +336,7 @@ Class ORM extends Database {
 		if($valid === true) {
 
 			// run the before save function
-			if(Hooks::call("before_save",array(&$this->data)) === false) return;
+			if(Hooks::call("before_save", array(&$this->_data)) === false) return;
 
 			// set the database name
 			$dbName = Core::toDB($this->_name);
@@ -409,7 +420,7 @@ Class ORM extends Database {
 					$this->success = true;
 
 					// get the id of the inserted
-					$id = $insert?$this->db->lastInsertId():$id;
+					$id = $insert?$this->db->lastInsertId():$this->_data['id'];
 
 					// return the id
 					return $id;
