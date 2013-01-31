@@ -54,9 +54,6 @@ Class Asset {
 		// create an array with the controller and action
 		$array = array($controller,$action);
 
-		// if the params is empty then do nothing if there is something then set it to the third index in the array
-		empty($params)?"":$array[2] = $params;
-
 		// if the array is in the routes
 		if(in_array($array, Core::$routes)) {
 
@@ -71,6 +68,36 @@ Class Asset {
 
      				// if the route is the root return the url
      				if($route_url == "/") return $url;
+
+     				// index of the param
+     				$current_param_index = 0;
+
+     				// loop through the route pieces
+     				foreach($route_array = explode("/", $route_url) as $index => $part)
+     				{
+     					// if it is suppose to be a param
+     					if($part === ":num" || $part ===":any" )
+     					{
+
+     						// if a param is set for this route set the param
+     						if(isset($params[$current_param_index]))
+     						{
+     							$route_array[$index] = $params[$current_param_index];
+
+     							$current_param_index++;
+     						}
+     						// if the param isn't set then remove that part of the route
+     						else
+     						{
+     							unset($route_array[$index]);
+     						}
+
+     					}
+
+     				}
+
+     				// piece the route back together
+     				$route_url = implode("/", $route_array);
 
      				// return the url plus "/" plus the controller
      				return $url.$route_url;
