@@ -59,15 +59,19 @@ Class SoftDeletion
 	public function find(&$model)
 	{
 
+		if(isset($model->soft_delete) && $model->soft_delete === false)
+		{
+			return;
+		}
 		// if it is timestamp set it to the current time
 		if(DELETION_TYPE === 'timestamp')
 		{
-			array_push($model->options['where'], DELETION_COL_NAME." IS NULL");
+			array_push($model->options['where'], $model->_name.".".DELETION_COL_NAME." IS NULL");
 		}
 		// if it is a boolean set it to one
 		else if(DELETION_TYPE === 'boolean')
 		{
-			$model->options['where'][DELETION_COL_NAME] = array(1);
+			$model->options['where'][$model->_name.".".DELETION_COL_NAME] = array(1);
 		}
 
 	}
