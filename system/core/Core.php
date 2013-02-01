@@ -297,9 +297,12 @@ Class Core {
 					$controller->request[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
 
 				}
+				$request_data = $controller->request[$controller->request['TYPE']];
 
-				// if params are empty put the variable we got as them
-				if(empty(self::$info_of_url['params'])) self::$info_of_url['params'] = array($controller->request[$controller->request['TYPE']]);
+
+				// if there is request data add it to the params
+				if(!empty($request_data)) array_push(self::$info_of_url['params'], $request_data);
+
 
 			}
 
@@ -431,6 +434,12 @@ Class Core {
 						array_push($params,$request[$index]);
 
 					}
+					else if($string == ":action" && isset($request[$index]))
+					{
+
+						self::$info_of_url['action'] = $request[$index];
+
+					}
 					else if(strtolower($string) == strtolower($request[$index]))
 					{
 						$route_string .= "/".$request[$index];
@@ -445,16 +454,20 @@ Class Core {
 
 			}
 
+
 			$route = str_replace("/:num", "", $route);
 			$route = str_replace("/:any", "", $route);
+			$route = str_replace("/:action", "", $route);
 
 			if(strtolower("/".$route) === strtolower($route_string))
 			{
 				self::$info_of_url['controller'] = ucfirst($info[0])."Controller";
-				self::$info_of_url['action'] = $info[1];
+				if(empty(self::$info_of_url['action'])) isset($info[1])? self::$info_of_url['action'] = $info[1]:self::_set_action($method);
 				self::$info_of_url['params'] = $params;
+
 				return true;
 			}
+
 
 		}
 

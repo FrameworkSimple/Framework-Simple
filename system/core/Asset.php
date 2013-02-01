@@ -50,18 +50,17 @@ Class Asset {
 
 		// create a string from the params separated by /
 		$paramsURL = is_array($params)?implode("/", $params):$params;
-
-		// create an array with the controller and action
 		$array = array($controller,$action);
+		$array_controller = array($controller);
 
 		// if the array is in the routes
-		if(in_array($array, Core::$routes)) {
+		if(in_array($array, Core::$routes) || in_array($array_controller, Core::$routes)) {
 
 			// loop through the routes
 			foreach (Core::$routes as $key => $value) {
 
 				// if the array equals the value
-  				if($array == $value){
+  				if($array == $value || $array_controller == $value){
 
   					// set the url to the key
      				$route_url = $key;
@@ -92,6 +91,17 @@ Class Asset {
      							unset($route_array[$index]);
      						}
 
+     					}
+     					if($part === ":action")
+     					{
+     						if(!empty($action))
+     						{
+     							$route_array[$index] = $action;
+     						}
+     						else
+     						{
+     							unset($route_array[$index]);
+     						}
      					}
 
      				}
