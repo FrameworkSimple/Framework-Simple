@@ -170,42 +170,52 @@ Class ORM extends Database {
 					$table = $info[0];
 					$col = $info[1];
 
-					// if the table isn't set in the return result
-					if(!isset($returnResult[$table]))
+					if($this->options['recursive'] === 0)
 					{
-
-						// set up the table array
-						$returnResult[$table] = array();
+						$returnResult[$col] = $val;
 
 					}
-					// if it is a has many table
-					if(in_array($table, $this->hasMany))
-					{
+					else {
 
-						// if the has many table isn't set up as an array
-						if(!isset($returnResult[$table][0]))
+						// if the table isn't set in the return result
+						if(!isset($returnResult[$table]))
 						{
 
 							// set up the table array
-							$returnResult[$table][0] = array();
+							$returnResult[$table] = array();
+
+						}
+						// if it is a has many table
+						if(in_array($table, $this->hasMany))
+						{
+
+							// if the has many table isn't set up as an array
+							if(!isset($returnResult[$table][0]))
+							{
+
+								// set up the table array
+								$returnResult[$table][0] = array();
+
+							}
+
+							// put info into an indexed array
+							$returnResult[$table][0][$info[1]] = $val;
+
+						}else {
+
+							// set the value to that column inside its table
+							$returnResult[$info[0]][$info[1]] = $val;
 
 						}
 
-						// put info into an indexed array
-						$returnResult[$table][0][$info[1]] = $val;
-
-					}else {
-
-						// set the value to that column inside its table
-						$returnResult[$info[0]][$info[1]] = $val;
-
 					}
+
 
 
 				}
 
 				// if the result has the same id as the last result
-				if($returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
+				if($this->options['recursive'] !== 0 && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
 				{
 
 						// loop through all the has many tables
@@ -246,7 +256,7 @@ Class ORM extends Database {
 
 					}
 					$currentQuery = $returnResult;
-					$prevID = $returnResult[$this->_name]['id'];
+					if($this->options['recursive'] !== 0)$prevID = $returnResult[$this->_name]['id'];
 
 
 				}
@@ -421,6 +431,7 @@ Class ORM extends Database {
 
 					// get the id of the inserted
 					$id = $insert?$this->db->lastInsertId():$this->_data['id'];
+
 
 					if($this->options['returnSaved'])
 					{
