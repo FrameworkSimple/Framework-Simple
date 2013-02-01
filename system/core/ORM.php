@@ -422,6 +422,13 @@ Class ORM extends Database {
 					// get the id of the inserted
 					$id = $insert?$this->db->lastInsertId():$this->_data['id'];
 
+					if($this->options['returnSaved'])
+					{
+
+						$this->_data = array();
+						return call_user_func(array(get_called_class(),"findById"),$id);
+					}
+
 					// return the id
 					return $id;
 				}
@@ -553,6 +560,8 @@ Class ORM extends Database {
 		// set the blank statement
 		$selectStatement = "";
 
+
+
 		foreach($this->_tables as $table)
 		{
 			// if no fields then get all the fields
@@ -571,7 +580,6 @@ Class ORM extends Database {
 
 					}
 				}
-
 
 			}
 
@@ -593,6 +601,7 @@ Class ORM extends Database {
 				}
 			}
 		}
+
 		// remove the last comma and return the statement
 		return substr($selectStatement,0,-2);
 	}
