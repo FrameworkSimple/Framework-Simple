@@ -45,7 +45,7 @@ Class ORM extends Database {
 		else if(strstr($method,"findBy"))
 		{
 			// remove "findBy" and then make the db version of the columns
-			$cols = Core::toDB(str_replace("findBy","",$method));
+			$cols = Core::to_db(str_replace("findBy","",$method));
 
 			// seperate the columns into an array
 			$cols = explode("_and_", $cols);
@@ -111,7 +111,7 @@ Class ORM extends Database {
 		$order = $this->_createOrder();
 
 		// the dabase name for this model
-		$dbName = Core::toDB($this->_name);
+		$dbName = Core::to_db($this->_name);
 
 		// create the where statement
 		$where = $this->_createWhere();
@@ -349,7 +349,7 @@ Class ORM extends Database {
 			if(Hooks::call("before_save", array(&$this->_data)) === false) return;
 
 			// set the database name
-			$dbName = Core::toDB($this->_name);
+			$dbName = Core::to_db($this->_name);
 
 			// set up the table
 			$this->_setTable($dbName);
@@ -499,7 +499,7 @@ Class ORM extends Database {
 	{
 
 		// set the database name
-		$dbName = Core::toDB($this->_name);
+		$dbName = Core::to_db($this->_name);
 
 		// call the before delete function
 		if(Hooks::call("before_delete",$id, $dbName, $this) === false) return;
@@ -626,7 +626,7 @@ Class ORM extends Database {
 		if(!isset(parent::$tables[$table]))
 		{
 			// the database name
-			$dbName = Core::toDB($table);
+			$dbName = Core::to_db($table);
 
 			// the statement to get all the columns
 			$statement = "SHOW COLUMNS from ".$dbName;
@@ -732,8 +732,8 @@ Class ORM extends Database {
 			// set the tables and their database names
 			$table1 = $tables[0];
 			$table2 = $tables[1];
-			$dbTable1 = Core::toDB($table1);
-			$dbTable2 = Core::toDB($table2);
+			$dbTable1 = Core::to_db($table1);
+			$dbTable2 = Core::to_db($table2);
 
 			// if the alias is already created then use the other table
 			if(in_array($table1, $this->_tables))

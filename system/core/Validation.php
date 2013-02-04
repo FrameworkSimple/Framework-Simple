@@ -9,7 +9,7 @@ class Validation {
 	public $required;
 
 	public function validate($tableName,$data,$required,$rules) {
-		$this->tableName = Core::toDB($tableName);
+		$this->tableName = Core::to_db($tableName);
 		$this->name = $tableName;
 		$this->data = $data;
 		$this->errors = array();
@@ -21,7 +21,7 @@ class Validation {
 					unset($this->data[$col]);
 					array_push($this->errors,array(
 						"name"=>$col,
-						"string"=>Core::toNorm($col)." is required"
+						"string"=>Core::to_norm($col)." is required"
 						)
 					);
 				}
@@ -76,7 +76,7 @@ class Validation {
 		if(!$bool) {
 			array_push($this->errors, array(
 					"name"=>$col,
-					"string"=>Core::toNorm($col)." ".$errorString
+					"string"=>Core::to_norm($col)." ".$errorString
 				));
 			unset($this->data[$col]);
 			return false;

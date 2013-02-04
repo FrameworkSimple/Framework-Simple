@@ -1,7 +1,6 @@
 <?php
 
-// start measuring time
-$startTime = microtime(true);
+define("START_TIME", microtime(true));
 
 include ('core/Core.php');
 include ('Settings.php');
@@ -30,12 +29,3 @@ if(DEBUG) {
 }
 
 Core::run();
-
-// if debug is on
-if(DEBUG)
-{
-
-	// see how much time has passed
-	echo "Time:  " . number_format(( microtime(true) - $startTime), 4) . " Seconds\n";
-
-}

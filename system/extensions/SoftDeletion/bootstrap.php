@@ -2,7 +2,7 @@
 
 	include "Settings.php";
 
-	Core::addClasses("SoftDeletion",array(
+	Core::add_classes("SoftDeletion",array(
 		"SoftDeletion"     =>"controllers/SoftDeletion.php",
 		)
 	);

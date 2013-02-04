@@ -1,6 +1,6 @@
 <?php
 
-	Core::addClasses("Testing",array(
+	Core::add_classes("Testing",array(
 		"TestsController"     =>"controllers/TestsController.php",
 		"Enhance\Core" => "controllers/EnhanceTestFramework.php",
 		"\Enhance\TestFixture" => "controllers/EnhanceTestFramework.php",

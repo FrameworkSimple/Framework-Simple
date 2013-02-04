@@ -17,10 +17,18 @@ Class View
 		// set the file path of the view
 		$file_path = SYSTEM_PATH."/views/".$file.".php";
 
+		if(!is_file($file_path))
+		{
+
+			trigger_error("404: View: ".$file." Not Found",E_USER_ERROR);
+			return;
+		}
+
 		if(DEBUG) {
 
 			array_push(Core::$debug['views'],$file_path);
 		}
+
 		// set the root url
 		$root = Asset::get_base();
 
@@ -54,12 +62,28 @@ Class View
 		// if the data is not an indexed array
 		else
 		{
-			// get the content
-			$view = self::get_contents($file_path,$data,$root);
+			//split the name
+			$split = preg_split("/[.]/", $file);
 
-			// if we got a view
-			if($view)
+			// if there is an extension
+			$ext = isset($filename[1]);
+
+			// if there is an extension and it is json
+			if($ext && $filename[1] === 'json')
 			{
+
+				// render the json object using the data
+				Asset::json($data);
+
+				return Asset::json($data);
+
+			}
+			// TODO: add more file ext types (xml, html, etc.)
+			// render the page normally
+			else
+			{
+				// get the content
+				$view = self::get_contents($file_path,$data,$root);
 
 				// if there is a layout file and layouts are on
 				if($layout && LAYOUTS)
@@ -68,15 +92,20 @@ Class View
 					// layout file path
 					$layout_path = SYSTEM_PATH."/views/layouts/".$layout.".php";
 
-					if(DEBUG) {
+					if(!is_file($layout_path))
+					{
+						trigger_error("404: Layout File: ".$layout." Not Found",E_USER_ERROR);
+						return;
+					}
+
+					if(DEBUG)
+					{
 
 						array_push(Core::$debug['views'],$layout_path);
 					}
 
 					// get the whole page including layout
 					$view = self::get_contents($layout_path,$layoutInfo,$root,$view);
-
-
 				}
 
 				$id = isset($data['id'])?$data['id']:'';
@@ -88,37 +117,9 @@ Class View
 
 				// return the text
 				return $view;
-
-			}
-			// if a view file didn't exist
-			else
-			{
-
-				//split the name
-				$split = preg_split("/[.]/", $file);
-
-				// if there is an extension
-				$ext = isset($filename[1]);
-
-				// if there is an extension like json or xml
-				if($ext && $filename[1] === 'json')
-				{
-
-					// render the json object using the data
-					Asset::json($data);
-
-				}
-				else
-				{
-
-					// TODO: Add 404 Error Handling
-					echo "404 Error: View File Didn't Exist <br />";
-					echo $file_path;
-
-				}
-
 			}
 		}
+
 	}
 
 	// check to see if array is associative or indexed
@@ -138,21 +139,14 @@ Class View
 
 		}
 
+    	// start the output buffer
+        ob_start();
 
-		// if the file is a file
-	    if (is_file($filename)) {
+        // include the file
+        include $filename;
 
-	    	// start the output buffer
-	        ob_start();
+        // return a clean stream
+        return ob_get_clean();
 
-	        // include the file
-	        include $filename;
-
-	        // return a clean stream
-	        return ob_get_clean();
-	    }
-
-	    // if the file doesn't exist return false
-	    return false;
 	}
 }

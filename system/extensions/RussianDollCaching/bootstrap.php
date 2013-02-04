@@ -2,7 +2,7 @@
 
 	include "Settings.php";
 
-	Core::addClasses("RussianDollCaching",array(
+	Core::add_classes("RussianDollCaching",array(
 		"Caching"     =>"controllers/Caching.php",
 		)
 	);
