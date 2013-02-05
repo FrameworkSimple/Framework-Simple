@@ -1,15 +1,50 @@
 <?php
 
+/**
+ * Everything having to do with authentication
+ */
+
+/**
+ * This handles all the user authentication
+ * @category   Core
+ * @package    Core
+ * @subpackage Helpers
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 Class Auth {
 
-	public static $allowed = array();
-
+	/**
+	 * controllers: array
+	 *
+	 * all the allow controllers
+	 *
+	 * an array of strings that holds controllers that are always allowed
+	 *
+	 * @var array
+	 */
 	public static $controllers = array();
 
+
+	/**
+	 * actions: array
+	 *
+	 * all the allowd actions
+	 *
+	 * an array of strings that holds actions that are allowed for all controllers
+	 *
+	 * @var array
+	 */
 	public static $actions = array();
 
-	// check if you are authorized to be here
-	public static function isAuthorized()
+	/**
+	 * check if you are authorized to be on this page
+	 * @api
+	 * @return boolean if authorized
+	 */
+	public static function is_authorized()
 	{
 
 		// get the controller and action
@@ -63,7 +98,12 @@ Class Auth {
 
 	}
 
-	// log in a user
+	/**
+	 * log in a user
+	 * @api
+	 * @param  array  $user all the user information
+	 * @return boolean       if logged in
+	 */
 	public static function login($user=array())
 	{
 
@@ -107,8 +147,11 @@ Class Auth {
 
 	}
 
-	// log out a user
-	public static function logout($user=array())
+	/**
+	 * log out a user
+	 * @api
+	 */
+	public static function logout()
 	{
 
 		// set logged in to false
@@ -116,7 +159,13 @@ Class Auth {
 
 	}
 
-	// get and set user
+	/**
+	 * get and set user information in the session
+	 * @api
+	 * @param  string $key   the key you want to get or set
+	 * @param  object $value the value you want to set
+	 * @return boolean/object        the key you got or set
+	 */
 	public static function user($key=NULL,$value=NULL)
 	{
 

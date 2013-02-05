@@ -1,18 +1,43 @@
 <?php
+/**
+ * Handles everything having to do with assets
+ */
+
+/**
+ * This handles the asset pipeline and loading in various assets
+ * @category   Helpers
+ * @package    Core
+ * @subpackage Helpers
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 
 Class Asset {
 
-	// used to set file paths for assets
-	public static $paths;
-
-	// default paths for assets
+	/**
+	 * _paths: array
+	 *
+	 * default paths for assets
+	 *
+	 * css => 'css/'
+	 * js => 'js/'
+	 * img => 'img/'
+	 *
+	 * @var array
+	 */
 	private static $_paths = array(
 		"css"=>"css/",
 		"js"=>"js/",
 		"img"=>"img/"
 	);
 
-	// get the base url so we know the root for assets
+	/**
+	 * get the base url so we know the root for assets
+	 * @api
+	 * @return string the base url
+	 */
 	public static function get_base()
 	{
 		// create base url variable
@@ -37,14 +62,17 @@ Class Asset {
 		return rtrim($base_url, '/').'/';
 	}
 
-	// used for routing to create urls to content dynamically
-	// @controller = the controller you want to target
-	// @action = the action you want to target
-	// @params = the params you may want to pass
+	/**
+	 * used for routing to create urls to content dynamically
+	 * Asset::create_url("controller","action",array(1));
+	 * @api
+	 * @param  string $controller the controller you want to target
+	 * @param  string $action     the action you want to target
+	 * @param  array  $params     the params you want to pass
+	 * @return string             to controller/action/params
+	 */
 	public static function create_url($controller,$action='',$params=array())
 	{
-
-
 		// get the url
 		$url = self::get_base();
 
@@ -128,25 +156,52 @@ Class Asset {
 		return $url;
 	}
 
+	/**
+	 * Create css link tags
+	 * @api
+	 * @param  array $stylesheets  names of stylesheets you want to include with any attributes
+	 * @param  array  $attr        attributes you want applied to all stylesheets
+	 * @return string              link tags to the stylesheets
+	 */
 	public static function css($stylesheets,$attr=array())
 	{
 		// create a tag with a css type, the files and the global attributes
 		return self::create('css',$stylesheets,$attr);
 	}
 
+	/**
+	 * create js script tags
+	 * @api
+	 * @param  array $scripts  names of scripts you want to include with any atrributes
+	 * @param  array  $attr    attributes you want applied to all scripts
+	 * @return string          script tags to the javascript files
+	 */
 	public static function js($scripts,$attr=array())
 	{
 		// create a tag with a js type, the files and the global attributes
 		return self::create('js',$scripts,$attr);
 	}
 
+	/**
+	 * create an image tag
+	 * @api
+	 * @param  string $imgs the name of the image you want to include
+	 * @param  array  $attr attributes you want applied to the image tag
+	 * @return string       img tag to the image
+	 */
 	public static function img($imgs,$attr=array())
 	{
 		// create a tag with a img type, the files and the global attributes
 		return self::create('img',$imgs,$attr);
 	}
 
-	// create a tag for each of the three types
+	/**
+	 * create an html tag for scripts, links and imgs.
+	 * @param  string $type  type of tag you want to create
+	 * @param  array $items the items you want created
+	 * @param  array  $attrs attributes you want applied to all of the tags
+	 * @return string        the tags that were created
+	 */
 	private static function create($type,$items,$attrs=array())
 	{
 		// empty string to hold the html string
@@ -156,7 +211,7 @@ Class Asset {
 		$path = self::get_base();
 
 		// if the public variable for paths is set if not then use the default one to get the path for this type
-		$path .= isset(self::$paths[$type])?self::$paths[$type]:self::$_paths[$type];
+		$path .= isset(Core::$paths[$type])?Core::$paths[$type]:self::$_paths[$type];
 
 		// if items isn't an array make it one
 		$items = is_array($items)?$items:array($items);
@@ -221,7 +276,13 @@ Class Asset {
 		return $html;
 	}
 
-	// create an html tag
+	/**
+	 * create an html tag
+	 * @param  string  $tag     the tag you want to create
+	 * @param  array   $attr    the attributes you want applied
+	 * @param  boolean/string $content any content you want inside the tag, default = false
+	 * @return string           the html tag
+	 */
 	private static function _html_tag($tag, $attr = array(), $content = false)
 	{
 		// if the tag has content or if it is self closing
@@ -240,7 +301,11 @@ Class Asset {
 		return $html.PHP_EOL;
 	}
 
-	// convert and array of attributes to a string
+	/**
+	 * convert and array of attributes to a string
+	 * @param  array $attr an array of attributes
+	 * @return string       a string of attributes
+	 */
 	private static function _array_to_attr($attr)
 	{
 		// string for the attribute
@@ -258,7 +323,11 @@ Class Asset {
 		return trim($attr_str);
 	}
 
-	// json encode and echo out object for json view
+	/**
+	 * json encode and echo out object for json view
+	 * @api
+	 * @param  array $object the array to encode
+	 */
 	public static function json($object)
 	{
 		// echo out the json object encoded

@@ -1,10 +1,41 @@
 <?php
+/**
+ * Holds all the information for the database
+ */
+
+/**
+ * This is all the database information
+ *
+ * Creates the pdo for the sql database
+ *
+ * @category   Core
+ * @package    Core
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 class Database {
-	// the database
+	/**
+	 * db
+	 *
+	 * The database PDO
+	 *
+	 * @var PDO
+	 */
 	public $db = NULL;
-	// the tables that are in the database
+	/**
+	 * tables: array
+	 *
+	 * the tables that are in the database
+	 *
+	 * @var tables
+	 */
 	public static $tables;
-	// set up PDO
+
+	/**
+	 * Set up PDO
+	 */
 	public function __construct() {
 		$this -> db = new \PDO(DB_DSN,DB_USERNAME,DB_PASSWORD);
 		$this -> db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);

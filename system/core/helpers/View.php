@@ -1,15 +1,36 @@
 <?php
+/**
+ * Handles everything to do with rendering views
+ */
 
-// class for helping render views
+/**
+ * Allows you to render views
+ *
+ * @category   Helpers
+ * @package    Core
+ * @subpackage Helpers
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 Class View
 {
 
-	// render a view
+	/**
+	 * Render a view
+	 * @api
+	 * @param  string  $file       file you want to render
+	 * @param  array   $data       data you want to be passed to the view
+	 * @param  boolean/string $layout     the layout file you want to render. Default=false
+	 * @param  array   $layoutInfo data you want passed to the layout
+	 * @return string              the view that was rendered
+	 */
 	public static function render($file,$data=array(),$layout=FALSE,$layoutInfo=array())
 	{
 
 		// call the before_render hook and if it returns false then stop the function
-		if(Hooks::call("before_render") === false) return;
+		if(Hook::call("before_render") === false) return;
 
 		// check to see if it is an index array
 		$indexed = !self::_is_assoc($data);
@@ -50,7 +71,7 @@ Class View
 
 				$id = isset($snippet['id'])?$snippet['id']:'';
 
-				Hooks::call("after_render",$view_data,$file,$id);
+				Hook::call("after_render",$view_data,$file,$id);
 
 			}
 
@@ -110,7 +131,7 @@ Class View
 
 				$id = isset($data['id'])?$data['id']:'';
 
-				Hooks::call("after_render",$view,$file,$data);
+				Hook::call("after_render",$view,$file,$data);
 
 				// render out the view
 				echo $view;
@@ -122,13 +143,24 @@ Class View
 
 	}
 
-	// check to see if array is associative or indexed
+	/**
+	 * check to see if array is associative or indexed
+	 * @param  array  $array the array you want to check on
+	 * @return boolean        if the array is associative
+	 */
 	private static function _is_assoc($array)
 	{
 		return array_keys($array) !== range(0, count($array) - 1);
 	}
 
-	// get the contents of a file
+	/**
+	 * get the contents of a file
+	 * @param  string $filename           the name of the file
+	 * @param  array $data                the data you want the view to have
+	 * @param  string $root               the path to the root
+	 * @param  string $content_for_layout the string of the view if rendering a layout
+	 * @return string                  	  the content of the file
+	 */
 	public static function get_contents($filename, $data=NULL,$root=NULL, $content_for_layout=NULL) {
 
 		// if there is data

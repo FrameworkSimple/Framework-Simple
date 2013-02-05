@@ -1,13 +1,25 @@
 <?php
+/**
+ * The Unit Testing Framework
+ * @category Extensions
+ * @package  Extensions
+ * @subpackage Testing
+ * @link       http://www.enhance-php.com/
+ */
+
+/**
+ * @namespace Enhance Framework
+ */
 namespace Enhance;
 
 ini_set('error_reporting', (string)E_ALL);
 ini_set('display_errors', '1');
 
-// Public API
+/**
+ * @ignore
+ */
 class Core
 {
-    /** @var EnhanceTestFramework $Instance */
     private static $Instance;
     private static $Language = Language::English;
 
@@ -34,22 +46,43 @@ class Core
         self::$Instance->runTests($output);
     }
 
-    public static function getCodeCoverageWrapper($className, $args = null)
+    public static function getCodeCoverageWrapper($/**
+ * @ignore
+ */
+className, $args = null)
     {
         self::setInstance();
-        self::$Instance->registerForCodeCoverage($className);
-        return new CodeCoverageWrapper($className, $args);
+        self::$Instance->registerForCodeCoverage($/**
+ * @ignore
+ */
+className);
+        return new CodeCoverageWrapper($/**
+ * @ignore
+ */
+className, $args);
     }
 
-    public static function log($className, $methodName)
+    public static function log($/**
+ * @ignore
+ */
+className, $methodName)
     {
         self::setInstance();
-        self::$Instance->log($className, $methodName);
+        self::$Instance->log($/**
+ * @ignore
+ */
+className, $methodName);
     }
 
-    public static function getScenario($className, $args = null)
+    public static function getScenario($/**
+ * @ignore
+ */
+className, $args = null)
     {
-        return new Scenario($className, $args, self::$Language);
+        return new Scenario($/**
+ * @ignore
+ */
+className, $args, self::$Language);
     }
 
     public static function setInstance()
@@ -60,13 +93,19 @@ class Core
     }
 }
 
-// Public API
+
+/**
+ * @ignore
+ */
 class TestFixture
 {
 
 }
 
-// Public API
+
+/**
+ * @ignore
+ */
 class MockFactory
 {
     public static function createMock($typeName)
@@ -75,7 +114,10 @@ class MockFactory
     }
 }
 
-// Public API
+
+/**
+ * @ignore
+ */
 class StubFactory
 {
     public static function createStub($typeName)
@@ -84,7 +126,10 @@ class StubFactory
     }
 }
 
-// Public API
+
+/**
+ * @ignore
+ */
 class Expect
 {
     const AnyValue = 'ENHANCE_ANY_VALUE_WILL_DO';
@@ -108,10 +153,12 @@ class Expect
     }
 }
 
-// Public API
+
+/**
+ * @ignore
+ */
 class Assert
 {
-    /** @var Assertions $EnhanceAssertions */
     private static $EnhanceAssertions;
 
     private static function GetEnhanceAssertionsInstance()
@@ -272,9 +319,15 @@ class Assert
         self::GetEnhanceAssertionsInstance()->isNotInstanceOfType($expected, $actual);
     }
 
-    public static function throws($class, $methodName, $args = null)
+    public static function throws($/**
+ * @ignore
+ */
+class, $methodName, $args = null)
     {
-        self::GetEnhanceAssertionsInstance()->throws($class, $methodName, $args);
+        self::GetEnhanceAssertionsInstance()->throws($/**
+ * @ignore
+ */
+class, $methodName, $args);
     }
 }
 
@@ -282,6 +335,9 @@ class Assert
 // You don't need to call any of these bits directly - use the public API above, which will
 // use the stuff below to carry out your tests!
 
+/**
+ * @ignore
+ */
 class TextFactory
 {
     public static $Text;
@@ -289,13 +345,22 @@ class TextFactory
     public static function getLanguageText($language)
     {
         if (self::$Text === null) {
-            $languageClass = 'Enhance\Text' . $language;
-            self::$Text = new $languageClass();
+            $language/**
+ * @ignore
+ */
+class = 'Enhance\Text' . $language;
+            self::$Text = new $language/**
+ * @ignore
+ */
+class();
         }
         return self::$Text;
     }
 }
 
+/**
+ * @ignore
+ */
 class TextEn
 {
     public $FormatForTestRunTook = 'Test run took {0} seconds';
@@ -325,6 +390,9 @@ class TextEn
     public $LineFile = 'Line {0} in file {1}';
 }
 
+/**
+ * @ignore
+ */
 class TextFr
 {
     public $FormatForTestRunTook = 'Le test a prit {0} seconds';
@@ -353,6 +421,10 @@ class TextFr
     public $ScenarioWithExpectMismatch = 'Les scenarios doivent être initialisé avec le même nombre d\'appel à "with" et "expect"';
     public $LineFile = 'Ligne {0} dans le fichier {1}';
 }
+
+/**
+ * @ignore
+ */
 class TextDe
 {
     public $FormatForTestRunTook = 'Fertig nach {0} Sekunden';
@@ -383,6 +455,9 @@ class TextDe
     public $TypeOfVar=" Typ: ";
 }
 
+/**
+ * @ignore
+ */
 class TextPtBr
 {
     public $FormatForTestRunTook = 'Execução de teste levou {0} segundos';
@@ -413,6 +488,10 @@ class TextPtBr
     public $TypeOfVar=" Tipo: ";
 }
 
+
+/**
+ * @ignore
+ */
 class TextSp
 {
     public $FormatForTestRunTook = 'La ejecución de las pruebas tomó {0} segundos';
@@ -443,6 +522,10 @@ class TextSp
     public $TypeOfVar=" Tipo: ";
 }
 
+
+/**
+ * @ignore
+ */
 class TextRo{
     public $FormatForTestRunTook = 'Testul a durat {0} secunde';
     public $FormatForExpectedButWas = 'Se aștepta {0} dar a returnat {1}';
@@ -471,6 +554,9 @@ class TextRo{
     public $LineFile = 'Linia {0} in fișierul {1}';
 }
 
+/**
+ * @ignore
+ */
 class EnhanceTestFramework
 {
     private $FileSystem;
@@ -526,69 +612,180 @@ class EnhanceTestFramework
         }
     }
 
-    public function log($className, $methodName)
+    public function log($/**
+ * @ignore
+ */
+className, $methodName)
     {
-        $index = $this->getMethodIndex($className, $methodName);
+        $index = $this->getMethodIndex($/**
+ * @ignore
+ */
+className, $methodName);
         if (array_key_exists($index ,$this->MethodCalls)) {
             $this->MethodCalls[$index] = $this->MethodCalls[$index] + 1;
         }
     }
 
-    public function registerForCodeCoverage($className)
+    public function registerForCodeCoverage($/**
+ * @ignore
+ */
+className)
     {
-        $classMethods = get_class_methods($className);
-        foreach($classMethods as $methodName) {
-            $index = $this->getMethodIndex($className, $methodName);
+        $/**
+ * @ignore
+ */
+classMethods = get_/**
+ * @ignore
+ */
+class_methods($/**
+ * @ignore
+ */
+className);
+        foreach($/**
+ * @ignore
+ */
+classMethods as $methodName) {
+            $index = $this->getMethodIndex($/**
+ * @ignore
+ */
+className, $methodName);
             if (!array_key_exists($index ,$this->MethodCalls)) {
                 $this->MethodCalls[$index] = 0;
             }
         }
     }
 
-    private function getMethodIndex($className, $methodName)
+    private function getMethodIndex($/**
+ * @ignore
+ */
+className, $methodName)
     {
-        return $className . '#' . $methodName;
+        return $/**
+ * @ignore
+ */
+className . '#' . $methodName;
     }
 
     private function getTestFixturesByParent()
     {
-        $classes = get_declared_classes();
-        foreach($classes as $className) {
-            $this->add_classesIfTest($className);
+        $/**
+ * @ignore
+ */
+classes = get_declared_/**
+ * @ignore
+ */
+classes();
+        foreach($/**
+ * @ignore
+ */
+classes as $/**
+ * @ignore
+ */
+className) {
+            $this->add_/**
+ * @ignore
+ */
+classesIfTest($/**
+ * @ignore
+ */
+className);
         }
     }
 
-    private function add_classesIfTest($className)
+    private function add_/**
+ * @ignore
+ */
+classesIfTest($/**
+ * @ignore
+ */
+className)
     {
-        $parentClassName = get_parent_class($className);
-        if ($parentClassName === 'Enhance\TestFixture') {
-            $instance = new $className();
+        $parent/**
+ * @ignore
+ */
+className = get_parent_/**
+ * @ignore
+ */
+class($/**
+ * @ignore
+ */
+className);
+        if ($parent/**
+ * @ignore
+ */
+className === 'Enhance\TestFixture') {
+            $instance = new $/**
+ * @ignore
+ */
+className();
             $this->addFixture($instance);
         } else {
-            $ancestorClassName = get_parent_class($parentClassName);
-            if ($ancestorClassName === 'Enhance\TestFixture') {
-                $instance = new $className();
+            $ancestor/**
+ * @ignore
+ */
+className = get_parent_/**
+ * @ignore
+ */
+class($parent/**
+ * @ignore
+ */
+className);
+            if ($ancestor/**
+ * @ignore
+ */
+className === 'Enhance\TestFixture') {
+                $instance = new $/**
+ * @ignore
+ */
+className();
                 $this->addFixture($instance);
             }
         }
     }
 
-    private function addFixture($class)
+    private function addFixture($/**
+ * @ignore
+ */
+class)
     {
-        $classMethods = get_class_methods($class);
-        foreach($classMethods as $method) {
+        $/**
+ * @ignore
+ */
+classMethods = get_/**
+ * @ignore
+ */
+class_methods($/**
+ * @ignore
+ */
+class);
+        foreach($/**
+ * @ignore
+ */
+classMethods as $method) {
             if (strtolower($method) !== 'setup' && strtolower($method) !== 'teardown') {
-                $reflection = new \ReflectionMethod($class, $method);
+                $reflection = new \ReflectionMethod($/**
+ * @ignore
+ */
+class, $method);
                 if ($reflection->isPublic()) {
-                    $this->addTest($class, $method);
+                    $this->addTest($/**
+ * @ignore
+ */
+class, $method);
                 }
             }
         }
     }
 
-    private function addTest($class, $method)
+    private function addTest($/**
+ * @ignore
+ */
+class, $method)
     {
-        $testMethod = new Test($class, $method);
+        $testMethod = new Test($/**
+ * @ignore
+ */
+class, $method);
         $this->Tests[] = $testMethod;
     }
 
@@ -611,6 +808,9 @@ class EnhanceTestFramework
     }
 }
 
+/**
+ * @ignore
+ */
 class FileSystem
 {
     public function getFilesFromDirectory($directory, $isRecursive, $excludeRules)
@@ -664,6 +864,9 @@ class FileSystem
     }
 }
 
+/**
+ * @ignore
+ */
 class TestMessage
 {
     public $Message;
@@ -678,9 +881,15 @@ class TestMessage
     }
 }
 
+/**
+ * @ignore
+ */
 class Test
 {
-    private $ClassName;
+    private $/**
+ * @ignore
+ */
+className;
     private $TestName;
     private $TestMethod;
     private $SetUpMethod;
@@ -689,13 +898,40 @@ class Test
     private $Line;
     private $File;
 
-    public function __construct($class, $method)
+    public function __construct($/**
+ * @ignore
+ */
+class, $method)
     {
-        $className = get_class($class);
-        $this->ClassName = $className;
-        $this->TestMethod = array($className, $method);
-        $this->SetUpMethod = array($className, 'setUp');
-        $this->TearDownMethod = array($className, 'tearDown');
+        $/**
+ * @ignore
+ */
+className = get_/**
+ * @ignore
+ */
+class($/**
+ * @ignore
+ */
+class);
+        $this->/**
+ * @ignore
+ */
+className = $/**
+ * @ignore
+ */
+className;
+        $this->TestMethod = array($/**
+ * @ignore
+ */
+className, $method);
+        $this->SetUpMethod = array($/**
+ * @ignore
+ */
+className, 'setUp');
+        $this->TearDownMethod = array($/**
+ * @ignore
+ */
+className, 'tearDown');
         $this->TestName = $method;
     }
 
@@ -704,9 +940,15 @@ class Test
         return $this->TestName;
     }
 
-    public function getClassName()
+    public function get/**
+ * @ignore
+ */
+className()
     {
-        return $this->ClassName;
+        return $this->/**
+ * @ignore
+ */
+className;
     }
 
     public function getMessage()
@@ -726,17 +968,32 @@ class Test
 
     public function run()
     {
-        /** @var $testClass iTestable */
-        $testClass = new $this->ClassName();
+        /** @var $test/**
+ * @ignore
+ */
+class iTestable */
+        $test/**
+ * @ignore
+ */
+class = new $this->/**
+ * @ignore
+ */
+className();
 
         try {
             if (is_callable($this->SetUpMethod)) {
-                $testClass->setUp();
+                $test/**
+ * @ignore
+ */
+class->setUp();
             }
         } catch (\Exception $e) { }
 
         try {
-            $testClass->{$this->TestName}();
+            $test/**
+ * @ignore
+ */
+class->{$this->TestName}();
             $result = true;
         } catch (TestException $e) {
             $this->Message = $e->getMessage();
@@ -747,7 +1004,10 @@ class Test
 
         try {
             if (is_callable($this->TearDownMethod)) {
-                $testClass->tearDown();
+                $test/**
+ * @ignore
+ */
+class->tearDown();
             }
         } catch (\Exception $e) { }
 
@@ -755,27 +1015,63 @@ class Test
     }
 }
 
+/**
+ * @ignore
+ */
 class CodeCoverageWrapper
 {
     private $Instance;
-    private $ClassName;
+    private $/**
+ * @ignore
+ */
+className;
 
-    public function __construct($className, $args)
+    public function __construct($/**
+ * @ignore
+ */
+className, $args)
     {
-        $this->ClassName = $className;
+        $this->/**
+ * @ignore
+ */
+className = $/**
+ * @ignore
+ */
+className;
         if ($args !== null) {
-            $rc = new \ReflectionClass($className);
+            $rc = new \Reflection/**
+ * @ignore
+ */
+class($/**
+ * @ignore
+ */
+className);
             $this->Instance = $rc->newInstanceArgs($args);
         } else {
-            $this->Instance = new $className();
+            $this->Instance = new $/**
+ * @ignore
+ */
+className();
         }
-        Core::log($this->ClassName, $className);
-        Core::log($this->ClassName, '__construct');
+        Core::log($this->/**
+ * @ignore
+ */
+className, $/**
+ * @ignore
+ */
+className);
+        Core::log($this->/**
+ * @ignore
+ */
+className, '__construct');
     }
 
     public function __call($methodName, $args = null)
     {
-        Core::log($this->ClassName, $methodName);
+        Core::log($this->/**
+ * @ignore
+ */
+className, $methodName);
         if ($args !== null) {
             /** @noinspection PhpParamsInspection */
             return call_user_func_array(array($this->Instance, $methodName), $args);
@@ -795,17 +1091,32 @@ class CodeCoverageWrapper
     }
 }
 
+/**
+ * @ignore
+ */
 class Mock
 {
     private $IsMock;
     private $Text;
-    private $ClassName;
+    private $/**
+ * @ignore
+ */
+className;
     private $Expectations = array();
 
-    public function __construct($className, $isMock, $language)
+    public function __construct($/**
+ * @ignore
+ */
+className, $isMock, $language)
     {
         $this->IsMock = $isMock;
-        $this->ClassName = $className;
+        $this->/**
+ * @ignore
+ */
+className = $/**
+ * @ignore
+ */
+className;
         $this->Text = TextFactory::getLanguageText($language);
     }
 
@@ -818,7 +1129,10 @@ class Mock
     {
         if (!$this->IsMock) {
             throw new \Exception(
-                $this->ClassName . ': ' . $this->Text->CannotCallVerifyOnStub
+                $this->/**
+ * @ignore
+ */
+className . ': ' . $this->Text->CannotCallVerifyOnStub
             );
         }
 
@@ -836,7 +1150,10 @@ class Mock
 
                 throw new \Exception(
                     $this->Text->ExpectationFailed . ' ' .
-                        $this->ClassName . '->' . $expectation->MethodName . '(' . $Arguments . ') ' .
+                        $this->/**
+ * @ignore
+ */
+className . '->' . $expectation->MethodName . '(' . $Arguments . ') ' .
                         $this->Text->Expected . ' #' . $expectation->ExpectedCalls . ' ' .
                         $this->Text->Called . ' #' . $expectation->ActualCalls, 0);
             }
@@ -877,7 +1194,10 @@ class Mock
         if ($this->IsMock)  {
             throw new \Exception(
                 $this->Text->ExpectationFailed . ' ' .
-                    $this->ClassName . '->' . $methodName . '(' . $args . ') ' .
+                    $this->/**
+ * @ignore
+ */
+className . '->' . $methodName . '(' . $args . ') ' .
                     $this->Text->Expected . ' #0 ' .
                     $this->Text->Called . ' #1', 0);
         }
@@ -928,17 +1248,32 @@ class Mock
     }
 }
 
+/**
+ * @ignore
+ */
 class Scenario
 {
     private $Text;
-    private $Class;
+    private $/**
+ * @ignore
+ */
+class;
     private $FunctionName;
     private $Inputs = array();
     private $Expectations = array();
 
-    public function __construct($class, $functionName, $language)
+    public function __construct($/**
+ * @ignore
+ */
+class, $functionName, $language)
     {
-        $this->Class = $class;
+        $this->/**
+ * @ignore
+ */
+class = $/**
+ * @ignore
+ */
+class;
         $this->FunctionName = $functionName;
         $this->Text = TextFactory::getLanguageText($language);
     }
@@ -968,7 +1303,10 @@ class Scenario
             $expected = array_shift($this->Expectations);
             $expected = $expected[0];
 
-            $actual = call_user_func_array(array($this->Class, $this->FunctionName), $input);
+            $actual = call_user_func_array(array($this->/**
+ * @ignore
+ */
+class, $this->FunctionName), $input);
 
             if (is_float($expected)) {
                 if ((string)$expected !== (string)$actual) {
@@ -985,6 +1323,9 @@ class Scenario
     }
 }
 
+/**
+ * @ignore
+ */
 class Expectation
 {
     public $MethodName;
@@ -1076,6 +1417,9 @@ class Expectation
     }
 }
 
+/**
+ * @ignore
+ */
 class Assertions
 {
     private $Text;
@@ -1345,7 +1689,10 @@ class Assertions
 
     public function isInstanceOfType($expected, $actual)
     {
-        $actualType = get_class($actual);
+        $actualType = get_/**
+ * @ignore
+ */
+class($actual);
         if ($expected !== $actualType) {
             throw new TestException(
                 str_replace('{0}', $expected,
@@ -1355,7 +1702,10 @@ class Assertions
 
     public function isNotInstanceOfType($expected, $actual)
     {
-        $actualType = get_class($actual);
+        $actualType = get_/**
+ * @ignore
+ */
+class($actual);
         if ($expected === $actualType) {
             throw new TestException(
                 str_replace('{0}', $expected,
@@ -1363,16 +1713,25 @@ class Assertions
         };
     }
 
-    public function throws($class, $methodName, $args = null)
+    public function throws($/**
+ * @ignore
+ */
+class, $methodName, $args = null)
     {
         $exception = false;
 
         try {
             if ($args !== null) {
                 /** @noinspection PhpParamsInspection */
-                call_user_func_array(array($class, $methodName), $args);
+                call_user_func_array(array($/**
+ * @ignore
+ */
+class, $methodName), $args);
             } else {
-                $class->{$methodName}();
+                $/**
+ * @ignore
+ */
+class->{$methodName}();
             }
         } catch (\Exception $e) {
             $exception = true;
@@ -1386,7 +1745,10 @@ class Assertions
     private function getDescription($mixed)
     {
         if (is_object($mixed)){
-            return get_class($mixed);
+            return get_/**
+ * @ignore
+ */
+class($mixed);
         } else if (is_bool($mixed)){
             return $mixed ? 'true' : 'false';
         } else {
@@ -1395,6 +1757,9 @@ class Assertions
     }
 }
 
+/**
+ * @ignore
+ */
 class TestException extends \Exception
 {
     public function __construct($message = null, $code = 0, \Exception $previous = null)
@@ -1420,6 +1785,9 @@ interface iTestable
     public function tearDown();
 }
 
+/**
+ * @ignore
+ */
 class HtmlTemplate implements iOutputTemplate
 {
     private $Text;
@@ -1441,44 +1809,110 @@ class HtmlTemplate implements iOutputTemplate
         $passCount = count($results);
         $methodCallCount = count($methodCalls);
 
-        $currentClass = '';
+        $current/**
+ * @ignore
+ */
+class = '';
         if ($failCount > 0) {
-            $message .= '<h2 class="error">' . $text->Test . ' ' . $text->Failed . '</h2>';
+            $message .= '<h2 /**
+ * @ignore
+ */
+class="error">' . $text->Test . ' ' . $text->Failed . '</h2>';
 
             $message .= '<ul>';
             foreach ($errors as $error) {
-                $testClassName = $error->Test->getClassName();
-                if ($testClassName != $currentClass) {
-                    if ($currentClass === '') {
+                $test/**
+ * @ignore
+ */
+className = $error->Test->get/**
+ * @ignore
+ */
+className();
+                if ($test/**
+ * @ignore
+ */
+className != $current/**
+ * @ignore
+ */
+class) {
+                    if ($current/**
+ * @ignore
+ */
+class === '') {
                         $message .= '<li>';
                     } else {
                         $message .= '</ul></li><li>';
                     }
-                    $message .=  '<strong>' . $testClassName . '</strong><ul>';
-                    $currentClass = $testClassName;
+                    $message .=  '<strong>' . $test/**
+ * @ignore
+ */
+className . '</strong><ul>';
+                    $current/**
+ * @ignore
+ */
+class = $test/**
+ * @ignore
+ */
+className;
                 }
-                $message .= '<li class="error">' . $error->Message . '</li>';
+                $message .= '<li /**
+ * @ignore
+ */
+class="error">' . $error->Message . '</li>';
             }
             $message .= '</ul></li></ul>';
         } else {
-            $message .= '<h2 class="ok">' . $text->TestPassed . '</h2>';
+            $message .= '<h2 /**
+ * @ignore
+ */
+class="ok">' . $text->TestPassed . '</h2>';
         }
 
-        $currentClass = '';
+        $current/**
+ * @ignore
+ */
+class = '';
         if ($passCount > 0) {
             $message .= '<ul>';
             foreach ($results as $result) {
-                $testClassName = $result->Test->getClassName();
-                if ($testClassName != $currentClass) {
-                    if ($currentClass === '') {
+                $test/**
+ * @ignore
+ */
+className = $result->Test->get/**
+ * @ignore
+ */
+className();
+                if ($test/**
+ * @ignore
+ */
+className != $current/**
+ * @ignore
+ */
+class) {
+                    if ($current/**
+ * @ignore
+ */
+class === '') {
                         $message .= '<li>';
                     } else {
                         $message .= '</ul></li><li>';
                     }
-                    $message .=  '<strong>' . $testClassName . '</strong><ul>';
-                    $currentClass = $testClassName;
+                    $message .=  '<strong>' . $test/**
+ * @ignore
+ */
+className . '</strong><ul>';
+                    $current/**
+ * @ignore
+ */
+class = $test/**
+ * @ignore
+ */
+className;
                 }
-                $message .= '<li class="ok">' . $result->Message . '</li>';
+                $message .= '<li /**
+ * @ignore
+ */
+class="ok">' . $result->Message . '</li>';
             }
             $message .= '</ul></li></ul>';
         }
@@ -1489,10 +1923,16 @@ class HtmlTemplate implements iOutputTemplate
             foreach ($methodCalls as $key => $value) {
                 $key = str_replace('#', '->', $key);
                 if ($value === 0) {
-                    $message .= '<li class="error">' . $key . ' ' . $text->Called . ' ' . $value . ' ' .
+                    $message .= '<li /**
+ * @ignore
+ */
+class="error">' . $key . ' ' . $text->Called . ' ' . $value . ' ' .
                         $text->Times . '</li>';
                 } else {
-                    $message .= '<li class="ok">' . $key . ' ' . $text->Called . ' ' . $value . ' ' .
+                    $message .= '<li /**
+ * @ignore
+ */
+class="ok">' . $key . ' ' . $text->Called . ' ' . $value . ' ' .
                         $text->Times . '</li>';
                 }
             }
@@ -1553,6 +1993,9 @@ class HtmlTemplate implements iOutputTemplate
     }
 }
 
+/**
+ * @ignore
+ */
 class XmlTemplate implements iOutputTemplate
 {
     private $Text;
@@ -1648,6 +2091,9 @@ class XmlTemplate implements iOutputTemplate
     }
 }
 
+/**
+ * @ignore
+ */
 class CliTemplate implements iOutputTemplate
 {
     private $Text;
@@ -1714,6 +2160,9 @@ class CliTemplate implements iOutputTemplate
     }
 }
 
+/**
+ * @ignore
+ */
 class TapTemplate implements iOutputTemplate
 {
     private $Text;
@@ -1753,6 +2202,9 @@ class TapTemplate implements iOutputTemplate
 
 }
 
+/**
+ * @ignore
+ */
 class TemplateFactory
 {
     public static function createOutputTemplate($type, $language)
@@ -1776,6 +2228,9 @@ class TemplateFactory
     }
 }
 
+/**
+ * @ignore
+ */
 class TemplateType
 {
     const Xml = 0;
@@ -1784,6 +2239,9 @@ class TemplateType
     const Tap = 3;
 }
 
+/**
+ * @ignore
+ */
 class Language
 {
     const French = "Fr";
@@ -1794,6 +2252,9 @@ class Language
     const Romana = 'Ro';
 }
 
+/**
+ * @ignore
+ */
 class Localisation
 {
     public $Language = Language::English;

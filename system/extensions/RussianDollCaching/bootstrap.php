@@ -1,5 +1,14 @@
 <?php
-
+	/**
+	 * Initialize the Russian Doll Caching extension
+	 * @category Extensions
+ 	 * @package  Extensions
+ 	 * @subpackage RussianDollCaching
+	 * @author     Rachel Higley <me@rachelhigley.com>
+	 * @copyright  2013 Framework Simple
+	 * @license    http://www.opensource.org/licenses/mit-license.php MIT
+	 * @link       http://rachelhigley.com/framework
+	 */
 	include "Settings.php";
 
 	Core::add_classes("RussianDollCaching",array(
@@ -21,5 +30,5 @@
 		}
 
 	}
-	Hooks::register("before_action",array("Caching","check_cache"));
+	Hook::register("before_action",array("Caching","check_cache"));
 ?>

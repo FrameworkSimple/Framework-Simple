@@ -1,13 +1,83 @@
 <?php
+/**
+ * Holds all the validation methods
+ */
+
+/**
+ * This is used before saving to check if the information being saved is in valid format.
+ * @category   Core
+ * @package    Core
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 class Validation {
+
+	/**
+	 * tableName: string
+	 *
+	 * the name of the table in db format
+	 * @var string
+	 */
 	private $tableName;
+
+	/**
+	 * name: string
+	 *
+	 * the name of the table in model formation
+	 * @var string
+	 */
 	private $name;
+
+	/**
+	 * data
+	 *
+	 * the data to be validated
+	 * @var array
+	 */
 	private $data;
+
+	/**
+	 * db: PDO
+	 *
+	 * the database PDO
+	 * @var PDO
+	 */
 	public $db;
+
+	/**
+	 * errors: array
+	 *
+	 * all the errors we found
+	 * @var array
+	 */
 	public $errors;
+
+	/**
+	 * validate: array
+	 *
+	 * the rules to validate by
+	 * @var array
+	 */
 	public $validate;
+
+	/**
+	 * required: array
+	 *
+	 * the array of required fields
+	 * @var array
+	 */
 	public $required;
 
+	/**
+	 * Validate the information
+	 * @param  string $tableName the name of the table in model formation
+	 * @param  array $data      the datate to validate
+	 * @param  array $required  the required fields
+	 * @param  array $rules     the rulles to valiate on
+	 * @return array/boolean    true if no errors and errors array if errors
+	 */
 	public function validate($tableName,$data,$required,$rules) {
 		$this->tableName = Core::to_db($tableName);
 		$this->name = $tableName;
@@ -60,6 +130,15 @@ class Validation {
 		}
 		return true;
 	}
+
+	/**
+	 * check against a regular expression
+	 * @param  string $check       the string to check
+	 * @param  string $regex       the regular expression to check against
+	 * @param  string $col         the column name
+	 * @param  string $errorString the error string to use
+	 * @return boolean              if the check was successful
+	 */
 	private function _check($check, $regex, $col,$errorString=NULL) {
 		$bool =  preg_match($regex, $check);
 		if(!$bool && $col) {
@@ -72,6 +151,14 @@ class Validation {
 		}
 		return $bool;
 	}
+
+	/**
+	 * create an error for the errors array
+	 * @param  string  $col         the name of the column
+	 * @param  string  $errorString the error string to use
+	 * @param  boolean $bool        if there needs to be an array
+	 * @return boolean               if a error was added
+	 */
 	private function _createError($col,$errorString,$bool=FALSE) {
 		if(!$bool) {
 			array_push($this->errors, array(
@@ -84,21 +171,48 @@ class Validation {
 		return true;
 	}
 
-	// "field" => array("regex"=>array("//","error"=>"this is an error"));
+	/**
+	 * Checks if the value matches a regular expression
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("regex"=> "/^$/"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the regular expression
+	 * @return boolean       if the data was valid
+	 */
 	private function _regex($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"did not meet requirement";
 		$regex = isset($value[0])?$value[0]:$value;
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field" => array('alphaNumeric');
+	/**
+	 * Checks if the value only includes Letters and Numbers
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("alphaNumeric"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _alphaNumeric($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"can only be letters and numbers";
 		$regex = '/^[\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}]+$/mu';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field" => array('between'=>array(1,2));
+	/**
+	 * Checks if the value is between two numbers
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("between"=>array(1,5)));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the numbers to check betweent
+	 * @return boolean       if the data was valid
+	 */
 	private function _between($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is test short";
 		$min = $value[0];
@@ -108,14 +222,32 @@ class Validation {
 		return $this->_createError($col,$errorString,$bool);
 	}
 
-	//"field"=>array("boolean")
+	/**
+	 * Checks if the value is a boolean, possible booleans are 0,1,"0","1",true,false
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("boolean"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _boolean($val,$col,$value = NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a boolean";
 		$booleanList = array(0, 1, '0', '1', true, false);
 		return $this->_createError($col,$errorString,in_array($val, $booleanList, true));
 	}
 
-	// "field" => array("cc");
+	/**
+	 * Checks if the value is a valid credit card number
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("cc"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _cc($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid credit card number";
 		$val = str_replace(array('-', ' '), '', $val);
@@ -158,7 +290,25 @@ class Validation {
 		}
 	}
 
-	//"field"=> array("format"=>"ymd","regex"=>"//");
+	/**
+	 * Checks if the value is a valid date, must pass either a format or regex to check by formats
+	 * 	"dmy" e.g. 27-12-2006 or 27-12-06 (separators can be a space, period, dash, forward slash)
+	 *  "mdy" e.g. 12-27-2006 or 12-27-06 (separators can be a space, period, dash, forward slash)
+	 *  "ymd" e.g. 2006-12-27 or 06-12-27 (separators can be a space, period, dash, forward slash)
+	 *  "dMy" e.g. 27 December 2006 or 27 Dec 2006
+	 *  "Mdy" e.g. December 27, 2006 or Dec 27, 2006 (comma is optional)
+	 *  "My" e.g. (December 2006 or Dec 2006)
+	 *  "my" e.g. 12/2006 or 12/06 (separators can be a space, period, dash, forward slash)
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("date"=>array("format"=> "ymd")));
+	 * - or -
+	 * $validate = array("fieldName"=>array("date"=>array("regex"=> "/^$/")));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the format
+	 * @return boolean       if the data was valid
+	 */
 	private function _date($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid date";
 		$regex = isset($value["regex"])?$value["regex"]:NULL;
@@ -185,7 +335,16 @@ class Validation {
 		return false;
 	}
 
-	// "field"=>array("decimal"=>{places});
+	/**
+	 * Checks if the value is a decimal, pass places value to check the number of places that the number is to
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("decimal"=>2));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the number of places to check against
+	 * @return boolean       if the data was valid
+	 */
 	private function _decimal($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"must be a decimal";
 		$places = isset($value[0])?$value[0]:$value;
@@ -198,14 +357,32 @@ class Validation {
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field"=>array("equalTo"=>{compare});
+	/**
+	 * Checks if the value is equal to the passed parameter, can be any simple data type
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("equalTo"=>"this a string"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string and the string to check against
+	 * @return boolean       if the data was valid
+	 */
 	private function _equalTo($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"does not match";
 		$compareTo = isset($value[0])?$value[0]:$value;
 		return $this->_createError($col,$errorString,($check === $compareTo));
 	}
 
-	// "field"=>array("email")
+	/**
+	 * Checks if value is a valid email address
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("email"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _email($val,$col,$value=NULL){
 		$errorString = isset($value["error"])?$value["error"]:"not a valid email address";
 
@@ -214,8 +391,17 @@ class Validation {
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field"=>array("extension"=>array(".fdx",".celtx"));
-	private function _extension($val,$col,$value= array('gif', 'jpeg', 'png', 'jpg')) {
+	/**
+	 * Checks to see if the value is an acceptable file extension, pass the file extensions that are valid
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("extension"=>array(".png", ".jpg", ".gif")));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the extensions to check against
+	 * @return boolean       if the data was valid
+	 */
+	private function _extension($val,$col,$value= array('gif', 'jpeg', 'png', 'jpg')){
 		if(isset($value["error"])) {
 			$errorString = $value["error"];
 			unset($value["error"]);
@@ -233,7 +419,16 @@ class Validation {
 		}
 		return $this->_createError($col,$errorString);
 	}
-	// "field"=>array("inlist"=>array({value},{value}))
+	/**
+	 * Checks to see if the valid is in a list, pass the list of items to check against
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("inList"=>array("value1", "value2", 3)));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the list to check against
+	 * @return boolean       if the data was valid
+	 */
 	private function _inlist($val,$col,$value=NULL) {
 		if(isset($value["error"])) {
 			$errorString = $value["error"];
@@ -244,7 +439,16 @@ class Validation {
 		$list = $value;
 		return $this->_createError($col,$errorString,in_array($val, $list));
 	}
-	// "field"=>array("ip"=>"ipv4")
+	/**
+	 * Checks if value is a valid IP address in either ipv4 or ipv6
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("ip"=> "ipv4"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _ip($val,$col,$value="both") {
 		if(gettype($value)=="array") {
 			$type = strtolower($value[0]);
@@ -264,7 +468,16 @@ class Validation {
 		return $this->_createError($col,$errorString,$bool);
 	}
 
-	// "field"=>array("minlength"=>1);
+	/**
+	 * Checks if the string is atleast a certain number of characters long
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("minLength"=>2));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the minimum length
+	 * @return boolean       if the data was valid
+	 */
 	private function _minlength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too short";
 		$min = isset($value[0])?$value["error"]:$value;
@@ -273,7 +486,16 @@ class Validation {
 		return $this->_createError($col,$errorString,$bool);
 	}
 
-	// "field"=>array("maxlength"=>1,);
+	/**
+	 * Check if the string is less then a cetain number of characters long
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("maxLength"=>20));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the maximum length
+	 * @return boolean       if the data was valid
+	 */
 	private function _maxlength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too long";
 		$min = isset($value[0])?$value["error"]:$value;
@@ -282,7 +504,16 @@ class Validation {
 		return $this->_createError($col,$errorString,$bool);
 	}
 
-	//"field"=>array("money"=>"right")
+	/**
+	 * Check if the string is valid currency amount, pass the side the symbol is positioned, (default left)
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("money");
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _money($val,$col,$value="left") {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid amount";
 		$symbolPosition = strtolower(isset($value[0])?$value[0]:$value);
@@ -297,14 +528,32 @@ class Validation {
 
 	}
 
-	// "field"=>array("numeric");
+	/**
+	 * $validate = array("fieldName"=>array("numberic"));
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("numberic"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _numeric($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a number";
 		$bool = is_numeric($val);
 		return $this->_createError($col,$errorString,$bool);
 	}
 
-	// "field"=>array("phone");
+	/**
+	 * Check if the value is a valid phone number
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("phone"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _phone($val,$col,$value="us") {
 		$errorString = isset($value["error"])?$value["error"]:"is not a number";
 		$country = gettype($value)=="array"?$value[0]:$value;
@@ -321,7 +570,16 @@ class Validation {
 		}
 		return $this->_check($val,$regex,$col,$errorString);
 	}
-	// "field"=>array("postal");
+	/**
+	 * Checks the value to see is a valid zip code
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("postal"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _postal($val,$col,$value="us") {
 		$errorString = isset($value["error"])?$value["error"]:"is not a number";
 		$country = isset($value[0])?$value[0]:$value;
@@ -346,7 +604,16 @@ class Validation {
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field"=>array("range"=>array({lower},{upper}));
+	/**
+	 * Checks the value to see if a value is inside a range
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("range"=>array(2,4)));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the values to check between
+	 * @return boolean       if the data was valid
+	 */
 	private function _range($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a number in the range";
 		$lower = $value[0];
@@ -361,7 +628,16 @@ class Validation {
 
 	}
 
-	//"field"=>array("ssn");
+	/**
+	 * Checks if the value is a valid social security number
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("ssn"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string, and the values to check between
+	 * @return boolean       if the data was valid
+	 */
 	private function _ssn($val,$col,$value="us") {
 		$errorString = isset($value["error"])?$value["error"]:"is not a social security number";
 		$contry = isset($value[0])?$value[0]:$value;
@@ -381,28 +657,64 @@ class Validation {
 	}
 
 
-	//"field"=>array("time");
+	/**
+	 * Checks if the value is a valid time
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("time"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _time($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid time";
 		$regex = '%^((0?[1-9]|1[012])(:[0-5]\d){0,2} ?([AP]M|[ap]m))$|^([01]\d|2[0-3])(:[0-5]\d){0,2}$%';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
-	// "field"=>array(uuid)
+	/**
+	 * Checks if the value is a valid uuid
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("uuid"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _uuid($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid uuid";
 		$regex = '/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i';
 		return $this->_check($val,$col,$col,$errorString);
 	}
 
-	// "field"=>array("url");
+	/**
+	 * Checks if value is a valid url
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("url"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _url($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid url";
 		$regex = "/^http\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?$/";
 		return $this->_check($val,$col,$col,$errorString);
 	}
 
-	// "field"=>array("unique");
+	/**
+	 * Checks to see if the value is unique in the database
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("unique"));
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
 	private function _unique($val,$col,$value=NULL) {
 		if(!empty($this->required)) {
 			$errorString = isset($value["error"])?$value["error"]:"already exists";

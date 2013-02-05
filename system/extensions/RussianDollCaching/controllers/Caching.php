@@ -1,11 +1,35 @@
 <?php
+/**
+ * The Caching Controller
+ */
 
+/**
+ * The Russian Doll Caching Extension controller
+ * @category Extensions
+ * @package  Extensions
+ * @subpackage RussianDollCaching
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 Class Caching {
 
-	// id to use to create cached version
+	/**
+	 * id: int
+	 *
+	 * id to use to create cached version
+	 *
+	 * @var string
+	 */
 	public static $id="";
 
-	// create the cached view after logic has been run
+	/**
+	 * create the cached view after logic has been run
+	 * @param  string $view      rendered view
+	 * @param  string $file_name name of the file
+	 * @param  array $data      data for the view
+	 */
 	public static function create($view,$file_name,$data="")
 	{
 
@@ -30,7 +54,12 @@ Class Caching {
 
 	}
 
-	// check the cache to see if the file exists
+	/**
+	 * check the cache to see if the file exists
+	 * @param  object $controller the controller to check
+	 * @param  int $id         the id to look for
+	 * @return boolean             if cached was found stop the render
+	 */
 	public function check_cache($controller, $id="")
 	{
 

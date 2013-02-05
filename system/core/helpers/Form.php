@@ -1,6 +1,28 @@
 <?php
-	class FormHelper {
-		public function createForm($action, $method, $inputs, $enctype=NULL) {
+/**
+ * Form Hellper Class
+ */
+/**
+ * This handles the creation of forms and validation of forms
+ * @category   Helpers
+ * @package    Core
+ * @subpackage Helpers
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
+	class Form {
+		/**
+		 * Create a form
+		 * @api
+		 * @param  string $action  the action of the form
+		 * @param  string $method  the method of the form
+		 * @param  array $inputs  the inputs you want created
+		 * @param  string $enctype the encode type
+		 * @return string          the html form
+		 */
+		public function create_form($action, $method, $inputs, $enctype=NULL) {
 			$enctype = empty($enctype)?"":"enctype='{$enctype}'";
 			$html = "<form action='{$action}' method='{$method}' ".$enctype.">\n\t<div>\n";
 			foreach($inputs as $input) {
@@ -9,28 +31,36 @@
 				$value = empty($input["value"])?"":$input["value"];
 				$id = empty($input["id"])?"":$input["id"];
 				$label = empty($input["label"])?"":$input["label"];
-				
+
 				if (!empty($label)) {
 					$labelHtml = "\t\t<label";
 					$labelHtml .= empty($id)?">":" for='{$id}'>";
 					$labelHtml .= "{$label}</label>\n";
-					
+
 					$html .= $labelHtml;
-				};	
-				
+				};
+
 				$inputHtml = "\t\t<input type='{$type}' ";
 				$inputHtml .= empty($name)?"":"name='{$name}'";
 				$inputHtml .= empty($value)?"":"value='{$value}'";
 				$inputHtml .= empty($id)?"":"id='{$id}'";
 				$inputHtml .= "/>";
-				
+
 				$html .= "{$inputHtml}\n";
-				
+
 			}
 			$html.= "\t</div>\n</form>";
 			echo $html;
 		}
-	
+
+		/**
+		 * validate a form
+		 * @api
+		 * @param  string $method     the method
+		 * @param  string $submitName the name of the submit button
+		 * @param  array $inputs     the inputs to validate
+		 * @return array             the fields or the error strings
+		 */
 		public function validate($method,$submitName,$inputs) {
 			$scope = $method=="get"?$_GET:$_POST;
 			$valid = true;
@@ -47,7 +77,7 @@
 					if(!empty($inputString)) {
 						if (!$this -> validateType($input["type"], $inputString, $limit)) {
 							array_push($errorStrings, array("name"=>$name, "errorString"=>"{$label} is incorrect"));
-							$valid = false; 
+							$valid = false;
 						}else {
 							$fields[":{$name}"] = $inputString;
 						}
@@ -58,8 +88,15 @@
 				}
 				return $valid?$fields:$errorStrings;
 			}
-			
+
 		}
+		/**
+		 * Valiate based on type
+		 * @param  string $type   the type of validation
+		 * @param  string $string the string to validate
+		 * @param  string $limit  extra information
+		 * @return boolean        if valid
+		 */
 		private function validateType($type, $string, $limit=NULL) {
 			switch($type) {
 				case "email":
@@ -84,10 +121,18 @@
 					break;
 				case "length":
 					$valid = strlen($string) > $limit;
-					break;	
+					break;
 			}
 			return $valid;
 		}
+
+		/**
+		 * return params
+		 * @param  array $scope   the scope of the param
+		 * @param  string $name    the name of the param
+		 * @param  string $default the default
+		 * @return string          param
+		 */
 		private function param($scope, $name, $default="") {
 			if (empty($scope[$name])) {
 				return $default;

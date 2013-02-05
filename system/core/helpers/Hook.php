@@ -1,11 +1,43 @@
 <?php
+/**
+ * Handles everything to do with hooks
+ */
 
-Class Hooks {
+/**
+ * This handles the ablitiy to call and register hooks.
+ *
+ * You can do this before certain methods in the framework.
+ *
+ *
+ * @category   Helpers
+ * @package    Core
+ * @subpackage Helpers
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 
-	// hold all the hooks in here
+Class Hook {
+
+	/**
+	 * Hooks: array
+	 *
+	 * an array of all the hooks that have been registered
+	 *
+	 * @var array
+	 */
 	private static $hooks = array();
 
-	// call a hook
+	/**
+	 * Call a hook at a specific point in the process.
+	 *
+	 * This will call all the methods that were registered earlier
+	 *
+	 * @param  string $hook the name of the hook to call
+	 * @param  array  $args any arguements you want to be passed to the methods
+	 * @return boolean      if the framework should continue running
+	 */
 	public static function call($hook, $args = array())
 	{
 
@@ -32,7 +64,12 @@ Class Hooks {
 
 	}
 
-	// register a new function for a hook
+	/**
+	 * Register a hook to be called when the hook is called
+	 * @api
+	 * @param  string $hook     name of the hook you want to be linked to
+	 * @param  string $function the method you want called when hook is called
+	 */
 	public static function register($hook,$function)
 	{
 

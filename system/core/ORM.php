@@ -1,11 +1,34 @@
 <?php
+/**
+ * Holds all the ORM calls
+ */
 
+/**
+ * This is the ORM. It allows you to use Object Relational Mapping to call find, save, and delete
+ * @category   Core
+ * @package    Core
+ * @extends    Database
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 Class ORM extends Database {
 
-	// the options you can save
+	/**
+	 * options: array
+	 *
+	 * the options you want to use for this call
+	 * @var array
+	 */
 	public $options = array();
 
-	// all the default options
+	/**
+	 * _defaultOptions: array
+	 *
+	 * the default options that will be overwritten by $options
+	 * @var array
+	 */
 	private $_defaultOptions = array(
 			"recursive"=>3,
 			"fields"=>array(),
@@ -17,16 +40,36 @@ Class ORM extends Database {
 			"byCol"=>false,
 			"orderBy"=> ""
 			);
-	// the name of this model
+	/**
+	 * _name: string
+	 *
+	 * the name of this model
+	 * @var string
+	 */
 	public $_name = "";
 
-	// the tables that we are using
+	/**
+	 * _tables: array
+	 *
+	 * an array of all the tables we are using with their columns
+	 * @var array
+	 */
 	private $_tables = array();
 
-	// the data for the query
+	/**
+	 * _data: array
+	 *
+	 * the data we will be using for the call
+	 * @var array
+	 */
 	private $_data = array();
 
-	// seperates the calls and decides what to do with them
+	/**
+	 * This is called whenever a call is made on this model
+	 * @param  string $method the method that was called
+	 * @param  object $value  the params that were passed
+	 * @return object         the response we got from the database
+	 */
 	public function __call($method, $value)
 	{
 		$this->_name = get_called_class();
@@ -95,11 +138,14 @@ Class ORM extends Database {
 		return $response;
 	}
 
-	// searchs the database for information
+	/**
+	 * searchs the database for information
+	 * @return object the response from the database
+	 */
 	private function _find()
 	{
 
-		if(Hooks::call("before_find", array(&$this)) === false) return;
+		if(Hook::call("before_find", array(&$this)) === false) return;
 
 		// set all the joins to be added
 		$joins = $this->_setJoins();
@@ -318,7 +364,10 @@ Class ORM extends Database {
 
 	}
 
-	// insert or update information
+	/**
+	 * save information to the database
+	 * @return object the id or the saved result
+	 */
 	private function _save() {
 
 		// insert or update
@@ -331,7 +380,7 @@ Class ORM extends Database {
 		if($insert) {
 
 			// before validation run this function
-			if(Hooks::call("before_validation", array(&$this->_data)) === false) return;
+			if(Hook::call("before_validation", array(&$this->_data)) === false) return;
 
 			// create the validtor
 			$validator = new Validation();
@@ -346,7 +395,7 @@ Class ORM extends Database {
 		if($valid === true) {
 
 			// run the before save function
-			if(Hooks::call("before_save", array(&$this->_data)) === false) return;
+			if(Hook::call("before_save", array(&$this->_data)) === false) return;
 
 			// set the database name
 			$dbName = Core::to_db($this->_name);
@@ -494,7 +543,10 @@ Class ORM extends Database {
 
 	}
 
-	// delete from database by id
+	/**
+	 * delete information from the database
+	 * @param  int $id the id you want to be deleted
+	 */
 	private function _delete($id)
 	{
 
@@ -502,7 +554,7 @@ Class ORM extends Database {
 		$dbName = Core::to_db($this->_name);
 
 		// call the before delete function
-		if(Hooks::call("before_delete",$id, $dbName, $this) === false) return;
+		if(Hook::call("before_delete",$id, $dbName, $this) === false) return;
 
 		// create the delete statement
 		$statement = "DELETE FROM $dbName where id = :id";
@@ -565,7 +617,10 @@ Class ORM extends Database {
 
 	}
 
-	// create the select statement with all the fields
+	/**
+	 * create the select statement with all the fields
+	 * @return string the select statement
+	 */
 	private function _createSelect()
 	{
 		// set the blank statement
@@ -618,7 +673,10 @@ Class ORM extends Database {
 	}
 
 
-	// set the table structure
+	/**
+	 * set the table structure in the $_tables
+	 * @param string $table the table we need to set up
+	 */
 	private function _setTable($table)
 	{
 
@@ -677,7 +735,9 @@ Class ORM extends Database {
 	}
 
 
-	// set up all the joins in the options
+	/**
+	 * set up all the joins in the options
+	 */
 	private function _setJoins()
 	{
 			// reverse the order so that later they will be the right order
@@ -714,7 +774,10 @@ Class ORM extends Database {
 			return $this->_createJoins();
 	}
 
-	// create all the join statements
+	/**
+	 * create all the join statements
+	 * @return string the join statement
+	 */
 	private function _createJoins()
 	{
 		// get all the joins
@@ -763,7 +826,10 @@ Class ORM extends Database {
 		return $statement;
 	}
 
-	// create a where statement if needed
+	/**
+	 * create the where statement
+	 * @return string the where statement
+	 */
 	private function _createWhere()
  	{
  		if(!empty($this->options['where'])) {
@@ -806,7 +872,10 @@ Class ORM extends Database {
  		}
  	}
 
- 	// create a limit statement if needed
+ 	/**
+ 	 * create a limit statement if needed
+ 	 * @return string the limit statement
+ 	 */
  	private function _createLimit()
  	{
  		// set the limit string
@@ -823,7 +892,10 @@ Class ORM extends Database {
 		return $limit;
  	}
 
- 	// create the order by statement
+ 	/**
+ 	 * create the order by statement
+ 	 * @return string the order by statement
+ 	 */
  	private function _createOrder()
  	{
 

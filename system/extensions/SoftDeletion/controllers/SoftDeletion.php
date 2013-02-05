@@ -1,8 +1,28 @@
 <?php
+/**
+ * The Soft Deletion Controller
+ */
+
+/**
+ * The Soft Deletion Extension controller
+ * @category Core
+ * @package  Extensions
+ * @subpackage SoftDeletion
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 Class SoftDeletion
 {
 
-	// runs before the deletion of data in ORM
+	/**
+	 * runs before the deletion of data in ORM
+	 * @param  int $id      the id to be deleted
+	 * @param  string $db_name the name of the model
+	 * @param  object $model   the model
+	 * @return boolean          if the delete should continue
+	 */
 	public function delete($id, $db_name, $model)
 	{
 
@@ -56,6 +76,11 @@ Class SoftDeletion
 
 	}
 
+	/**
+	 * runs before the find of data in ORM
+	 * @param  object $model the model
+	 * @return boolean        if the find should continue
+	 */
 	public function find(&$model)
 	{
 

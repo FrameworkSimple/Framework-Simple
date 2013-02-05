@@ -1,10 +1,30 @@
 <?php
+/**
+ * Sets up and runs the framework
+ * @category   Core
+ * @package    Core
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
+
+/**
+ * start_time: timestamp
+ *
+ * the time that the script started running
+ */
 
 define("START_TIME", microtime(true));
 
 include ('core/Core.php');
 include ('Settings.php');
 
+/**
+ * system_path: string
+ *
+ * the path to the system
+ */
 define("SYSTEM_PATH", __DIR__);
 
 // if auth is on or session is on

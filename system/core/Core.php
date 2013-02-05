@@ -1,43 +1,123 @@
 <?php
+/**
+ * Holds all the important things of the framework
+ */
+
+/**
+ * This is all the basic functions of the framework. Including: Autoloading, running the framework and utilities
+ * @category   Core
+ * @package    Core
+ * @author     Rachel Higley <me@rachelhigley.com>
+ * @copyright  2013 Framework Simple
+ * @license    http://www.opensource.org/licenses/mit-license.php MIT
+ * @link       http://rachelhigley.com/framework
+ */
 
 Class Core {
-	// holds all the classes that have been instantiated
+	/**
+	 * instantiated: array
+	 *
+	 * The classes that have been instantiated
+	 *
+	 * This will be an array of objects holding all the of classes that have ever been instantiated in this run
+	 *
+	 * @var array
+	 */
 	private static $instantiated = array();
 
-	// variable for all the debug information
+	/**
+	 * files: array
+	 *
+	 * Holds all the files to autoload
+	 *
+	 * array has a key of the folder name and a array of all the file names and path of each file in the folder
+	 *
+	 * @var array
+	 */
+	private static $files = array(
+			"core" =>array(
+				"Asset"      =>"helpers/Asset.php",
+				"Auth"       =>"helpers/Auth.php",
+				"Hook"		 =>"helpers/Hook.php",
+				"Session"    =>"helpers/Session.php",
+				"View"       =>"helpers/View.php",
+				"Form"		 =>"helpers/Form.php",
+				"Controller" =>"Controller.php",
+				"Core"       =>"Core.php",
+				"Database"   =>"Database.php",
+				"Debug"		 =>"Debug.php",
+				"Model"      =>"Model.php",
+				"ORM"        =>"ORM.php",
+				"Validation" =>"Validation.php",
+				),
+
+			"extensions" => array()
+		);
+
+	/**
+	 * paths: array
+	 *
+	 * the path to various asset folders
+	 *
+	 * @var [type]
+	 */
+	public static $paths;
+
+
+	/**
+	 * debug: array
+	 *
+	 * All the debug information
+	 *
+	 * this holds all the sequal statements that ran, all the names of the classes that were instantiated, all the information from the url, and all the views that were rendered.
+	 *
+	 * @var array
+	 */
 	public static $debug = array(	"statements"   =>array(),
 									"instantiated" =>array(),
 									"url"          =>array(),
 									"views"        =>array()
 								);
 
-	private static $files = array(
-			"core" =>array(
-				"Core"       =>"Core.php",
-				"Controller" =>"Controller.php",
-				"CFDump"     =>"CFDump.php",
-				"FormHelper" =>"FormHelper.php",
-				"Model"      =>"Model.php",
-				"ORM"        =>"ORM.php",
-				"Validation" =>"Validation.php",
-				"Auth"       =>"Auth.php",
-				"Asset"      =>"Asset.php",
-				"Database"   =>"Database.php",
-				"View"       =>"View.php",
-				"Session"    =>"Session.php",
-				"Hooks"		 =>"Hooks.php"),
-			"extensions" => array()
-		);
-	// what extensions to include
+	/**
+	 * extensions: array
+	 *
+	 * What extensions to include
+	 *
+	 * @var array
+	 */
 	public static $extensions = array();
 
-	// auto routes
+	/**
+	 * routes: array
+	 *
+	 * routes for the framework
+	 *
+	 * holds all the various dynamic routes for each application
+	 * @var array
+	 */
 	public static $routes = array();
 
-	//info of url
+	/**
+	 * Info of URL: array
+	 *
+	 * This will hold all the url information
+	 *
+	 * Controller: name of the controller to go to
+	 *
+	 * Action: name of the action to run
+	 *
+	 * Params: array of params to pass to action
+	 *
+	 * @var array
+	 */
 	public static $info_of_url = array("controller"=>"","action"=>"","params"=>array(),"ext"=>"");
 
-	// loads all the classes automatically
+	/**
+	 * Autoload Classes using the name of the class
+	 *
+	 * @param  string $classname Name of the string to autoload
+	 */
 	public static function autoloader($classname)
 	{
 
@@ -70,7 +150,9 @@ Class Core {
 		}
 	}
 
-	// run the function
+	/**
+	 * Run the framework.
+	 */
 	public static function run()
 	{
 
@@ -126,9 +208,10 @@ Class Core {
 
 		// call the before action method and see if we should continue
 		// if it comes back false stop running
-		if(Hooks::call("before_action") === false)
+		if(Hook::call("before_action") === false)
 		{
-			self::_output_debug();
+			// output the debug information
+			Debug::render();
 			return;
 		}
 
@@ -145,9 +228,10 @@ Class Core {
 
 
 		// run the after action method
-		if(Hooks::call("after_action") === false)
+		if(Hook::call("after_action") === false)
 		{
-			self::_output_debug();
+			// output the debug information
+			Debug::render();
 			return;
 		}
 
@@ -170,10 +254,13 @@ Class Core {
 		// render the page
 		if(AUTO_RENDER) View::render($file_name,$controller::$view_info,$layout,$controller::$layout_info);
 
-		self::_output_debug();
+		// output the debug information
+		Debug::render();
 	}
 
-	// get all the url information
+	/**
+	 * Find the Controller, Action and Params from the url that was called
+	 */
 	private static function _get_url()
 	{
 
@@ -284,20 +371,14 @@ Class Core {
 		}
 	}
 
-	// the debug output if debug is on
-	private static function _output_debug()
-	{
-		// if debug is on
-		if(DEBUG)
-		{
-			include SYSTEM_PATH."/core/Debug.php";
-		}
-	}
-
-	// check to see if the request is the routes
+	/**
+	 * check to see if the request is the routes
+	 * @param  array $request the information that came through the url
+	 * @param  string $method  the method that called this page
+	 * @return Boolean          if the request was in the routes
+	 */
 	private static function _check_routes($request,$method)
 	{
-
 
 		// loop through the routes
 		foreach(Core::$routes as $route=>$info)
@@ -381,7 +462,10 @@ Class Core {
 		return false;
 	}
 
-	// set the action
+	/**
+	 * Set the action to either the rest or the default depending on settings
+	 * @param string $method the method that called this page
+	 */
 	private static function _set_action($method)
 	{
 
@@ -406,7 +490,11 @@ Class Core {
 		}
 	}
 
-	// create a new class
+	/**
+	 * instantiate classes for user
+	 * @api
+	 * @param  string $classname the name of the class to instatinate
+	 */
 	public static function instantiate($classname)
 	{
 		// if it has already been instantiated
@@ -430,14 +518,25 @@ Class Core {
 		}
 	}
 
-	// redirect to pages
+	/**
+	 * Redirect to a different location
+	 * @api
+	 * @param  string $controller the controller name
+	 * @param  string $action     the action name
+	 * @param  array  $params     the params to pass to the new url
+	 */
 	public static function redirect($controller,$action,$params=array())
 	{
 		$url = Asset::create_url($controller,$action,$params);
 		header( "Location: $url" ) ;
 	}
 
-	// encrypt any sensitive infromation
+	/**
+	 * encrypt sensitive data using this function
+	 * @api
+	 * @param  string $value string you want to encrypt
+	 * @return string        The encrypted string
+	 */
 	public static function encrypt($value)
 	{
 
@@ -451,21 +550,36 @@ Class Core {
 		}
 	}
 
-	// split on caps, add underscores and then convert it to lowercase
+	/**
+	 * split on caps, add underscores and then convert it to lowercase
+	 * @api
+	 * @param  string $string the string to convert
+	 * @return string         the converted string
+	 */
 	public static function to_db($string){
 
 		$string = preg_replace('/\B([A-Z])/', '_$1', $string);
     	return strtolower($string);
 	}
 
-	// replace underscores with spaces and capitalize first letter
+	/**
+	 * replace underscores with spaces and capitalize first letter
+	 * @api
+	 * @param  string $string the string to convert
+	 * @return string         the converted string
+	 */
 	public static function to_norm($string)
 	{
 		$string = str_replace("_", " ", $string);
 		return ucfirst($string);
 	}
 
-	// find the underscores and convert the following letter to and uppercase
+	/**
+	 * find the underscores and convert the following letter to and uppercase
+	 * @api
+	 * @param  string $string the string to convert
+	 * @return string         the converted string
+	 */
 	public static function to_cam($string)
 	{
 		$func = create_function('$c', 'return strtoupper($c[1]);');
@@ -473,7 +587,12 @@ Class Core {
 		return ucfirst($string);
 	}
 
-	// add classes to be autoloaded
+	/**
+	 * add classes to be autoloaded
+	 * @api
+	 * @param string $folder the folder name
+	 * @param array $files  file names in the folder
+	 */
 	public static function add_classes($folder,$files)
 	{
 		// add the files to that folder
