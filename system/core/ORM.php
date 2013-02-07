@@ -145,7 +145,7 @@ Class ORM extends Database {
 	private function _find()
 	{
 
-		if(Hook::call("before_find", array(&$this)) === false) return;
+		if(Hooks::call("before_find", array(&$this)) === false) return;
 
 		// set all the joins to be added
 		$joins = $this->_setJoins();
@@ -245,12 +245,12 @@ Class ORM extends Database {
 							}
 
 							// put info into an indexed array
-							$returnResult[$table][0][$info[1]] = $val;
+							$returnResult[$table][0][$col] = $val;
 
 						}else {
 
 							// set the value to that column inside its table
-							$returnResult[$info[0]][$info[1]] = $val;
+							$returnResult[$table][$col] = $val;
 
 						}
 
@@ -260,9 +260,12 @@ Class ORM extends Database {
 
 				}
 
+
 				// if the result has the same id as the last result
-				if($this->options['recursive'] !== 0 && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
+				if($this->options['recursive'] > 1  && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
 				{
+
+
 
 						// loop through all the has many tables
 						foreach($this->hasMany as $table)
@@ -277,55 +280,63 @@ Class ORM extends Database {
 				else
 				{
 
-
-					if($prevID != NULL)
+					if( $this->options['recursive'] > 1 && $i !== 0)
 					{
-						// if the by column is set
-						if($this->options['byCol'])
-						{
 
-							// get the key value
-							$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
+						$returnResult = $currentQuery;
+					}
 
-							// set the query
-							$returnResults[$key] = $currentQuery;
+					// if the by column is set
+					if($this->options['byCol'])
+					{
 
-						}
-						// if by column isn't set
-						else
-						{
-
-							// push the query into the results array
-							array_push($returnResults, $currentQuery);
-
-						}
+						// get the key value
+						$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
+						// set the query
+						$returnResults[$key] = $currentQuery;
 
 					}
-					$currentQuery = $returnResult;
-					if($this->options['recursive'] !== 0)$prevID = $returnResult[$this->_name]['id'];
+					// if by column isn't set
+					else if($this->options['recursive'] <= 1 || ( $this->options['recursive'] > 1 && $i !== 0))
+					{
+						// push the query into the results array
+						array_push($returnResults, $returnResult);
+
+					}
+					else
+					{
+						$currentQuery = $returnResult;
+					}
+
+					if($this->options['recursive'] > 1)$prevID = $returnResult[$this->_name]['id'];
 
 
 				}
 
 			}
-			// if the by column is set
-			if($this->options['byCol'])
+
+			if($this->options['recursive'] > 1  && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
 			{
 
-				// get the key value
-				$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
+				$currentQuery = $returnResult;
 
-				// set the query
-				$returnResults[$key] = $currentQuery;
+				// if the by column is set
+				if($this->options['byCol'])
+				{
 
-			}
-			// if by column isn't set
-			else
-			{
+					// get the key value
+					$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
+					// set the query
+					$returnResults[$key] = $currentQuery;
 
-				// push the query into the results array
-				array_push($returnResults, $currentQuery);
+				}
+				// if by column isn't set
+				else
+				{
+					// push the query into the results array
+					array_push($returnResults, $currentQuery);
 
+				}
 			}
 
 			// set success to true
@@ -795,6 +806,7 @@ Class ORM extends Database {
 			// set the tables and their database names
 			$table1 = $tables[0];
 			$table2 = $tables[1];
+			$direction = isset($tables[2])?$tables[2]:"LEFT";
 			$dbTable1 = Core::to_db($table1);
 			$dbTable2 = Core::to_db($table2);
 
@@ -803,7 +815,7 @@ Class ORM extends Database {
 			{
 
 				// create the join statement
-				$statement .= " LEFT JOIN $dbTable2 AS $table2 ON $table1.".$dbTable2."_id = $table2.id";
+				$statement .= " $direction JOIN $dbTable2 AS $table2 ON $table1.".$dbTable2."_id = $table2.id";
 
 				// push the table into the alias
 				array_push($this->_tables, $table2);
@@ -814,7 +826,7 @@ Class ORM extends Database {
 			{
 
 				// create the join table
-				$statement .= " LEFT JOIN $dbTable1 AS $table1 ON $table1.".$dbTable2."_id = $table2.id";
+				$statement .= " $direction JOIN $dbTable1 AS $table1 ON $table1.".$dbTable2."_id = $table2.id";
 
 				// push the table into the alias
 				array_push($this->_tables, $table1);
