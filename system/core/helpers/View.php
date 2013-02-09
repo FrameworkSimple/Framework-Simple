@@ -150,7 +150,8 @@ Class View
 	 */
 	private static function _is_assoc($array)
 	{
-		return array_keys($array) !== range(0, count($array) - 1);
+		if(is_array($array))return array_keys($array) !== range(0, count($array) - 1);
+		return false;
 	}
 
 	/**
