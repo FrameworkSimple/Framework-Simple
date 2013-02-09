@@ -182,14 +182,22 @@ Class ORM extends Database {
 			$results = $stmt->fetchAll();
 
 			// set up the return array for all results
-			$returnResults = array();
+			$return_results = array();
 
-			$prevID = NULL;
+			// where we are in the $return_results
+			$return_results_index = 0;
 
-			$currentQuery = array();
+			// has many ids so that we can make sure we only get one of each type of data
+			$ids = array();
+
+			// the current results has_many index
+			$current = array();
+
+			// length of the results
+			$length = count($results);
 
 			// if there were no results
-			if(count($results) == 0){
+			if($length == 0){
 
 				// set success to false
 				$this->success = false;
@@ -198,17 +206,20 @@ Class ORM extends Database {
 				$this->error = array("msg"=>"No Results found","code"=>3);
 
 				return;
-
-
 			}
 
-			// loop through the resuts
+			// set up the return array for one result
+			$current_result = array();
+
+			// set up the previous id so that we can group rows together
+			$prev_id = $this->options['recursive'] <= 1?false:$results[0][$this->_name.'$id'];
+
+			// loop through the results
 			foreach($results as $i=>$result)
 			{
-				// set up the return array for one result
-				$returnResult = array();
 
-				// loop throught this result
+
+				// loop through this result
 				foreach($result as $col=>$val)
 				{
 					// split the column name into the table and the column
@@ -216,134 +227,123 @@ Class ORM extends Database {
 					$table = $info[0];
 					$col = $info[1];
 
+					// if there are no joins then don't worry about the table data because it is all from the same table
 					if($this->options['recursive'] === 0)
 					{
-						$returnResult[$col] = $val;
+						//set the column
+						$current_result[$col] = $val;
 
 					}
-					else {
-
-						// if the table isn't set in the return result
-						if(!isset($returnResult[$table]))
-						{
-
-							// set up the table array
-							$returnResult[$table] = array();
-
-						}
-						// if it is a has many table
-						if(in_array($table, $this->hasMany))
-						{
-
-							// if the has many table isn't set up as an array
-							if(!isset($returnResult[$table][0]))
-							{
-
-								// set up the table array
-								$returnResult[$table][0] = array();
-
-							}
-
-							// put info into an indexed array
-							$returnResult[$table][0][$col] = $val;
-
-						}else {
-
-							// set the value to that column inside its table
-							$returnResult[$table][$col] = $val;
-
-						}
-
-					}
-
-
-
-				}
-
-
-				// if the result has the same id as the last result
-				if($this->options['recursive'] > 1  && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
-				{
-
-
-
-						// loop through all the has many tables
-						foreach($this->hasMany as $table)
-						{
-
-							// push the returnResult table into the current Query
-							array_push($currentQuery[$table], $returnResult[$table][0]);
-
-						}
-
-				}
-				else
-				{
-
-					if( $this->options['recursive'] > 1 && $i !== 0)
-					{
-
-						$returnResult = $currentQuery;
-					}
-
-					// if the by column is set
-					if($this->options['byCol'])
-					{
-
-						// get the key value
-						$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
-						// set the query
-						$returnResults[$key] = $currentQuery;
-
-					}
-					// if by column isn't set
-					else if($this->options['recursive'] <= 1 || ( $this->options['recursive'] > 1 && $i !== 0))
-					{
-						// push the query into the results array
-						array_push($returnResults, $returnResult);
-
-					}
+					// if we have has many joins then we have to worry about multiple rows
 					else
 					{
-						$currentQuery = $returnResult;
+						// if this col is the id
+						if($col == "id")
+						{
+							// if the id doesn't have a value then don't set any of the contents
+							if($val === NULL)
+							{
+								$current[$table] = array("set"=>false);
+							}
+							else
+							{
+
+								// if we don't have that table in the $has_many ids set it
+								if(!isset($ids[$table]))
+								{
+									$ids[$table] = array();
+									$current[$table] = array("set"=>true,"index"=>0,"id"=>$val);
+								}
+								// if we already had this id stop set
+								else if(in_array($val,$ids[$table]))
+								{
+									$current[$table]['set'] = false;
+								}
+								// if we haven't then set it to
+								else
+								{
+									$current[$table]['set'] = true;
+									$current[$table]['id'] = $val;
+									$current[$table]['index']++;
+									array_push($ids[$table], $val);
+								}
+							}
+
+
+						}
+
+						if($prev_id !== $current[$this->_name]['id'])
+						{
+
+							// set the current result
+							$return_results[$return_results_index] = $current_result;
+
+							// reset the current_result
+							$current_result = array();
+
+							// increase the index
+							$return_results_index++;
+
+							// set the previous id
+							$prev_id = $current[$this->_name]['id'];
+
+							// reset the ids
+							$ids = array();
+
+							// reset all the indexes
+							foreach($current as $current_setting)
+							{
+								$current_setting['index'] = 0;
+							}
+
+						}
+
+						// if the table isn't in the result
+						if(!isset($current_result[$table]))
+						{
+							$current_result[$table] = array();
+						}
+
+						// if it is not a has many table then it is just associative, only do this once per result
+						if(!in_array($table, $this->hasMany) && $current[$table]['set'])
+						{
+							$current_result[$table][$col] = $val;
+						}
+						// if it is a has many and set is turned on then add this info
+						else if($current[$table]['set'])
+						{
+
+							// if we haven't set up this index to have an array
+							if(!isset($current_result[$table][$current[$table]['index']]))
+							{
+								$current_result[$table][$current[$table]['index']] = array();
+							}
+							// set the column
+							$current_result[$table][$current[$table]['index']][$col] = $val;
+
+						}
+
 					}
 
-					if($this->options['recursive'] > 1)$prevID = $returnResult[$this->_name]['id'];
-
-
 				}
-
-			}
-
-			if($this->options['recursive'] > 1  && $returnResult[$this->_name]['id'] == $prevID && $prevID != NULL)
-			{
-
-				$currentQuery = $returnResult;
-
-				// if the by column is set
-				if($this->options['byCol'])
+				// if there are no previous ids or this the last row
+				if($prev_id === false || $i === $length -1)
 				{
 
-					// get the key value
-					$key = $currentQuery[$this->options['byCol'][0]][$this->options['byCol'][1]];
-					// set the query
-					$returnResults[$key] = $currentQuery;
+					// set the current result
+					$return_results[$return_results_index] = $current_result;
+
+					// reset the current_result
+					$current_result = array();
+
+					// increase the index
+					$return_results_index++;
 
 				}
-				// if by column isn't set
-				else
-				{
-					// push the query into the results array
-					array_push($returnResults, $currentQuery);
 
-				}
+
 			}
-
-			// set success to true
-			$this->success = true;
-
-			// return the results
-			return $returnResults;
+			return $return_results;
 		}
 		// if the statement didn't work
 		else
