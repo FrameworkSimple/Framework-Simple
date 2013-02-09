@@ -211,7 +211,7 @@ Class Core {
 		if(Hook::call("before_action") === false)
 		{
 			// output the debug information
-			Debug::render();
+			if(!$controller->request['AJAX'])Debug::render();
 			return;
 		}
 
@@ -231,7 +231,7 @@ Class Core {
 		if(Hook::call("after_action") === false)
 		{
 			// output the debug information
-			Debug::render();
+			if(!$controller->request['AJAX'])Debug::render();
 			return;
 		}
 
@@ -255,7 +255,7 @@ Class Core {
 		if(AUTO_RENDER) View::render($file_name,$controller::$view_info,$layout,$controller::$layout_info);
 
 		// output the debug information
-		Debug::render();
+		if(!$controller->request['AJAX'])Debug::render();
 	}
 
 	/**
@@ -306,7 +306,7 @@ Class Core {
 				self::$info_of_url['controller'] = ucfirst($request[0]).'Controller';
 
 				// remove the controller from the request
-				unset($request[0]);
+				array_shift($request);
 
 			}
 			// if the file doesn't exist
@@ -325,13 +325,12 @@ Class Core {
 				// if the second request is a method
 				if(method_exists(self::$info_of_url['controller'], $request[0]))
 				{
-
 					// set the action
 					// url: /controller/action
 					self::$info_of_url['action'] = $request[0];
 
 					// remove the action from the request
-					unset($request[0]);
+					array_shift($request);
 
 				}
 				else
@@ -379,7 +378,6 @@ Class Core {
 	 */
 	private static function _check_routes($request,$method)
 	{
-
 		// loop through the routes
 		foreach(Core::$routes as $route=>$info)
 		{
@@ -462,6 +460,7 @@ Class Core {
 		return false;
 	}
 
+
 	/**
 	 * Set the action to either the rest or the default depending on settings
 	 * @param string $method the method that called this page
@@ -490,6 +489,7 @@ Class Core {
 		}
 	}
 
+
 	/**
 	 * instantiate classes for user
 	 * @api
@@ -516,6 +516,7 @@ Class Core {
 			// instatiate it and put it in the array and then return it
 			return self::$instantiated[$classname] = new $classname;
 		}
+
 	}
 
 	/**
@@ -550,6 +551,7 @@ Class Core {
 		}
 	}
 
+
 	/**
 	 * split on caps, add underscores and then convert it to lowercase
 	 * @api
@@ -561,6 +563,7 @@ Class Core {
 		$string = preg_replace('/\B([A-Z])/', '_$1', $string);
     	return strtolower($string);
 	}
+
 
 	/**
 	 * replace underscores with spaces and capitalize first letter
@@ -574,6 +577,7 @@ Class Core {
 		return ucfirst($string);
 	}
 
+
 	/**
 	 * find the underscores and convert the following letter to and uppercase
 	 * @api
@@ -586,6 +590,7 @@ Class Core {
     	$string = preg_replace_callback('/_([a-z])/', $func, $string);
 		return ucfirst($string);
 	}
+
 
 	/**
 	 * add classes to be autoloaded
