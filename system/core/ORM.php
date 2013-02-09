@@ -272,7 +272,7 @@ Class ORM extends Database {
 
 						}
 
-						if($prev_id !== $current[$this->_name]['id'])
+						if($prev_id !== false && $prev_id !== $current[$this->_name]['id'])
 						{
 
 							// set the current result
