@@ -145,7 +145,7 @@ Class ORM extends Database {
 	private function _find()
 	{
 
-		if(Hooks::call("before_find", array(&$this)) === false) return;
+		if(Hook::call("before_find", array(&$this)) === false) return;
 
 		// set all the joins to be added
 		$joins = $this->_setJoins();
