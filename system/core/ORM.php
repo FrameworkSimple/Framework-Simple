@@ -38,7 +38,8 @@ Class ORM extends Database {
 			"where"=>array(),
 			"returnSaved"=>false,
 			"byCol"=>false,
-			"orderBy"=> ""
+			"orderBy"=> "",
+			"key"=>array()
 			);
 	/**
 	 * _name: string
@@ -218,7 +219,6 @@ Class ORM extends Database {
 			foreach($results as $i=>$result)
 			{
 
-
 				// loop through this result
 				foreach($result as $col=>$val)
 				{
@@ -240,10 +240,43 @@ Class ORM extends Database {
 						// if this col is the id
 						if($col == "id")
 						{
+
+							if($prev_id !== false && $prev_id !== $result[$this->_name.'$id'])
+							{
+
+								// set the current result
+								$return_results[$return_results_index] = $current_result;
+
+								// reset the current_result
+								$current_result = array();
+
+								// increase the index
+								$return_results_index++;
+
+								// set the previous id
+								$prev_id = $result[$this->_name.'$id'];
+
+								// reset the ids
+								$ids = array();
+
+								// reset all the indexes
+								foreach($current as $current_setting)
+								{
+									$current_setting['index'] = 0;
+								}
+
+							}
 							// if the id doesn't have a value then don't set any of the contents
 							if($val === NULL)
 							{
-								$current[$table] = array("set"=>false);
+								if($table === $this->_name)
+								{
+									$current[$table] = array("set"=>true);
+								}
+								else
+								{
+									$current[$table] = array("set"=>false);
+								}
 							}
 							else
 							{
@@ -251,8 +284,10 @@ Class ORM extends Database {
 								// if we don't have that table in the $has_many ids set it
 								if(!isset($ids[$table]))
 								{
-									$ids[$table] = array();
+									$ids[$table] = array($val);
 									$current[$table] = array("set"=>true,"index"=>0,"id"=>$val);
+									if(isset($this->options['key'][$table]))$current[$table]['index'] = $result[$table."$".$this->options['key'][$table]];
+
 								}
 								// if we already had this id stop set
 								else if(in_array($val,$ids[$table]))
@@ -265,35 +300,10 @@ Class ORM extends Database {
 									$current[$table]['set'] = true;
 									$current[$table]['id'] = $val;
 									$current[$table]['index']++;
+									if(isset($this->options['key'][$table]))$current[$table]['index'] = $result[$table."$".$this->options['key'][$table]];
 									array_push($ids[$table], $val);
 								}
-							}
 
-
-						}
-
-						if($prev_id !== false && $prev_id !== $current[$this->_name]['id'])
-						{
-
-							// set the current result
-							$return_results[$return_results_index] = $current_result;
-
-							// reset the current_result
-							$current_result = array();
-
-							// increase the index
-							$return_results_index++;
-
-							// set the previous id
-							$prev_id = $current[$this->_name]['id'];
-
-							// reset the ids
-							$ids = array();
-
-							// reset all the indexes
-							foreach($current as $current_setting)
-							{
-								$current_setting['index'] = 0;
 							}
 
 						}
@@ -304,15 +314,9 @@ Class ORM extends Database {
 							$current_result[$table] = array();
 						}
 
-						// if it is not a has many table then it is just associative, only do this once per result
-						if(!in_array($table, $this->hasMany) && $current[$table]['set'])
+						// if the key is set or if it is a has many and set is turned on then add this info
+						if($current[$table]['set'] && ( isset($this->options['key'][$table]) || in_array($table, $this->hasMany) ) )
 						{
-							$current_result[$table][$col] = $val;
-						}
-						// if it is a has many and set is turned on then add this info
-						else if($current[$table]['set'])
-						{
-
 							// if we haven't set up this index to have an array
 							if(!isset($current_result[$table][$current[$table]['index']]))
 							{
@@ -321,6 +325,11 @@ Class ORM extends Database {
 							// set the column
 							$current_result[$table][$current[$table]['index']][$col] = $val;
 
+						}
+						// if it is not a has many table then it is just associative, only do this once per result
+						else if($current[$table]['set'])
+						{
+							$current_result[$table][$col] = $val;
 						}
 
 					}
@@ -809,6 +818,15 @@ Class ORM extends Database {
 			$direction = isset($tables[2])?$tables[2]:"LEFT";
 			$dbTable1 = Core::to_db($table1);
 			$dbTable2 = Core::to_db($table2);
+
+			if(!in_array($table1, $this->hasMany) && $table1 != $this->_name)
+			{
+				array_push($this->hasMany, $table1);
+			}
+			if(!in_array($table2, $this->belongsTo))
+			{
+				array_push($this->belongsTo, $table2);
+			}
 
 			// if the alias is already created then use the other table
 			if(in_array($table1, $this->_tables))
