@@ -752,6 +752,8 @@ Class ORM extends Database {
 				return false;
 			}
 		}
+
+		return true;
 	}
 
 
