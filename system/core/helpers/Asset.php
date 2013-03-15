@@ -63,6 +63,19 @@ Class Asset {
 	}
 
 	/**
+	 * Get the url path relative to the webroot
+	 * @api
+	 * @return string the relative url
+	 */
+	public static function relative_url()
+	{
+
+		$url = str_replace('\\', '/', dirname($_SERVER["SCRIPT_NAME"]));
+
+		return rtrim($url, '/').'/';
+
+	}
+	/**
 	 * used for routing to create urls to content dynamically
 	 * Asset::create_url("controller","action",array(1));
 	 * @api
