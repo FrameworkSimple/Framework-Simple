@@ -54,9 +54,9 @@ Class View
 						// render the json object using the data
 						$json = Asset::json($data,false);
 
-						echo $json
+						echo $json;
 
-						return Asset::json($data);
+						return $json;
 
 					break;
 

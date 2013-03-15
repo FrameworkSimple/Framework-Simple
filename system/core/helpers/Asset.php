@@ -338,6 +338,6 @@ Class Asset {
 		if($echo) echo $json;
 
 		// return the object
-		return $json
+		return $json;
 	}
 }
