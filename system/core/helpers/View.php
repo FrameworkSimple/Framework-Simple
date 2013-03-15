@@ -38,9 +38,32 @@ Class View
 		// set the file path of the view
 		$file_path = SYSTEM_PATH."/views/".$file.".php";
 
+		//split the name
+		$split = preg_split("/[.]/", $file);
+
+		// if there is an extension
+		$ext = isset($split[1]);
+
 		if(!is_file($file_path))
 		{
 
+			if($ext)
+			{
+				switch ($ext) {
+					case 'json':
+						// render the json object using the data
+						$json = Asset::json($data,false);
+
+						echo $json
+
+						return Asset::json($data);
+
+					break;
+
+					//TODO: Add other extension types
+				}
+
+			}
 			trigger_error("404: View: ".$file." Not Found",E_USER_ERROR);
 			return;
 		}
@@ -83,62 +106,41 @@ Class View
 		// if the data is not an indexed array
 		else
 		{
-			//split the name
-			$split = preg_split("/[.]/", $file);
+			// get the content
+			$view = self::get_contents($file_path,$data,$root);
 
-			// if there is an extension
-			$ext = isset($filename[1]);
-
-			// if there is an extension and it is json
-			if($ext && $filename[1] === 'json')
+			// if there is a layout file and layouts are on
+			if($layout && LAYOUTS)
 			{
 
-				// render the json object using the data
-				Asset::json($data);
+				// layout file path
+				$layout_path = SYSTEM_PATH."/views/layouts/".$layout.".php";
 
-				return Asset::json($data);
-
-			}
-			// TODO: add more file ext types (xml, html, etc.)
-			// render the page normally
-			else
-			{
-				// get the content
-				$view = self::get_contents($file_path,$data,$root);
-
-				// if there is a layout file and layouts are on
-				if($layout && LAYOUTS)
+				if(!is_file($layout_path))
 				{
-
-					// layout file path
-					$layout_path = SYSTEM_PATH."/views/layouts/".$layout.".php";
-
-					if(!is_file($layout_path))
-					{
-						trigger_error("404: Layout File: ".$layout." Not Found",E_USER_ERROR);
-						return;
-					}
-
-					if(DEBUG)
-					{
-
-						array_push(Core::$debug['views'],$layout_path);
-					}
-
-					// get the whole page including layout
-					$view = self::get_contents($layout_path,$layoutInfo,$root,$view);
+					trigger_error("404: Layout File: ".$layout." Not Found",E_USER_ERROR);
+					return;
 				}
 
-				$id = isset($data['id'])?$data['id']:'';
+				if(DEBUG)
+				{
 
-				Hook::call("after_render",$view,$file,$data);
+					array_push(Core::$debug['views'],$layout_path);
+				}
 
-				// render out the view
-				echo $view;
-
-				// return the text
-				return $view;
+				// get the whole page including layout
+				$view = self::get_contents($layout_path,$layoutInfo,$root,$view);
 			}
+
+			$id = isset($data['id'])?$data['id']:'';
+
+			Hook::call("after_render",$view,$file,$data);
+
+			// render out the view
+			echo $view;
+
+			// return the text
+			return $view;
 		}
 
 	}

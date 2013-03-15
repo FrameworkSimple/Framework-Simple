@@ -328,9 +328,16 @@ Class Asset {
 	 * @api
 	 * @param  array $object the array to encode
 	 */
-	public static function json($object)
+	public static function json($object,$echo=true)
 	{
+
+		// json encode the object
+		$json = json_encode($object);
+
 		// echo out the json object encoded
-		echo json_encode($object);
+		if($echo) echo $json;
+
+		// return the object
+		return $json
 	}
 }
