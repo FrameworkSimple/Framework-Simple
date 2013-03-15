@@ -24,9 +24,10 @@ Class View
 	 * @param  array   $data       data you want to be passed to the view
 	 * @param  boolean/string $layout     the layout file you want to render. Default=false
 	 * @param  array   $layoutInfo data you want passed to the layout
+	 * @param  boolean $render if the view should be auto rendered or just returned
 	 * @return string              the view that was rendered
 	 */
-	public static function render($file,$data=array(),$layout=FALSE,$layoutInfo=array())
+	public static function render($file,$data=array(),$layout=FALSE,$layoutInfo=array(),$render=TRUE)
 	{
 
 		// call the before_render hook and if it returns false then stop the function
@@ -54,7 +55,7 @@ Class View
 						// render the json object using the data
 						$json = Asset::json($data,false);
 
-						echo $json;
+						if($render) echo $json;
 
 						return $json;
 
@@ -98,7 +99,7 @@ Class View
 
 			}
 
-			echo $view;
+			if($render) echo $view;
 
 			return $view;
 
@@ -137,7 +138,7 @@ Class View
 			Hook::call("after_render",$view,$file,$data);
 
 			// render out the view
-			echo $view;
+			if($render) echo $view;
 
 			// return the text
 			return $view;
