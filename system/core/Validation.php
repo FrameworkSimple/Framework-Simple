@@ -662,6 +662,10 @@ class Validation {
 	 *
 	 * use this check:
 	 * $validate = array("fieldName"=>array("time"));
+	 *
+	 * Matches	2009-04-20 14:34:32 | 2010-03-09 12:59:00 | 1020-03-09 23:59:00
+	 * Non-Matches	text | 2009-13-00 00:00:00 | 2009-12-20 23:60:00
+	 *
 	 * @param  object $val   the value to check
 	 * @param  string $col   the column(field) name
 	 * @param  array $value  holds the error string
@@ -669,9 +673,30 @@ class Validation {
 	 */
 	private function _time($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid time";
-		$regex = '%^((0?[1-9]|1[012])(:[0-5]\d){0,2} ?([AP]M|[ap]m))$|^([01]\d|2[0-3])(:[0-5]\d){0,2}$%';
+		$regex = '^[1-9]{1}[0-9]{3}-(0[1-9]{1}|1[0-2]{1})-([0-2]{1}[1-9]{1}|3[0-1]{1}) ([0-1]{1}[0-9]{1}|2[0-3]{1}):[0-5]{1}[0-9]{1}:[0-5]{1}[0-9]{1}$';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
+
+	/**
+	 * Checks if the value is a valid timestamp
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("timestamp"));
+	 *
+	 * Matches	1:01 AM | 23:52:01 | 03.24.36 AM
+	 * Non-Matches	19:31 AM | 9:9 PM | 25:60:61
+	 *
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
+	private function _timestamp($val,$col,$value=NULL) {
+		$errorString = isset($value["error"])?$value["error"]:"is not a valid timestamp";
+		$regex = '^((([0]?[1-9]|1[0-2])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?))$';
+		return $this->_check($val,$regex,$col,$errorString);
+	}
+
 
 	/**
 	 * Checks if the value is a valid uuid
