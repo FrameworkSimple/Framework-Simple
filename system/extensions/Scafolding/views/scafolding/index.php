@@ -6,7 +6,7 @@
 </head>
 <body>
 	<h1>Scafolding</h1>
-	<form action="<?php Asset::create_url("Scafolding","post");?>" method="POST" enctype="multipart/form-data">
+	<form action="<?= Asset::create_url("Scafolding","post");?>" method="POST" enctype="multipart/form-data">
 
 		<label for="name">Name:</label>
 		<input type="text" name="name" id="name">

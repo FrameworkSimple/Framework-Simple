@@ -252,7 +252,7 @@ Class Core {
 		$extension = !empty(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
 		// the name of the controller with out Controller
-		$controller_name = strtolower(str_replace("Controller", "", self::$info_of_url['controller']));
+		$controller_name = self::to_db(str_replace("Controller", "", self::$info_of_url['controller']));
 
 		// path to view
 		$file_name= "{$controller_name}/{$controller::$view_name}$extension";
@@ -336,8 +336,9 @@ Class Core {
 
 			}
 			// if there is an second value
-			if (isset($request[0]))
+			if (isset($request[0]) && !empty($request[0]))
 			{
+
 
 
 				// if the second request is a method
@@ -350,16 +351,22 @@ Class Core {
 					// remove the action from the request
 					array_shift($request);
 
+					// set the params
+					// url: /controller/action/param
+					self::$info_of_url['params'] = $request;
+
 				}
 				else
 				{
+					// set the params
+					// url: /controller/action/param
+					self::$info_of_url['params'] = $request;
+
 					// set the action
 					self::_set_action($method);
 				}
 
-				// set the params
-				// url: /controller/action/param
-				self::$info_of_url['params'] = $request;
+
 
 
 			}
@@ -448,6 +455,8 @@ Class Core {
 			{
 				self::$info_of_url['controller'] = ucfirst($info[0])."Controller";
 
+				self::$info_of_url['params'] = $params;
+
 				if(empty(self::$info_of_url['action'])) isset($info[1])? self::$info_of_url['action'] = $info[1]:self::_set_action($method);
 
 				// if the method doesn't exist
@@ -458,8 +467,6 @@ Class Core {
 					return false;
 
 				}
-
-				self::$info_of_url['params'] = $params;
 
 				return true;
 			}
@@ -484,7 +491,7 @@ Class Core {
 		{
 
 			// set the action to the method
-			self::$info_of_url['action'] = $method;
+			self::$info_of_url['action'] = ($method === "get" && empty(self::$info_of_url['params']))? "index" : $method;
 
 		}
 
