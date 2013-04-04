@@ -12,5 +12,6 @@
 
 	Core::add_classes("Scafolding",array(
 		"ScafoldingController"     =>"controllers/ScafoldingController.php",
+		"Scafolding"     =>"models/Scafolding.php",
 		)
 	);
