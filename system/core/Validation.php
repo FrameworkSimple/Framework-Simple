@@ -78,14 +78,14 @@ class Validation {
 	 * @param  array $rules     the rulles to valiate on
 	 * @return array/boolean    true if no errors and errors array if errors
 	 */
-	public function validate($tableName,$data,$required,$rules) {
+	public function validate($tableName,$data,$required,$rules,$new=true) {
 		$this->tableName = Core::to_db($tableName);
 		$this->name = $tableName;
 		$this->data = $data;
 		$this->errors = array();
 		$this->required = $required;
 		$this->validate = $rules;
-		if(!empty($this->required)) {
+		if(!empty($this->required) && $new) {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
 					unset($this->data[$col]);
@@ -128,6 +128,11 @@ class Validation {
 
 						}
 					}
+				}
+				else if(empty($this->data[$col]) && in_array($col, $this->required))
+				{
+
+					$this->_createError($col,"can not be empty");
 				}
 
 			}

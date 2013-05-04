@@ -418,7 +418,7 @@ Class ORM extends Database {
 		}
 		else
 		{
-			$valid = $validator->validate($this->_name,$this->_data,array(),$this->rules);
+			$valid = $validator->validate($this->_name,$this->_data,$this->required,$this->rules,false);
 		}
 
 		if($valid === true) {
