@@ -132,9 +132,9 @@ Class ScafoldingController extends Controller {
 			$underscores = Core::to_db($table['name']);
 			$controller = "<?php\n/**\n * The ".$normal." Controller\n */\n\n/**\n * The ".$normal." Controller\n * @category   Controllers\n * @package    ".$_POST['application_name']."\n * @subpackage Controllers\n * @author     ".$_POST['name']."\n */\n Class ".$table['name']."Controller extends Controller\n{";
 			$controller .= "\n\t/**\n\t * Get all the ".$normal."s\n\t * @return array all the ".$normal."s\n\t */\n\tpublic function index()\n\t{\n\n\t\t// load the model\n\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t// only get this table\n\t\t".'$this->'.$table['name']."->options['recursive'] = 0;\n\n\t\t// get all the ".$normal."s\n\t\t$".$underscores."s = ".'$this->'.$table['name']."->findAll();\n\n\t\t//set the success\n\t\t".'$this->view_data('."'success',".'$this->'.$table['name']."->success);\n\n\t\t// if the call was successful\n\t\tif(".'$this->'.$table['name']."->success)\n\t\t{\n\n\t\t\t// set the information for the view\n\t\t\t".'$this->view_data("'.$underscores.'s",$'.$underscores."s);\n\n\t\t\t// return the information\n\t\t\treturn $".$underscores."s;\n\n\t\t}\n\t}";
-			$controller .= "\n\t/**\n\t * Get one ".$normal."\n\t * @param  int the id of the ".$normal." to get\n\t * @return one ".$normal."\n\t*/\n\tpublic function get(".'$id'.")\n\t{\n\t\tif(".'$id'.")\n\t\t{\n\n\t\t\t// load the model\n\t\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t\t// only get this table\n\t\t\t".'$this->'.$table['name']."->options['recursive'] = 0;\n\n\t\t\t// get all the ".$normal."s\n\t\t\t$".$underscores." = ".'$this->'.$table['name']."->findById(".'$id'.");\n\n\t\t\t//set the success\n\t\t\t".'$this->view_data('."'success',".'$this->'.$table['name']."->success);\n\n\t\t\t// if the call was successful\n\t\t\tif(".'$this->'.$table['name']."->success)\n\t\t\t{\n\n\t\t\t\t// set the information for the view\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores.");\n\n\t\t\t\t// return the information\n\t\t\t\treturn $".$underscores.";\n\t\t\t}\n\t\t}\n\n\t}";
-			$controller .= "\n\t/**\n\t * Create new ".$normal."\n\t * @param  array $".$underscores." all the information to save\n\t * @return boolean if it was successfull\n\t */\n\tpublic function post($".$underscores."=NULL)\n\t{\n\t\t//if information was sent\n\t\tif($".$underscores.")\n\t\t{\n\t\t\t// load the model\n\t\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t\t// save the new ".$normal."\n\t\t\t".'$this->'.$table['name']."->save($".$underscores.");\n\n\t\t\t// set the success\n\t\t\t".'$this->view_data("success",$this->'.$table['name']."->success);\n\n\t\t\t// return the success\n\t\t\t".'$this->'.$table['name']."->success;\n\t\t}\n\t}";
-			$controller .= "\n\t/**\n\t * Update a ".$normal."\n\t * @param  array $".$underscores." all the information to update, including id\n\t * @return boolean if it was successfull\n\t */\n\tpublic function update($".$underscores."_id=NULL,$".$underscores."=NULL)\n\t{\n\n\t\t// if information was sent\n\t\tif($".$underscores.")\n\t\t{\n\t\t\t// load the model\n\t\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t\t// save the new ".$normal."\n\t\t\t".'$this->'.$table['name']."->save($".$underscores.");\n\n\t\t\t// set the success\n\t\t\t".'$this->view_data("success",$this->'.$table['name']."->success);\n\n\t\t\t// return the success\n\t\t\t".'$this->'.$table['name']."->success;\n\t\t}\n\n\t\t// if there is an id\n\t\tif($".$underscores."_id)\n\t\t{\n\t\t\t\n\t\t\t// get a ".$normal."\n\t\t\t".'$this->get($'.$underscores."_id);\n\t\t\t\n\t\t}\n\n\n\t}";
+			$controller .= $this->_controller_get($normal,$underscores, $table['name']);
+			$controller .= $this->_controller_post($normal, $underscores, $table['name']);
+			$controller .= $this->_controller_update($normal, $underscores, $table['name']);
 			$controller .= "\n\t/**\n\t * Delete a ".$normal."\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete\n\t * @return boolean if it was successfull\n\t */\n\tpublic function delete($".$underscores."_id=NULL)\n\t{\n\t\t// if there was an id sent\n\t\tif($".$underscores."_id)\n\t\t{\n\n\t\t\t// load the model\n\t\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t\t// save the new ".$normal."\n\t\t\t".'$this->'.$table['name']."->delete($".$underscores."_id);\n\n\t\t\t// set the success\n\t\t\t".'$this->view_data("success",$this->'.$table['name']."->success);\n\n\t\t\t// return the success\n\t\t\t".'$this->'.$table['name']."->success;\n\n\t\t}\n\t}";
 			$controller .= "\n}";
 			file_put_contents(SYSTEM_PATH."/controllers/".$table['name']."Controller.php", $controller);
@@ -164,36 +164,60 @@ Class ScafoldingController extends Controller {
 			{
 				$model .= "\n\tpublic ".'$rules = '."array(";
 				$form = '<?php $params = array(); if(isset($id)) $params[0] = $id; ?>'."\n<form method='POST' action='<?= Asset::create_url('".$table['name']."',".'$action'.",".'$params'.") ?>'>\n";
+				$index_titles =  "";
+				$index_row =  "";
+				$get = "";
 				foreach($table['cols'] as $col)
 				{
 					$model .= "\n\t\t'".$col['name']."' => array(";
-					$form .= "\n\t\t<div>\n\t\t<label for='".$col['name']."'>".$col['name']."</label>";
-					switch ($col['type']) {
-						case 'int':
-							$model .= "'numeric',";
-							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-							break;
+					$index_titles .= "\n\t\t<div class='col'>".$col['name']."</div>";
+					$index_row .= "\n\t\t\t<div class='col'>\n\t\t\t\t<?php echo $".$underscores."['".$col['name']."'] ?>\n\t\t\t</div>";
+					$get .= "<div class='row'>\n\t<div class='col'>".$col['name']."</div>\n\t<div class='col'><?php echo $".$underscores."['".$col['name']."'] ?></div>\n</div>\n";
 
-						case 'varchar':
-							$model .= "'alphaNumeric',";
-							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-							break;
+					if($col['name'] === 'id')
+					{
+						$model .= "'numeric',";
+						$form .= "\t".'<?php if(isset($id)):?>';
+						$form .= "\n\t\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
+						$form .= "\n\t\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
+						$form .= "\n\t\t<?php endif;?>";
+						$form .= "\n\t\t<div>\n\t\t\t<label for='".$col['name']."'>".$col['name']."</label>";
+						$form .= "\n\t\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+						$form .= "\t\t</div>";
+						$form .= "\n\t<?php endif;?>";
+					}
+					else {
+						$form .= "\n\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
+						$form .= "\n\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
+						$form .= "\n\t<?php endif;?>";
+						$form .= "\n\t<div>\n\t\t<label for='".$col['name']."'>".$col['name']."</label>";
+						switch ($col['type']) {
+							case 'int':
+								$model .= "'numeric',";
+								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+								break;
 
-						case 'timestamp':
-							$model .= "'timestamp',";
-							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-							break;
-						case 'text':
-							$model .= " ";
-							$form .="\n\t\t<textarea id='".$col['name']."' name='".$col['name']."'><?php if(isset($".$col['name'].")) echo $".$col['name']."; ?></textarea>\n";
-							break;
-						default:
-							$model .= " ";
-							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-							break;
+							case 'varchar':
+								$model .= "'alphaNumeric',";
+								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+								break;
+
+							case 'timestamp':
+								$model .= "'timestamp',";
+								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+								break;
+							case 'text':
+								$model .= " ";
+								$form .="\n\t\t<textarea id='".$col['name']."' name='".$col['name']."'><?php if(isset($".$col['name'].")) echo $".$col['name']."; ?></textarea>\n";
+								break;
+							default:
+								$model .= " ";
+								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+								break;
+						}
+						$form .= "\t</div>";
 					}
 
-					$form .= "\n\t\t</div>";
 
 
 					if(isset($col['length']))
@@ -226,20 +250,122 @@ Class ScafoldingController extends Controller {
 
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/_form.php", $form);
 
-			$index = "<div class='table'>\n\t<div class='row'>\n\t\t<?php foreach(array_keys($".$underscores."s[0]) as ".'$key'."):?>\n\t\t\t<div class='col'>".'<?= $key ?>'."</div>\n\t\t<?php endforeach?>\n\t</div>\n\t<?php foreach($".$underscores."s as ".'$row'."):?>\n\t\t<div class='row'>\n\t\t<?php foreach(".'$row'." as ".'$col'."):?>\n\t\t\t<div class='col'>".'<?= $col ?>'."</div>\n\t\t<?php endforeach ?>\n\t\t</div>\n\t<?php endforeach; ?>\n</div>";
+			$index = "<div class='table'>";
+			$index .= "\n\t<div class='row'>".$index_titles."\n\t</div>";
+			$index .= "\n\t<?php foreach($".$underscores."s as ".'$'.$underscores."):?>\n\t\t<div class='row'>".$index_row."\n\t\t</div>\n\t<?php endforeach ?>";
+			$index .= "\n</div>";
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/index.php", $index);
 
-			$get = "<?php foreach($".$underscores."[0] as ".'$key=>$col'."):?>\n\t\t<div class='row'><div class='col'><?=".'$key'." ?></div><div class='col'><?=".'$col'."?></div></div>\n\t<?php endforeach;?>";
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", $get);
 
-			$post = "<?php View::render('".$underscores."/_form',array('action'=>'post')); ?>";
+			file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", trim($get));
+
+			$post = "<?php ";
+			$post .= "\n\t".'$params = array("action"=>"post");';
+			$post .= "\n\t".'if(isset($errors)) $params = array_merge($params, $errors);';
+			$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
+			$post .= "\n ?>";
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/post.php", $post);
 
-			$update ="<?php\n\t$".$underscores."[0]['action'] = 'update';\n\tView::render('action_type/_form',$".$underscores."[0]);\n?>";
+			$update ="<?php\n\t$".$underscores."['action'] = 'update';";
+			$update .= "\n\t".'$params = isset($errors)?array_merge($'.$underscores.', $errors):$'.$underscores.';';
+			$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/update.php", $update);
 
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/delete.php", "<h1>Hello World</h1>");
 		}
+	}
+	private function _controller_get($normal, $underscores, $name)
+	{
+		$controller = "\n\t/**";
+		$controller .= "\n\t * Get one ".$normal;
+		$controller .= "\n\t * @param  int the id of the ".$normal." to get";
+		$controller .= "\n\t * @return one ".$normal;
+		$controller .= "\n\t*/\n\tpublic function get(".'$id'.")";
+		$controller .= "\n\t{";
+		$controller .= "\n\t\tif(".'$id'.")";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\n\t\t\t// load the model";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
+		$controller .= "\n\n\t\t\t// only get this table";
+		$controller .= "\n\t\t\t".'$this->'.$name."->options['recursive'] = 0;";
+		$controller .= "\n\n\t\t\t// get all the ".$normal."s";
+		$controller .= "\n\t\t\t$".$underscores." = ".'$this->'.$name."->findById(".'$id'.");";
+		$controller .= "\n\n\t\t\t//set the success";
+		$controller .= "\n\t\t\t".'$this->view_data('."'success',".'$this->'.$name."->success);";
+		$controller .= "\n\n\t\t\t// if the call was successful";
+		$controller .= "\n\t\t\tif(".'$this->'.$name."->success)";
+		$controller .= "\n\t\t\t{";
+		$controller .= "\n\n\t\t\t\t// set the information for the view";
+		$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores."[0]);";
+		$controller .= "\n\n\t\t\t\t// return the information";
+		$controller .= "\n\t\t\t\treturn $".$underscores."[0];";
+		$controller .= "\n\t\t\t}";
+		$controller .= "\n\t\t\treturn false;";
+		$controller .= "\n\t\t}";
+		$controller .= "\n\n\t}";
+
+		return $controller;
+	}
+	private function _controller_post($normal, $underscores, $name)
+	{
+			$controller = "\n\t/**";
+			$controller .= "\n\t * Create new ".$normal;
+			$controller .= "\n\t * @param  array $".$underscores." all the information to save";
+			$controller .= "\n\t * @return boolean if it was successfull";
+			$controller .= "\n\t */";
+			$controller .= "\n\tpublic function post($".$underscores."=NULL)";
+			$controller .= "\n\t{";
+			$controller .= "\n\t\t//if information was sent";
+			$controller .= "\n\t\tif($".$underscores.")";
+			$controller .= "\n\t\t{";
+			$controller .= "\n\t\t\t// load the model";
+			$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
+			$controller .= "\n\n\t\t\t// save the new ".$normal;
+			$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
+			$controller .= "\n\n\t\t\t// set the success";
+			$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
+			$controller .= "\n\t\t\t".'if(!$this->'.$name.'->success) return $this->view_data("errors",$this->'.$name.'->error);';
+			$controller .= "\n\n\t\t\t// return the success";
+			$controller .= "\n\t\t\t".'return $this->'.$name."->success;";
+			$controller .= "\n\t\t}";
+			$controller .= "\n\t}";
+
+			return $controller;
+	}
+
+	private function _controller_update($normal, $underscores, $name)
+	{
+		$controller = "\n\t/**";
+		$controller .= "\n\t * Update a ".$normal;
+		$controller .= "\n\t * @param  array $".$underscores." all the information to update, including id";
+		$controller .= "\n\t * @return boolean if it was successfull";
+		$controller .= "\n\t */";
+		$controller .= "\n\tpublic function update($".$underscores."_id=NULL,$".$underscores."=NULL)";
+		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// if information was sent";
+		$controller .= "\n\t\tif($".$underscores.")";
+		$controller .= "\n\t\t{\n\t\t\t// load the model";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
+		$controller .= "\n\n\t\t\t// save the new ".$normal;
+		$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
+		$controller .= "\n\n\t\t\t// set the success";
+		$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
+		$controller .= "\n\n\t\t\t// if the save was not successful";
+		$controller .= "\n\t\t\t".'if(!$this->'.$name.'->success)';
+		$controller .= "\n\t\t\t{";
+		$controller .= "\n\t\t\t\t// set the errors";
+		$controller .= "\n\t\t\t\t".'$this->view_data("errors",$this->'.$name.'->error);';
+		$controller .= "\n\t\t\t}";
+		$controller .= "\n\t\t}";
+		$controller .= "\n\n\t\t// if there is an id";
+		$controller .= "\n\t\tif($".$underscores."_id)";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\t\t\t\n\t\t\t// get a ".$normal;
+		$controller .= "\n\t\t\t".'$this->get($'.$underscores."_id);";
+		$controller .= "\n\t\t\t\n\t\t}";
+		$controller .= "\n\n\n\t}";
+
+		return $controller;
 	}
 
 }

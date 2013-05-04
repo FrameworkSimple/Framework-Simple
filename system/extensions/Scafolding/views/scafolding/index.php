@@ -14,9 +14,6 @@
 		<label for="app_name">Application Name</label>
 		<input type="text" name="application_name" id="app_name">
 
-		<label for="sql">Upload Your Database</label>
-		<input type="file" name="sql" id="sql">
-
 		<input type="submit" value="Upload">
 
 	</form>
