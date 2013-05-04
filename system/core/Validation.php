@@ -89,11 +89,7 @@ class Validation {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
 					unset($this->data[$col]);
-					array_push($this->errors,array(
-						"name"=>$col,
-						"string"=>Core::to_norm($col)." is required"
-						)
-					);
+					$this->errors[$col] = Core::to_norm($col)." is required";
 				}
 			}
 		}
@@ -115,10 +111,21 @@ class Validation {
 						}
 					}else {
 						foreach($this->validate[$col] as $key=>$val) {
-							$method = "_".$key;
-							if(!$this->$method($value,$col,$val)){
-								break;
-							};
+							if(gettype($key) === "integer")
+							{
+								$method = "_".$val;
+								if(!$this->$method($value,$col)){
+									break;
+								};
+							}
+							else
+							{
+								$method = "_".$key;
+								if(!$this->$method($value,$col,$val)){
+									break;
+								};
+							}
+
 						}
 					}
 				}
@@ -161,10 +168,7 @@ class Validation {
 	 */
 	private function _createError($col,$errorString,$bool=FALSE) {
 		if(!$bool) {
-			array_push($this->errors, array(
-					"name"=>$col,
-					"string"=>Core::to_norm($col)." ".$errorString
-				));
+			$this->errors[$col] = Core::to_norm($col)." ".$errorString;
 			unset($this->data[$col]);
 			return false;
 		}
@@ -499,7 +503,6 @@ class Validation {
 	private function _maxlength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too long";
 		$min = isset($value[0])?$value["error"]:$value;
-
 		$bool = mb_strlen($val) <= $min;
 		return $this->_createError($col,$errorString,$bool);
 	}
