@@ -464,6 +464,8 @@ Class Core {
 				return true;
 			}
 
+				self::$info_of_url['action'] = "";
+				self::$info_of_url['params'] = array();
 
 		}
 
