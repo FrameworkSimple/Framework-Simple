@@ -55,16 +55,6 @@ Class Core {
 		);
 
 	/**
-	 * paths: array
-	 *
-	 * the path to various asset folders
-	 *
-	 * @var [type]
-	 */
-	public static $paths;
-
-
-	/**
 	 * debug: array
 	 *
 	 * All the debug information
@@ -157,7 +147,7 @@ Class Core {
 			return;
 		}
 		else {
-			trigger_error("404: ".$classname." Not Found",E_USER_ERROR);
+			trigger_error("404: ".$classname." Not Found",E_USER_NOTICE);
 			return;
 		}
 	}
@@ -309,6 +299,9 @@ Class Core {
 
 		// variable for the request that was made
 		$uri = str_replace(dirname($_SERVER['SCRIPT_NAME'])."/",'',$url[0]);
+
+		// if there is a / at the beginning
+		if(strpos($uri,"/") === 0) $uri = substr($uri, 1);
 
 		// if the uri is just a blank string use an array if it has length then break it into pieces
 		$request = !empty($uri)?explode("/", $uri):array("");
