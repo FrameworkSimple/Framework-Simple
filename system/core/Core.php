@@ -55,16 +55,6 @@ Class Core {
 		);
 
 	/**
-	 * paths: array
-	 *
-	 * the path to various asset folders
-	 *
-	 * @var [type]
-	 */
-	public static $paths;
-
-
-	/**
 	 * debug: array
 	 *
 	 * All the debug information
@@ -125,6 +115,7 @@ Class Core {
 		foreach(self::$files as $folder=>$file) {
 			foreach($file as $name=>$filePath) {
 				if($classname == $name) {
+					self::$instantiated[$classname]['file_path'] = "/".$folder."/".$filePath;
 					include_once SYSTEM_PATH."/".$folder."/".$filePath;
 					return ;
 				}
@@ -133,19 +124,30 @@ Class Core {
 
 		// if not in the framework list and includes the word controller instantiate a controller file
 		if(strstr($classname,"Controller")) {
-			if(strstr($classname,"Test")) {
+			if(strstr($classname,"Test") && is_file(SYSTEM_PATH."/tests/".$classname.".php")) {
+				self::$instantiated[$classname]['file_path'] = "/tests/".$classname.".php";
 				include SYSTEM_PATH."/tests/".$classname.".php";
 				return;
-			}else {
+			}else if (is_file(SYSTEM_PATH."/controllers/".$classname.".php")){
+				self::$instantiated[$classname]['file_path'] = "/controllers/".$classname.".php";
 				include SYSTEM_PATH."/controllers/".$classname.".php";
+				return;
+			}
+			else {
+				trigger_error("404: Controller: ".$classname." Not Found",E_USER_ERROR);
 				return;
 			}
 
 		}
 
 		// else instantiate a model
-		else {
+		else if(is_file(SYSTEM_PATH."/models/".$classname.".php")) {
+			self::$instantiated[$classname]['file_path'] = "/models/".$classname.".php";
 			include SYSTEM_PATH."/models/".$classname.".php";
+			return;
+		}
+		else {
+			trigger_error("404: ".$classname." Not Found",E_USER_NOTICE);
 			return;
 		}
 	}
@@ -240,7 +242,7 @@ Class Core {
 		$extension = !empty(self::$info_of_url['ext'])?".".self::$info_of_url['ext']:DEFAULT_VIEW_TYPE;
 
 		// the name of the controller with out Controller
-		$controller_name = strtolower(str_replace("Controller", "", self::$info_of_url['controller']));
+		$controller_name = self::to_db(str_replace("Controller", "", self::$info_of_url['controller']));
 
 		// path to view
 		$file_name= "{$controller_name}/{$controller::$view_name}$extension";
@@ -251,8 +253,22 @@ Class Core {
 		// if it is ajax we don't want to render a layout
 		if($controller->request['AJAX']) $layout = false;
 
+		// use the controller path if it is defined, else use the path to the controller to define it.
+		$path_to_views = $controller::$path_to_views;
+
+		// if the controller didn't have a path to views
+		if(!$path_to_views) {
+
+			// get the directory two levels up of the controller
+			$path_to_views = dirname(dirname(self::$instantiated[self::$info_of_url['controller']]['file_path']));
+
+			// add "views" to the file path
+			$path_to_views .= strlen($path_to_views) >1 ?"/views/":"views/";
+
+		}
+
 		// render the page
-		if(AUTO_RENDER) View::render($file_name,$controller::$view_info,$layout,$controller::$layout_info);
+		if(AUTO_RENDER) View::render($file_name,$controller::$view_info,array("layout"=>$layout,"layout_info"=>$controller::$layout_info,"path_to_views"=>$path_to_views));
 
 		// output the debug information
 		if(!$controller->request['AJAX'])Debug::render();
@@ -284,6 +300,9 @@ Class Core {
 		// variable for the request that was made
 		$uri = str_replace(dirname($_SERVER['SCRIPT_NAME'])."/",'',$url[0]);
 
+		// if there is a / at the beginning
+		if(strpos($uri,"/") === 0) $uri = substr($uri, 1);
+
 		// if the uri is just a blank string use an array if it has length then break it into pieces
 		$request = !empty($uri)?explode("/", $uri):array("");
 
@@ -309,17 +328,10 @@ Class Core {
 				array_shift($request);
 
 			}
-			// if the file doesn't exist
-			if(!is_file(SYSTEM_PATH."/controllers/".self::$info_of_url['controller'].".php"))
-			{
-
-				trigger_error("404: Controller: ".self::$info_of_url['controller']." Not Found",E_USER_ERROR);
-				return;
-
-			}
 			// if there is an second value
-			if (isset($request[0]))
+			if (isset($request[0]) && !empty($request[0]))
 			{
+
 
 
 				// if the second request is a method
@@ -332,16 +344,22 @@ Class Core {
 					// remove the action from the request
 					array_shift($request);
 
+					// set the params
+					// url: /controller/action/param
+					self::$info_of_url['params'] = $request;
+
 				}
 				else
 				{
+					// set the params
+					// url: /controller/action/param
+					self::$info_of_url['params'] = $request;
+
 					// set the action
 					self::_set_action($method);
 				}
 
-				// set the params
-				// url: /controller/action/param
-				self::$info_of_url['params'] = $request;
+
 
 
 			}
@@ -430,14 +448,8 @@ Class Core {
 			{
 				self::$info_of_url['controller'] = ucfirst($info[0])."Controller";
 
-				// if the file doesn't exist
-				if(!is_file(SYSTEM_PATH."/controllers/".self::$info_of_url['controller'].".php"))
-				{
+				self::$info_of_url['params'] = $params;
 
-					trigger_error("404: Controller: ".self::$info_of_url['controller']." Not Found",E_USER_ERROR);
-					return false;
-
-				}
 				if(empty(self::$info_of_url['action'])) isset($info[1])? self::$info_of_url['action'] = $info[1]:self::_set_action($method);
 
 				// if the method doesn't exist
@@ -448,8 +460,6 @@ Class Core {
 					return false;
 
 				}
-
-				self::$info_of_url['params'] = $params;
 
 				return true;
 			}
@@ -476,7 +486,7 @@ Class Core {
 		{
 
 			// set the action to the method
-			self::$info_of_url['action'] = $method;
+			self::$info_of_url['action'] = ($method === "get" && empty(self::$info_of_url['params']))? "index" : $method;
 
 		}
 
@@ -500,11 +510,11 @@ Class Core {
 	public static function instantiate($classname)
 	{
 		// if it has already been instantiated
-		if(isset(self::$instantiated[$classname]))
+		if(isset(self::$instantiated[$classname]['class']))
 		{
 
 			//return that one
-			return self::$instantiated[$classname];
+			return self::$instantiated[$classname]['class'];
 
 		}
 
@@ -516,7 +526,7 @@ Class Core {
 			array_push(self::$debug['instantiated'],$classname);
 
 			// instatiate it and put it in the array and then return it
-			return self::$instantiated[$classname] = new $classname;
+			return self::$instantiated[$classname]['class'] = new $classname;
 		}
 
 	}

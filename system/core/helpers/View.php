@@ -22,13 +22,20 @@ Class View
 	 * @api
 	 * @param  string  $file       file you want to render
 	 * @param  array   $data       data you want to be passed to the view
-	 * @param  boolean/string $layout     the layout file you want to render. Default=false
-	 * @param  array   $layoutInfo data you want passed to the layout
-	 * @param  boolean $render if the view should be auto rendered or just returned
+	 * @param  array   $options    all the options for rendering the view: layout, layout_info, render, and path_to_views
 	 * @return string              the view that was rendered
 	 */
-	public static function render($file,$data=array(),$layout=FALSE,$layoutInfo=array(),$render=TRUE)
+	public static function render($file,$data=array(),$options = array())
 	{
+
+		$default_options = array(
+			"layout"=>FALSE,
+			"layout_info"=>array(),
+			"render"=>TRUE,
+			"path_to_views"=>"/views/"
+		);
+
+		$options = array_merge($default_options,$options);
 
 		// call the before_render hook and if it returns false then stop the function
 		if(Hook::call("before_render") === false) return;
@@ -37,7 +44,7 @@ Class View
 		$indexed = !self::_is_assoc($data);
 
 		// set the file path of the view
-		$file_path = SYSTEM_PATH."/views/".$file.".php";
+		$file_path = SYSTEM_PATH.$options['path_to_views'].$file.".php";
 
 		//split the name
 		$split = preg_split("/[.]/", $file);
@@ -55,7 +62,7 @@ Class View
 						// render the json object using the data
 						$json = Asset::json($data,false);
 
-						if($render) echo $json;
+						if($options['render']) echo $json;
 
 						return $json;
 
@@ -99,7 +106,7 @@ Class View
 
 			}
 
-			if($render) echo $view;
+			if($options['render']) echo $view;
 
 			return $view;
 
@@ -111,15 +118,15 @@ Class View
 			$view = self::get_contents($file_path,$data,$root);
 
 			// if there is a layout file and layouts are on
-			if($layout && LAYOUTS)
+			if($options['layout'] && LAYOUTS)
 			{
 
 				// layout file path
-				$layout_path = SYSTEM_PATH."/views/layouts/".$layout.".php";
+				$layout_path = SYSTEM_PATH.$options['path_to_views']."layouts/".$options['layout'].".php";
 
 				if(!is_file($layout_path))
 				{
-					trigger_error("404: Layout File: ".$layout." Not Found",E_USER_ERROR);
+					trigger_error("404: Layout File: ".$options['layout']." Not Found",E_USER_ERROR);
 					return;
 				}
 
@@ -130,7 +137,7 @@ Class View
 				}
 
 				// get the whole page including layout
-				$view = self::get_contents($layout_path,$layoutInfo,$root,$view);
+				$view = self::get_contents($layout_path,$options['layout_info'],$root,$view);
 			}
 
 			$id = isset($data['id'])?$data['id']:'';
@@ -138,7 +145,7 @@ Class View
 			Hook::call("after_render",$view,$file,$data);
 
 			// render out the view
-			if($render) echo $view;
+			if($options['render']) echo $view;
 
 			// return the text
 			return $view;

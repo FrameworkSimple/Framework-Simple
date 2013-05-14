@@ -15,9 +15,8 @@
  */
 
 Class Asset {
-
 	/**
-	 * _paths: array
+	 * paths: array
 	 *
 	 * default paths for assets
 	 *
@@ -27,7 +26,7 @@ Class Asset {
 	 *
 	 * @var array
 	 */
-	private static $_paths = array(
+	public static $paths = array(
 		"css"=>"css/",
 		"js"=>"js/",
 		"img"=>"img/"
@@ -224,7 +223,7 @@ Class Asset {
 		$path = self::get_base();
 
 		// if the public variable for paths is set if not then use the default one to get the path for this type
-		$path .= isset(Core::$paths[$type])?Core::$paths[$type]:self::$_paths[$type];
+		$path .= self::$paths[$type];
 
 		// if items isn't an array make it one
 		$items = is_array($items)?$items:array($items);

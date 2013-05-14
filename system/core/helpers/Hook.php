@@ -92,8 +92,10 @@ Class Hook {
 		// if the function is just a string
 		else {
 
+			$backtrace = debug_backtrace();
+
 			// get the name of the file that called this file
-			$file = str_replace('.php','',str_replace(SYSTEM_PATH."/core/",'',debug_backtrace()[0]['file']));
+			$file = str_replace('.php','',str_replace(SYSTEM_PATH."/core/",'',$backtrace[0]['file']));
 
 
 			// push the new function into the hooks array

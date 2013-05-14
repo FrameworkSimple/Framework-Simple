@@ -37,7 +37,7 @@ class Database {
 	 * Set up PDO
 	 */
 	public function __construct() {
-		$this -> db = new \PDO(DB_DSN,DB_USERNAME,DB_PASSWORD);
+		$this -> db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME,DB_USERNAME,DB_PASSWORD);
 		$this -> db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 		$this -> db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 
