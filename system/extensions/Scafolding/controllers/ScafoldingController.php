@@ -135,7 +135,7 @@ Class ScafoldingController extends Controller {
 			$controller .= $this->_controller_get($normal,$underscores, $table['name']);
 			$controller .= $this->_controller_post($normal, $underscores, $table['name']);
 			$controller .= $this->_controller_update($normal, $underscores, $table['name']);
-			$controller .= "\n\t/**\n\t * Delete a ".$normal."\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete\n\t * @return boolean if it was successfull\n\t */\n\tpublic function delete($".$underscores."_id=NULL)\n\t{\n\t\t// if there was an id sent\n\t\tif($".$underscores."_id)\n\t\t{\n\n\t\t\t// load the model\n\t\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t\t// save the new ".$normal."\n\t\t\t".'$this->'.$table['name']."->delete($".$underscores."_id);\n\n\t\t\t// set the success\n\t\t\t".'$this->view_data("success",$this->'.$table['name']."->success);\n\n\t\t\t// return the success\n\t\t\t".'$this->'.$table['name']."->success;\n\n\t\t}\n\t}";
+			$controller .= $this->_controller_delete($normal,$underscores, $table['name']);
 			$controller .= "\n}";
 			file_put_contents(SYSTEM_PATH."/controllers/".$table['name']."Controller.php", $controller);
 
@@ -163,7 +163,7 @@ Class ScafoldingController extends Controller {
 			if(!empty($table['cols']))
 			{
 				$model .= "\n\tpublic ".'$rules = '."array(";
-				$form = '<?php $params = array(); if(isset($id)) $params[0] = $id; ?>'."\n<form method='POST' action='<?= Asset::create_url('".$table['name']."',".'$action'.",".'$params'.") ?>'>\n";
+				$form = "\n<form method='POST' action='".'<?=$_SERVER["REQUEST_URI"] ?>'."'>\n";
 				$index_titles =  "";
 				$index_row =  "";
 				$get = "";
@@ -260,14 +260,15 @@ Class ScafoldingController extends Controller {
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", trim($get));
 
 			$post = "<?php ";
-			$post .= "\n\t".'$params = array("action"=>"post");';
+			$post .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
 			$post .= "\n\t".'if(isset($errors)) $params = array_merge($params, $errors);';
 			$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
 			$post .= "\n ?>";
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/post.php", $post);
 
-			$update ="<?php\n\t$".$underscores."['action'] = 'update';";
-			$update .= "\n\t".'$params = isset($errors)?array_merge($'.$underscores.', $errors):$'.$underscores.';';
+			$update ="<?php";
+			$update .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
+			$update .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
 			$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
 			file_put_contents(SYSTEM_PATH."/views/".$underscores."/update.php", $update);
 
@@ -324,7 +325,13 @@ Class ScafoldingController extends Controller {
 			$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
 			$controller .= "\n\n\t\t\t// set the success";
 			$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
-			$controller .= "\n\t\t\t".'if(!$this->'.$name.'->success) return $this->view_data("errors",$this->'.$name.'->error);';
+			$controller .= "\n\n\t\t\t".'if(!$this->'.$name.'->success)';
+			$controller .= "\n\t\t\t{";
+			$controller .= "\n\n\t\t\t\t// set the errors because something went wrong";
+			$controller .= "\n\t\t\t\t".'$this->view_data("errors",$this->'.$name.'->error);';
+			$controller .= "\n\n\t\t\t\t// set the $normal so that you have the already inputed values";
+			$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores.");";
+			$controller .= "\n\t\t\t}";
 			$controller .= "\n\n\t\t\t// return the success";
 			$controller .= "\n\t\t\t".'return $this->'.$name."->success;";
 			$controller .= "\n\t\t}";
@@ -344,7 +351,10 @@ Class ScafoldingController extends Controller {
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
-		$controller .= "\n\t\t{\n\t\t\t// load the model";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\n\t\t\t// if there is no id in the form set it from the url";
+		$controller .= "\n\t\t\tif(!isset($".$underscores."['id'])$".$underscores."['id'] = $".$underscores."_id;";
+		$controller .= "\n\n\t\t\t// load the model";
 		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
 		$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
@@ -364,6 +374,33 @@ Class ScafoldingController extends Controller {
 		$controller .= "\n\t\t\t".'$this->get($'.$underscores."_id);";
 		$controller .= "\n\t\t\t\n\t\t}";
 		$controller .= "\n\n\n\t}";
+
+		return $controller;
+	}
+	private function _controller_delete($normal,$underscores,$name)
+	{
+		$controller = "\n\t/**";
+		$controller .= "\n\t * Delete a ".$normal;
+		$controller .= "\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete";
+		$controller .= "\n\t * @return boolean if it was successfull";
+		$controller .= "\n\t */";
+		$controller .= "\n\tpublic function delete($".$underscores."_id=NULL)";
+		$controller .= "\n\t{";
+		$controller .= "\n\t\t// if there was an id sent";
+		$controller .= "\n\t\tif($".$underscores."_id)";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\n\t\t\t// load the model";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
+		$controller .= "\n\n\t\t\t// save the new ".$normal;
+		$controller .= "\n\t\t\t".'$this->'.$name."->delete($".$underscores."_id);";
+		$controller .= "\n\n\t\t\t// set the success";
+		$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
+		$controller .= "\n\n\t\t\t// set the success";
+		$controller .= "\n\t\t\t".'$this->'.$name."->success;";
+		$controller .= "\n\n\t\t\t//return to the page that called it";
+		$controller .= "\n\t\t\t".'header("Location: ".$_SERVER["HTTP_REFERER"]);';
+		$controller .= "\n\n\t\t}";
+		$controller .= "\n\t}";
 
 		return $controller;
 	}
