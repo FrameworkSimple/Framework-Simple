@@ -78,22 +78,19 @@ class Validation {
 	 * @param  array $rules     the rulles to valiate on
 	 * @return array/boolean    true if no errors and errors array if errors
 	 */
-	public function validate($tableName,$data,$required,$rules) {
+	public function validate($tableName,$data,$required,$rules,$new=true) {
 		$this->tableName = Core::to_db($tableName);
 		$this->name = $tableName;
 		$this->data = $data;
 		$this->errors = array();
 		$this->required = $required;
 		$this->validate = $rules;
-		if(!empty($this->required)) {
+		$this->new = $new;
+		if(!empty($this->required) && $new) {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
 					unset($this->data[$col]);
-					array_push($this->errors,array(
-						"name"=>$col,
-						"string"=>Core::to_norm($col)." is required"
-						)
-					);
+					$this->errors[$col] = Core::to_norm($col)." is required";
 				}
 			}
 		}
@@ -115,12 +112,28 @@ class Validation {
 						}
 					}else {
 						foreach($this->validate[$col] as $key=>$val) {
-							$method = "_".$key;
-							if(!$this->$method($value,$col,$val)){
-								break;
-							};
+							if(gettype($key) === "integer")
+							{
+								$method = "_".$val;
+								if(!$this->$method($value,$col)){
+									break;
+								};
+							}
+							else
+							{
+								$method = "_".$key;
+								if(!$this->$method($value,$col,$val)){
+									break;
+								};
+							}
+
 						}
 					}
+				}
+				else if(empty($this->data[$col]) && in_array($col, $this->required))
+				{
+
+					$this->_createError($col,"can not be empty");
 				}
 
 			}
@@ -161,10 +174,7 @@ class Validation {
 	 */
 	private function _createError($col,$errorString,$bool=FALSE) {
 		if(!$bool) {
-			array_push($this->errors, array(
-					"name"=>$col,
-					"string"=>Core::to_norm($col)." ".$errorString
-				));
+			$this->errors[$col] = Core::to_norm($col)." ".$errorString;
 			unset($this->data[$col]);
 			return false;
 		}
@@ -199,7 +209,7 @@ class Validation {
 	 */
 	private function _alphaNumeric($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"can only be letters and numbers";
-		$regex = '/^[\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}]+$/mu';
+		$regex = '/^[a-zA-Z0-9\s\p{P}]+$/mu';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
@@ -369,8 +379,7 @@ class Validation {
 	 */
 	private function _equalTo($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"does not match";
-		$compareTo = isset($value[0])?$value[0]:$value;
-		return $this->_createError($col,$errorString,($check === $compareTo));
+		return $this->_createError($col,$errorString,($val === $value));
 	}
 
 	/**
@@ -499,7 +508,6 @@ class Validation {
 	private function _maxlength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too long";
 		$min = isset($value[0])?$value["error"]:$value;
-
 		$bool = mb_strlen($val) <= $min;
 		return $this->_createError($col,$errorString,$bool);
 	}
@@ -662,6 +670,10 @@ class Validation {
 	 *
 	 * use this check:
 	 * $validate = array("fieldName"=>array("time"));
+	 *
+	 * Matches	2009-04-20 14:34:32 | 2010-03-09 12:59:00 | 1020-03-09 23:59:00
+	 * Non-Matches	text | 2009-13-00 00:00:00 | 2009-12-20 23:60:00
+	 *
 	 * @param  object $val   the value to check
 	 * @param  string $col   the column(field) name
 	 * @param  array $value  holds the error string
@@ -669,9 +681,30 @@ class Validation {
 	 */
 	private function _time($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a valid time";
-		$regex = '%^((0?[1-9]|1[012])(:[0-5]\d){0,2} ?([AP]M|[ap]m))$|^([01]\d|2[0-3])(:[0-5]\d){0,2}$%';
+		$regex = '^[1-9]{1}[0-9]{3}-(0[1-9]{1}|1[0-2]{1})-([0-2]{1}[1-9]{1}|3[0-1]{1}) ([0-1]{1}[0-9]{1}|2[0-3]{1}):[0-5]{1}[0-9]{1}:[0-5]{1}[0-9]{1}$';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
+
+	/**
+	 * Checks if the value is a valid timestamp
+	 *
+	 * use this check:
+	 * $validate = array("fieldName"=>array("timestamp"));
+	 *
+	 * Matches	1:01 AM | 23:52:01 | 03.24.36 AM
+	 * Non-Matches	19:31 AM | 9:9 PM | 25:60:61
+	 *
+	 * @param  object $val   the value to check
+	 * @param  string $col   the column(field) name
+	 * @param  array $value  holds the error string
+	 * @return boolean       if the data was valid
+	 */
+	private function _timestamp($val,$col,$value=NULL) {
+		$errorString = isset($value["error"])?$value["error"]:"is not a valid timestamp";
+		$regex = '^((([0]?[1-9]|1[0-2])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?( )?(AM|am|aM|Am|PM|pm|pM|Pm))|(([0]?[0-9]|1[0-9]|2[0-3])(:|\.)[0-5][0-9]((:|\.)[0-5][0-9])?))$';
+		return $this->_check($val,$regex,$col,$errorString);
+	}
+
 
 	/**
 	 * Checks if the value is a valid uuid
@@ -716,7 +749,7 @@ class Validation {
 	 * @return boolean       if the data was valid
 	 */
 	private function _unique($val,$col,$value=NULL) {
-		if(!empty($this->required)) {
+		if(!empty($this->required) && $this->new) {
 			$errorString = isset($value["error"])?$value["error"]:"already exists";
 
 			$stmt = "SELECT $col from $this->tableName WHERE $col=:$col";

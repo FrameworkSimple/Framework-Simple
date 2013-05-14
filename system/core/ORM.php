@@ -78,6 +78,9 @@ Class ORM extends Database {
 		// set all the options for this call
 		$this->options = array_merge($this->_defaultOptions,$this->options);
 
+		// set the default of success to true
+		$this->success = true;
+
 		// set blank variables
 		$call = "";
 
@@ -396,22 +399,28 @@ Class ORM extends Database {
 		// valid is true by default
 		$valid = true;
 
+		// before validation run this function
+		if(Hook::call("before_validation", array(&$this->_data,&$this->rules)) === false) return;
+
+		// create the validtor
+		$validator = new Validation();
+
+		// set the database
+		$validator->db = $this->db;
+
 		// if insert
-		if($insert) {
-
-			// before validation run this function
-			if(Hook::call("before_validation", array(&$this->_data)) === false) return;
-
-			// create the validtor
-			$validator = new Validation();
-
-			// set the database
-			$validator->db = $this->db;
+		if($insert)
+		{
 
 			// validate information
 			$valid = $validator->validate($this->_name,$this->_data,$this->required,$this->rules);
 
 		}
+		else
+		{
+			$valid = $validator->validate($this->_name,$this->_data,$this->required,$this->rules,false);
+		}
+
 		if($valid === true) {
 
 			// run the before save function
@@ -574,7 +583,7 @@ Class ORM extends Database {
 		$dbName = Core::to_db($this->_name);
 
 		// call the before delete function
-		if(Hook::call("before_delete",$id, $dbName, $this) === false) return;
+		if(Hook::call("before_delete",array($id, $dbName, &$this)) === false) return;
 
 		// create the delete statement
 		$statement = "DELETE FROM $dbName where id = :id";

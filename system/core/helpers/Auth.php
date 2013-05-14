@@ -121,16 +121,17 @@ Class Auth {
 			$method = "findBy".ucfirst(AUTH_USERNAME_FIELD)."And".ucfirst(AUTH_PASSWORD_FIELD);
 
 			// the user returned from the database
-			$user_returned = $model->$method($user[AUTH_USERNAME_FIELD],Core::encrypt($user[AUTH_PASSWORD_FIELD]))[0];
+			$user_returned = $model->$method($user[AUTH_USERNAME_FIELD],Core::encrypt($user[AUTH_PASSWORD_FIELD]));
+			$user_returned = $user_returned[0];
 
 			// if successfull, user is not empty, password returned equals the password passed
 			if($model->success && !empty($user_returned)) {
 
 				// get rie of the password field out of the user_returned
-				unset($user_returned['User'][AUTH_PASSWORD_FIELD]);
+				unset($user_returned[AUTH_PASSWORD_FIELD]);
 
 				// set the session user
-				Session::set('user',$user_returned['User']);
+				Session::set('user',$user_returned);
 
 				// set that the user is logged in
 				Session::set('logged_in',true);
@@ -190,8 +191,10 @@ Class Auth {
 		else if ($key != NULL)
 		{
 
+			$user = Session::get('user');
+
 			// return the value of the key
-			return isset(Session::get('user')[$key])?Session::get('user')[$key]:false;
+			return isset($user[$key])?$user[$key]:false;
 
 		}
 		// if there is no key or value

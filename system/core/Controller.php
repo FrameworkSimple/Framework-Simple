@@ -42,6 +42,15 @@ class Controller {
 	static public $view_name;
 
 	/**
+	 * path_to_views: string
+	 *
+	 * the path to where the views are stored
+	 *
+	 * @var string
+	 */
+	static public $path_to_views = "";
+
+	/**
 	 * layout: string
 	 *
 	 * the name of the layout to use
