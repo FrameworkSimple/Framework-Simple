@@ -208,7 +208,7 @@ class Validation {
 	 */
 	private function _alphaNumeric($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"can only be letters and numbers";
-		$regex = '/^[\p{Ll}\p{Lm}\p{Lo}\p{Lt}\p{Lu}\p{Nd}]+$/mu';
+		$regex = '/^[a-zA-Z0-9\s\p{P}]+$/mu';
 		return $this->_check($val,$regex,$col,$errorString);
 	}
 
