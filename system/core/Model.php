@@ -94,7 +94,7 @@ class Model extends ORM {
 	 * @param  array $data all of the fields
 	 * @return boolean       if the validation should continue to run
 	 */
-	public function before_validation(&$data) {
+	public function before_validation(&$data,&$rules) {
 
 
 	}
