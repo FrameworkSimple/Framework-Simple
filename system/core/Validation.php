@@ -85,6 +85,7 @@ class Validation {
 		$this->errors = array();
 		$this->required = $required;
 		$this->validate = $rules;
+		$this->new = $new;
 		if(!empty($this->required) && $new) {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
@@ -378,8 +379,7 @@ class Validation {
 	 */
 	private function _equalTo($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"does not match";
-		$compareTo = isset($value[0])?$value[0]:$value;
-		return $this->_createError($col,$errorString,($check === $compareTo));
+		return $this->_createError($col,$errorString,($val === $value));
 	}
 
 	/**
@@ -749,7 +749,7 @@ class Validation {
 	 * @return boolean       if the data was valid
 	 */
 	private function _unique($val,$col,$value=NULL) {
-		if(!empty($this->required)) {
+		if(!empty($this->required) && $this->new) {
 			$errorString = isset($value["error"])?$value["error"]:"already exists";
 
 			$stmt = "SELECT $col from $this->tableName WHERE $col=:$col";
