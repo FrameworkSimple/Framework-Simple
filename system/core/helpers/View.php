@@ -72,7 +72,10 @@ Class View
 				}
 
 			}
-			trigger_error("404: View: ".$file." Not Found",E_USER_ERROR);
+			echo "<pre>";
+			var_dump($file_path);
+			echo "</pre>";
+			Core::error("404: View: ".$file." Not Found",E_USER_ERROR);
 			return;
 		}
 
@@ -126,7 +129,7 @@ Class View
 
 				if(!is_file($layout_path))
 				{
-					trigger_error("404: Layout File: ".$options['layout']." Not Found",E_USER_ERROR);
+					Core::error("404: Layout File: ".$options['layout']." Not Found",E_USER_ERROR);
 					return;
 				}
 
