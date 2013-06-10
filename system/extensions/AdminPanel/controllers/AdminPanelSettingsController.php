@@ -1,9 +1,24 @@
 <?php
+/**
+	 * The Admin Panel Settings Controller
+	 */
 
-Class SettingsController extends Controller
+	/**
+	 * The Admin Panel Extension Settings controller
+	 * @category Extensions
+	 * @package  Extensions
+	 * @subpackage AdminPanel
+	 * @author     Rachel Higley <me@rachelhigley.com>
+	 * @copyright  2013 Framework Simple
+	 * @license    http://www.opensource.org/licenses/mit-license.php MIT
+	 * @link       http://rachelhigley.com/framework
+	 */
+Class AdminPanelSettingsController extends Controller
 {
 
-	public function post($save_settings=NULL)
+	static public $layout = "admin_panel";
+
+	public function index($save_settings=NULL)
 	{
 
 		if($save_settings && !is_file(SYSTEM_PATH."/Settings.php"))
@@ -35,37 +50,38 @@ Class SettingsController extends Controller
 		}
 		elseif($save_settings)
 		{
-			$settings_file = file(SYSTEM_PATH."/Settings.php");
 
-			$pattern = "/";
-			foreach (array_reverse($save_settings) as $varable => $value) {
-				$varable = str_replace("$", '\$', $varable);
-				$pattern .= str_replace("-", " ", $varable)."|";
-			}
-			$pattern = substr($pattern, 0, -1);
-			$pattern .= "/";
+			$file_name = is_file(SYSTEM_PATH."/Settings.php")?SYSTEM_PATH."/Settings.php":SYSTEM_PATH."/Settings-Template.php";
+			$settings_file = file_get_contents($file_name);
 
-			foreach($settings_file as &$line)
+			$settings_file = preg_split("/(\/\*\*)|(\*\/)/", $settings_file);
+
+			$new_file = "<?php\n\t/**\n\t * @ignore\n\t */";
+
+			$settings_file = array_slice($settings_file, 3);
+
+			foreach($settings_file as $setting)
 			{
-				preg_match($pattern, $line,$matches);
-				if(!empty($matches[0])) {
+				if(strpos($setting, "*"))
+				{
 
-					$name = str_replace(" ", "-", $matches[0]);
+					$new_file .= "\n\n\t/**".$setting."*/";
 
-					$value = $save_settings[$name];
-					$value = $this->_get_value($value);
-
-					$line = "\t".$matches[0]." = ".$value.";\n";
-					unset($save_settings[$name]);
 				}
-			}
-			foreach ($save_settings as $varable => $value) {
+				else
+				{
+					$pieces = preg_split("( = )", $setting);
+					$name = trim(str_replace(" ", "-", $pieces[0]));
 
-				$value = $this->_get_value($value);
-				$settings_file .= "\n\n".str_replace("-", " ", $varable)." = ".$value.";";
+					$pieces[1] = $save_settings[$name];
+
+					$new_file .= $pieces[0]." = ".$this->_get_value($pieces[1]).";";
+				}
+
+
 			}
 
-			file_put_contents(SYSTEM_PATH."/Settings.php", $settings_file);
+			file_put_contents(SYSTEM_PATH."/Settings.php", $new_file);
 
 			$this->_get_default();
 		}

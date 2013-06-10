@@ -12,8 +12,15 @@
 	include "Settings.php";
 
 	Core::add_classes("AdminPanel",array(
-		"AdminPanel"     =>"controllers/AdminPanelController.php",
+		"AdminPanelController"			  =>"controllers/AdminPanelController.php",
+		"AdminPanelUserController"		  =>"controllers/AdminPanelUserController.php",
+		"AdminPanelSettingsController"	  =>"controllers/AdminPanelSettingsController.php",
+		"AdminPanelScaffoldingController" =>"controllers/AdminPanelScaffoldingController.php",
+		"AdminPanelMigrationsController"  =>"controllers/AdminPanelMigrationsController.php",
+		"Tables"						  =>"models/Tables.php"
 		)
 	);
+
+	define('ADMIN_DB',  dirname( __FILE__ ) . "/models/db.json");
 
 ?>

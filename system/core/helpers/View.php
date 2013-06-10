@@ -72,9 +72,6 @@ Class View
 				}
 
 			}
-			echo "<pre>";
-			var_dump($file_path);
-			echo "</pre>";
 			Core::error("404: View: ".$file." Not Found",E_USER_ERROR);
 			return;
 		}

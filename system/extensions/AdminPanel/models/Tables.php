@@ -1,6 +1,6 @@
 <?php
 
-Class Scafolding extends Database
+Class Tables extends Database
 {
 
 	public function get_statements()
@@ -32,9 +32,12 @@ Class Scafolding extends Database
 
 					$statement = $stmt->fetchAll();
 
-					$statement = str_replace("CREATE TABLE `", "", $statement[0]['Create Table']);
+					$table = array(
+						"name"=> $table,
+						"structure"=> $statement[0]['Create Table']
+					);
 
-					array_push($tables, $statement);
+					array_push($tables, $table);
 
 				}
 

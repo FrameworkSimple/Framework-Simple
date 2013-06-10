@@ -11,29 +11,15 @@
  */
 
 /**
- * Database Host: string
+ * Admin Username: string
  *
- * the host of your database
+ * the username for the admin panel
  */
-const DB_HOSTNAME = 'localhost';
+const ADMIN_USERNAME = 'admin';
 
 /**
- * Database Name: string
+ * Admin Password: string
  *
- * the name of the database you want to connect to
+ * the password for the admin panel
  */
-const DB_NAME = 'admin';
-
-/**
- * Database Username: string
- *
- * the username for the database
- */
-const DB_USERNAME = 'root';
-
-/**
- * Database Password: string
- *
- * the password for the database
- */
-const DB_PASSWORD = 'root';
+const ADMIN_PASSWORD = 'admin';

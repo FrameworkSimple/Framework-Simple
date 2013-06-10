@@ -1,31 +1,32 @@
 <?php
 /**
- * The Scafolding Controller
- */
-
-/**
- * The Russian Doll Caching Extension controller
- * @category Extensions
- * @package  Extensions
- * @subpackage Scafolding
- * @author     Rachel Higley <me@rachelhigley.com>
- * @copyright  2013 Framework Simple
- * @license    http://www.opensource.org/licenses/mit-license.php MIT
- * @link       http://rachelhigley.com/framework
- */
-Class ScafoldingController extends Controller {
-
-	public static $layout = false;
-
-	//public static $path_to_views = "/extensions/Scafolding/views/";
-	/**
-	 * The Default Upload View
+	 * The Admin Panel Scaffolding Controller
 	 */
+
+	/**
+	 * The Admin Panel Extension Scaffolding controller
+	 * @category Extensions
+	 * @package  Extensions
+	 * @subpackage AdminPanel
+	 * @author     Rachel Higley <me@rachelhigley.com>
+	 * @copyright  2013 Framework Simple
+	 * @license    http://www.opensource.org/licenses/mit-license.php MIT
+	 * @link       http://rachelhigley.com/framework
+	 */
+Class AdminPanelScaffoldingController extends Controller
+{
+	static public $layout = "admin_panel";
+
 	public function index()
 	{
 
+		// get the tables model
+		$this->loadModel("Tables");
 
+		// get all the tables witht their create statements
+		$tables = $this->Tables->get_statements();
 
+		$this->view_data('tables',$tables);
 	}
 
 	public function post() {
@@ -339,7 +340,6 @@ Class ScafoldingController extends Controller {
 
 			return $controller;
 	}
-
 	private function _controller_update($normal, $underscores, $name)
 	{
 		$controller = "\n\t/**";
@@ -404,5 +404,4 @@ Class ScafoldingController extends Controller {
 
 		return $controller;
 	}
-
 }
