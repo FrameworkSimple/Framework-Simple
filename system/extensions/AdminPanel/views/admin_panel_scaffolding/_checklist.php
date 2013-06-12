@@ -7,7 +7,11 @@
 		</div>
 		<div>
 			<input type="checkbox" checked name="<?php echo $name ?>[controller][get]" value="true" id="<?php echo $name ?>[controller][get]" />
-			<label for="<?php echo $name ?>[controller][get]">post</label>
+			<label for="<?php echo $name ?>[controller][get]">get</label>
+		</div>
+		<div>
+			<input type="checkbox" checked name="<?php echo $name ?>[controller][post]" value="true" id="<?php echo $name ?>[controller][post]" />
+			<label for="<?php echo $name ?>[controller][post]">post</label>
 		</div>
 		<div>
 			<input type="checkbox" checked name="<?php echo $name ?>[controller][update]" value="true" id="<?php echo $name ?>[controller][update]" />
