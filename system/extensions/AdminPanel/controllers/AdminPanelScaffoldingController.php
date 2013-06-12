@@ -29,9 +29,9 @@ Class AdminPanelScaffoldingController extends Controller
 		$this->view_data('tables',$tables);
 	}
 
-	public function post() {
+	public function post($info=NULL) {
 
-		$model = Core::instantiate("Scafolding");
+		$model = Core::instantiate("Tables");
 
 		$tables = $model->get_statements();
 
@@ -40,7 +40,8 @@ Class AdminPanelScaffoldingController extends Controller
 		$information['belongsTo'] = array();
 
 		foreach($tables as $index=>$table) {
-			$table_info = explode(") ENGINE", $table)[0];
+			$table['structure'] = str_replace("CREATE TABLE `", "",$table['structure']);
+			$table_info = explode(") ENGINE", $table['structure'])[0];
 			$table = array();
 			$table['cols_info'] = explode("\n", $table_info);
 			$information['tables'][$index]['name'] = Core::to_cam(str_replace("` (", "", $table['cols_info'][0]));
@@ -126,19 +127,96 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 
 		$layout = "<html>\n\t<head>\n\t\t<title>Scafolding Page</title>\n\t<style type='text/css'>.col{display:table-cell;border:1px solid #000;padding:5px;} .table{display:table;width:100%;border:1px solid #000;} .row{display:table-row;}</style>\n\t</head>\n\t<body>\n\t\t<?php echo ".'$content_for_layout'."?>\n\t</body>\n</html>";
-		file_put_contents(SYSTEM_PATH."/views/layouts/scafolding.php", $layout);
+		//file_put_contents(SYSTEM_PATH."/views/layouts/scafolding.php", $layout);
 		foreach ($information['tables'] as $table)
 		{
-			$normal = Core::to_norm($table['name']);
+
+			// create the name with underscores
 			$underscores = Core::to_db($table['name']);
-			$controller = "<?php\n/**\n * The ".$normal." Controller\n */\n\n/**\n * The ".$normal." Controller\n * @category   Controllers\n * @package    ".$_POST['application_name']."\n * @subpackage Controllers\n * @author     ".$_POST['name']."\n */\n Class ".$table['name']."Controller extends Controller\n{";
-			$controller .= "\n\t/**\n\t * Get all the ".$normal."s\n\t * @return array all the ".$normal."s\n\t */\n\tpublic function index()\n\t{\n\n\t\t// load the model\n\t\t".'$this->loadModel("'.$table['name'].'"'.");\n\n\t\t// only get this table\n\t\t".'$this->'.$table['name']."->options['recursive'] = 0;\n\n\t\t// get all the ".$normal."s\n\t\t$".$underscores."s = ".'$this->'.$table['name']."->findAll();\n\n\t\t//set the success\n\t\t".'$this->view_data('."'success',".'$this->'.$table['name']."->success);\n\n\t\t// if the call was successful\n\t\tif(".'$this->'.$table['name']."->success)\n\t\t{\n\n\t\t\t// set the information for the view\n\t\t\t".'$this->view_data("'.$underscores.'s",$'.$underscores."s);\n\n\t\t\t// return the information\n\t\t\treturn $".$underscores."s;\n\n\t\t}\n\t}";
-			$controller .= $this->_controller_get($normal,$underscores, $table['name']);
-			$controller .= $this->_controller_post($normal, $underscores, $table['name']);
-			$controller .= $this->_controller_update($normal, $underscores, $table['name']);
-			$controller .= $this->_controller_delete($normal,$underscores, $table['name']);
-			$controller .= "\n}";
-			file_put_contents(SYSTEM_PATH."/controllers/".$table['name']."Controller.php", $controller);
+
+			// if this table is not one that we want to build scaffolding stop the current iteration
+			if(!isset($info[$underscores])) continue;
+
+			// create the normal name for the database
+			$normal = Core::to_norm($table['name']);
+
+			// the path to the controller
+			$controller_path = SYSTEM_PATH."/controllers/".$table['name']."Controller.php";
+
+			// if we want to build the controller
+			if(isset($info[$underscores]["controller"]))
+			{
+
+				// if the controller file doesn't exist
+				if(!is_file($controller_path))
+				{
+					// set the basic top setup
+					$controller = $this->_controller_base($normal,$underscores,$table['name']);
+
+					// if we want the index function build and add it
+					if(isset($info[$underscores]['controller']['index'])) $controller .= $this->_controller_index($normal,$underscores,$table['name']);
+
+					// if we want the get function build and add it
+					if(isset($info[$underscores]['controller']['get'])) $controller .= $this->_controller_get($normal,$underscores,$table['name']);
+
+					// if we want the post function build and add it
+					if(isset($info[$underscores]['controller']['post'])) $controller .= $this->_controller_post($normal,$underscores,$table['name']);
+
+					// if we want the update function build and add it
+					if(isset($info[$underscores]['controller']['update'])) $controller .= $this->_controller_update($normal,$underscores,$table['name']);
+
+					// if we want the delete function build and add it
+					if(isset($info[$underscores]['controller']['delete'])) $controller .= $this->_controller_delete($normal,$underscores,$table['name']);
+
+					// close the class
+					$controller .= "\n}";
+
+				}
+				else
+				{
+
+
+					$controller = file_get_contents($controller_path);
+					$controller = preg_split("/(extends Controller\s+{\s+)/", $controller, NULL, PREG_SPLIT_DELIM_CAPTURE);
+					$controller[2] = substr(trim($controller[2]),0,-1);
+					$controller[3] = "\n}";
+					$function_split = preg_split("/(?=\/\*\*)([.\n\s\S]*?)(?=public func)/", $controller[2],NULL, PREG_SPLIT_DELIM_CAPTURE);
+
+					foreach ($function_split as $index=>$function) {
+
+						if(strpos($function, "public function ") === 0)
+						{
+
+
+							$function = str_replace("public function ", "", $function);
+
+							if(isset($info[$underscores]['controller']['index']) && strpos($function, "index(") === 0)
+								$function_split[$index] = $this->_controller_index($normal,$underscores,$table['name'],false);
+							if(isset($info[$underscores]['controller']['get']) && strpos($function, "get(") === 0)
+								$function_split[$index] = $this->_controller_get($normal,$underscores,$table['name'],false);
+							if(isset($info[$underscores]['controller']['post']) && strpos($function, "post(") === 0)
+								$function_split[$index] = $this->_controller_post($normal,$underscores,$table['name'],false);
+							if(isset($info[$underscores]['controller']['update']) && strpos($function, "update(") === 0)
+								$function_split[$index] = $this->_controller_update($normal,$underscores,$table['name'],false);
+							if(isset($info[$underscores]['controller']['delete']) && strpos($function, "delete(") === 0)
+								$function_split[$index] = $this->_controller_delete($normal,$underscores,$table['name'],false);
+
+							$function_split[$index] .= "\n\t";
+						}
+
+					}
+
+
+					$controller[2] = implode("", $function_split);
+
+					$controller = implode("", $controller);
+
+				}
+
+				// write the file
+				file_put_contents($controller_path,$controller);
+
+			}
 
 			$model = "<?php\nClass ".$table['name']." extends Model\n{\n";
 
@@ -238,7 +316,7 @@ Class AdminPanelScaffoldingController extends Controller
 			$model .= "\n\n}";
 
 
-			file_put_contents(SYSTEM_PATH."/models/".$table['name'].".php", $model);
+			//file_put_contents(SYSTEM_PATH."/models/".$table['name'].".php", $model);
 
 			if(!is_dir(SYSTEM_PATH."/views/".$underscores))
 			{
@@ -249,40 +327,95 @@ Class AdminPanelScaffoldingController extends Controller
 			}
 
 
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/_form.php", $form);
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/_form.php", $form);
 
 			$index = "<div class='table'>";
 			$index .= "\n\t<div class='row'>".$index_titles."\n\t</div>";
 			$index .= "\n\t<?php foreach($".$underscores."s as ".'$'.$underscores."):?>\n\t\t<div class='row'>".$index_row."\n\t\t</div>\n\t<?php endforeach ?>";
 			$index .= "\n</div>";
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/index.php", $index);
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/index.php", $index);
 
 
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", trim($get));
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", trim($get));
 
 			$post = "<?php ";
 			$post .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
 			$post .= "\n\t".'if(isset($errors)) $params = array_merge($params, $errors);';
 			$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
 			$post .= "\n ?>";
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/post.php", $post);
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/post.php", $post);
 
 			$update ="<?php";
 			$update .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
 			$update .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
 			$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/update.php", $update);
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/update.php", $update);
 
-			file_put_contents(SYSTEM_PATH."/views/".$underscores."/delete.php", "<h1>Hello World</h1>");
+			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/delete.php", "<h1>Hello World</h1>");
 		}
 	}
-	private function _controller_get($normal, $underscores, $name)
+
+	private function _controller_base($normal,$underscores,$name)
 	{
-		$controller = "\n\t/**";
-		$controller .= "\n\t * Get one ".$normal;
-		$controller .= "\n\t * @param  int the id of the ".$normal." to get";
-		$controller .= "\n\t * @return one ".$normal;
-		$controller .= "\n\t*/\n\tpublic function get(".'$id'.")";
+		$controller = "<?php\n/**";
+		$controller .= "\n * The ".$normal." Controller";
+		$controller .= "\n */";
+		$controller .= "\n\n/**";
+		$controller .= "\n * The ".$normal." Controller";
+		$controller .= "\n * @category   Controllers";
+		$controller .= "\n * @package    ".$_POST['application_name'];
+		$controller .= "\n * @subpackage Controllers\n * @author     ".$_POST['name'];
+		$controller .= "\n */";
+		$controller .= "\n Class ".$name."Controller extends Controller";
+		$controller .= "\n{";
+
+		return $controller;
+	}
+	private function _controller_index($normal, $underscores, $name, $comments=TRUE)
+	{
+		$controller = "";
+		if($comments)
+		{
+			$controller = "\n\t/**";
+			$controller .= "\n\t * Get all the ".$normal."s";
+			$controller .= "\n\t * @return array all the ".$normal."s";
+			$controller .= "\n\t */\n\t";
+		}
+		$controller .= "public function index()";
+		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// load the model";
+		$controller .= "\n\t\t".'$this->loadModel("'.$name.'"'.");";
+		$controller .= "\n\n\t\t// only get this table";
+		$controller .= "\n\t\t".'$this->'.$name."->options['recursive'] = 0;";
+		$controller .= "\n\n\t\t// get all the ".$normal."s";
+		$controller .= "\n\t\t$".$underscores."s = ".'$this->'.$name."->findAll();";
+		$controller .= "\n\n\t\t//set the success";
+		$controller .= "\n\t\t".'$this->view_data('."'success',".'$this->'.$name."->success);";
+		$controller .= "\n\n\t\t// if the call was successful";
+		$controller .= "\n\t\tif(".'$this->'.$name."->success)";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\n\t\t\t// set the information for the view";
+		$controller .= "\n\t\t\t".'$this->view_data("'.$underscores.'s",$'.$underscores."s);";
+		$controller .= "\n\n\t\t\t// return the information";
+		$controller .= "\n\t\t\treturn $".$underscores."s;";
+		$controller .= "\n\n\t\t}";
+		$controller .= "\n\t}";
+
+		return $controller;
+
+	}
+	private function _controller_get($normal, $underscores, $name,$comments=TRUE)
+	{
+		$controller = "";
+		if($comments)
+		{
+			$controller .= "\n\t/**";
+			$controller .= "\n\t * Get one ".$normal;
+			$controller .= "\n\t * @param  int the id of the ".$normal." to get";
+			$controller .= "\n\t * @return one ".$normal;
+			$controller .= "\n\t*/\n\t";
+		}
+		$controller .= "public function get(".'$id'.")";
 		$controller .= "\n\t{";
 		$controller .= "\n\t\tif(".'$id'.")";
 		$controller .= "\n\t\t{";
@@ -308,46 +441,56 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
-	private function _controller_post($normal, $underscores, $name)
+	private function _controller_post($normal, $underscores, $name,$comments=TRUE)
 	{
+		$controller = "";
+		if($comments)
+		{
 			$controller = "\n\t/**";
 			$controller .= "\n\t * Create new ".$normal;
 			$controller .= "\n\t * @param  array $".$underscores." all the information to save";
 			$controller .= "\n\t * @return boolean if it was successfull";
 			$controller .= "\n\t */";
-			$controller .= "\n\tpublic function post($".$underscores."=NULL)";
-			$controller .= "\n\t{";
-			$controller .= "\n\t\t//if information was sent";
-			$controller .= "\n\t\tif($".$underscores.")";
-			$controller .= "\n\t\t{";
-			$controller .= "\n\t\t\t// load the model";
-			$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
-			$controller .= "\n\n\t\t\t// save the new ".$normal;
-			$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
-			$controller .= "\n\n\t\t\t// set the success";
-			$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
-			$controller .= "\n\n\t\t\t".'if(!$this->'.$name.'->success)';
-			$controller .= "\n\t\t\t{";
-			$controller .= "\n\n\t\t\t\t// set the errors because something went wrong";
-			$controller .= "\n\t\t\t\t".'$this->view_data("errors",$this->'.$name.'->error);';
-			$controller .= "\n\n\t\t\t\t// set the $normal so that you have the already inputed values";
-			$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores.");";
-			$controller .= "\n\t\t\t}";
-			$controller .= "\n\n\t\t\t// return the success";
-			$controller .= "\n\t\t\t".'return $this->'.$name."->success;";
-			$controller .= "\n\t\t}";
-			$controller .= "\n\t}";
+			$controller .= "\n\t";
+		}
+		$controller .= "public function post($".$underscores."=NULL)";
+		$controller .= "\n\t{";
+		$controller .= "\n\t\t//if information was sent";
+		$controller .= "\n\t\tif($".$underscores.")";
+		$controller .= "\n\t\t{";
+		$controller .= "\n\t\t\t// load the model";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
+		$controller .= "\n\n\t\t\t// save the new ".$normal;
+		$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
+		$controller .= "\n\n\t\t\t// set the success";
+		$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
+		$controller .= "\n\n\t\t\t".'if(!$this->'.$name.'->success)';
+		$controller .= "\n\t\t\t{";
+		$controller .= "\n\n\t\t\t\t// set the errors because something went wrong";
+		$controller .= "\n\t\t\t\t".'$this->view_data("errors",$this->'.$name.'->error);';
+		$controller .= "\n\n\t\t\t\t// set the $normal so that you have the already inputed values";
+		$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores.");";
+		$controller .= "\n\t\t\t}";
+		$controller .= "\n\n\t\t\t// return the success";
+		$controller .= "\n\t\t\t".'return $this->'.$name."->success;";
+		$controller .= "\n\t\t}";
+		$controller .= "\n\t}";
 
-			return $controller;
+		return $controller;
 	}
-	private function _controller_update($normal, $underscores, $name)
+	private function _controller_update($normal, $underscores, $name,$comments=TRUE)
 	{
-		$controller = "\n\t/**";
-		$controller .= "\n\t * Update a ".$normal;
-		$controller .= "\n\t * @param  array $".$underscores." all the information to update, including id";
-		$controller .= "\n\t * @return boolean if it was successfull";
-		$controller .= "\n\t */";
-		$controller .= "\n\tpublic function update($".$underscores."_id=NULL,$".$underscores."=NULL)";
+		$controller = "";
+		if($comments)
+		{
+			$controller = "\n\t/**";
+			$controller .= "\n\t * Update a ".$normal;
+			$controller .= "\n\t * @param  array $".$underscores." all the information to update, including id";
+			$controller .= "\n\t * @return boolean if it was successfull";
+			$controller .= "\n\t */";
+			$controller .= "\n\t";
+		}
+		$controller .= "public function update($".$underscores."_id=NULL,$".$underscores."=NULL)";
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
@@ -377,14 +520,19 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
-	private function _controller_delete($normal,$underscores,$name)
+	private function _controller_delete($normal,$underscores,$name,$comments=TRUE)
 	{
-		$controller = "\n\t/**";
-		$controller .= "\n\t * Delete a ".$normal;
-		$controller .= "\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete";
-		$controller .= "\n\t * @return boolean if it was successfull";
-		$controller .= "\n\t */";
-		$controller .= "\n\tpublic function delete($".$underscores."_id=NULL)";
+		$controller = "";
+		if($comments)
+		{
+			$controller = "\n\t/**";
+			$controller .= "\n\t * Delete a ".$normal;
+			$controller .= "\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete";
+			$controller .= "\n\t * @return boolean if it was successfull";
+			$controller .= "\n\t */";
+			$controller .= "\n\t";
+		}
+		$controller .= "public function delete($".$underscores."_id=NULL)";
 		$controller .= "\n\t{";
 		$controller .= "\n\t\t// if there was an id sent";
 		$controller .= "\n\t\tif($".$underscores."_id)";
