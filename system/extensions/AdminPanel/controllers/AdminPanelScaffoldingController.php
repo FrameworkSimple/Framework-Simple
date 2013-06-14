@@ -544,7 +544,7 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t\tif($".$underscores.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\n\t\t\t// if there is no id in the form set it from the url";
-		$controller .= "\n\t\t\tif(!isset($".$underscores."['id'])$".$underscores."['id'] = $".$underscores."_id;";
+		$controller .= "\n\t\t\tif(!isset($".$underscores."['id'])) $".$underscores."['id'] = $".$underscores."_id;";
 		$controller .= "\n\n\t\t\t// load the model";
 		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
