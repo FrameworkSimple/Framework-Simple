@@ -23,8 +23,15 @@
 			<td></td>
 		</tr>
 		<tr>
-			<td colspan="5" style="text-align:right;">
-				<a href="#check" class="check">Check All</a>&nbsp;&nbsp;
+			<td>Global</td>
+			<td></td>
+			<td></td>
+			<td>
+				<input type="checkbox" checked name="layout" value="true" id="layout" />
+				<label for="layout">layout</label>
+			</td>
+			<td>
+				<a href="#check" class="check">Check All</a><br />
 				<a href="#check" class="uncheck">Uncheck All</a>
 			</td>
 		</tr>

@@ -95,6 +95,229 @@ Class AdminPanelScaffoldingController extends Controller
 
 		}
 
+		// make sure there are folders for the models, controlers, and views
+		$this->_createFolders();
+
+		if($info['layout'])
+		{
+			$layout = $this->_view_layout();
+			file_put_contents(SYSTEM_PATH."/views/layouts/page.php", $layout);
+		}
+
+		foreach ($information['tables'] as $table)
+		{
+
+			// create the name with underscores
+			$underscores = Core::to_db($table['name']);
+
+			// if this table is not one that we want to build scaffolding stop the current iteration
+			if(!isset($info[$underscores])) continue;
+
+			// create the normal name for the database
+			$normal = Core::to_norm($table['name']);
+
+			// the path to the controller
+			$controller_path = SYSTEM_PATH."/controllers/".$table['name']."Controller.php";
+
+			// the path to the model
+			$model_path = SYSTEM_PATH."/models/".$table['name'].".php";
+
+			// if we want to build the controller
+			if(isset($info[$underscores]["controller"]))
+			{
+
+				$controller_info = $info[$underscores]["controller"];
+				// if the controller file doesn't exist
+				if(!is_file($controller_path))
+				{
+					// set the basic top setup
+					$controller = $this->_controller_base($normal,$underscores,$table['name']);
+
+					// if we want the index function build and add it
+					if(isset($controller_info['index'])) $controller .= $this->_controller_index($normal,$underscores,$table['name']);
+
+					// if we want the get function build and add it
+					if(isset($controller_info['get'])) $controller .= $this->_controller_get($normal,$underscores,$table['name']);
+
+					// if we want the post function build and add it
+					if(isset($controller_info['post'])) $controller .= $this->_controller_post($normal,$underscores,$table['name']);
+
+					// if we want the update function build and add it
+					if(isset($controller_info['update'])) $controller .= $this->_controller_update($normal,$underscores,$table['name']);
+
+					// if we want the delete function build and add it
+					if(isset($controller_info['delete'])) $controller .= $this->_controller_delete($normal,$underscores,$table['name']);
+
+					// close the class
+					$controller .= "\n}";
+
+				}
+				else
+				{
+
+
+					$controller = file_get_contents($controller_path);
+					$controller = preg_split("/(extends Controller\s+{\s+)/", $controller, NULL, PREG_SPLIT_DELIM_CAPTURE);
+					$controller[2] = substr(trim($controller[2]),0,-1);
+					$controller[3] = "\n}";
+					$function_split = preg_split("/(?=\/\*\*)([.\n\s\S]*?)(?=public func)/", $controller[2],NULL, PREG_SPLIT_DELIM_CAPTURE);
+
+					foreach ($function_split as $index=>$function) {
+
+						if(strpos($function, "public function ") === 0)
+						{
+
+
+							$function = str_replace("public function ", "", $function);
+
+							if(isset($controller_info['index']) && strpos($function, "index(") === 0)
+								$function_split[$index] = $this->_controller_index($normal,$underscores,$table['name'],false);
+							if(isset($controller_info['get']) && strpos($function, "get(") === 0)
+								$function_split[$index] = $this->_controller_get($normal,$underscores,$table['name'],false);
+							if(isset($controller_info['post']) && strpos($function, "post(") === 0)
+								$function_split[$index] = $this->_controller_post($normal,$underscores,$table['name'],false);
+							if(isset($controller_info['update']) && strpos($function, "update(") === 0)
+								$function_split[$index] = $this->_controller_update($normal,$underscores,$table['name'],false);
+							if(isset($icontroller_info['delete']) && strpos($function, "delete(") === 0)
+								$function_split[$index] = $this->_controller_delete($normal,$underscores,$table['name'],false);
+
+							$function_split[$index] .= "\n\t";
+						}
+
+					}
+
+
+					$controller[2] = implode("", $function_split);
+
+					$controller = implode("", $controller);
+
+				}
+
+				// write the file
+				file_put_contents($controller_path,$controller);
+
+			}
+
+			if(isset($info[$underscores]["model"]))
+			{
+
+				// create the model
+				$model = "";
+
+				// model information
+				$model_information = $info[$underscores]["model"];
+
+
+				// if the model file doesn't already exist
+				if(!is_file($model_path))
+				{
+					$model = "<?php\nClass ".$table['name']." extends Model\n{\n";
+
+
+					if(isset($information['belongsTo'][$table['name']]) && isset($model_information["belongsTo"]))
+						$model .= $this->_model_belongsTo($information['belongsTo'][$table['name']]);
+
+					if(isset($information['hasMany'][$table['name']]) && isset($model_information['hasMany']))
+						$model .= $this->_model_hasMany($information['hasMany'][$table['name']]);
+
+					if(!empty($table['required']) && isset($model_information['required']))
+						$model .= $this->_model_required($table['required']);
+
+					if(!empty($table['cols']) && isset($model_information['rules']))
+						$model .= $this->_model_rules($table['cols']);
+
+					$model .= "\n\n}";
+
+				}
+				else
+				{
+					$model = file_get_contents($model_path);
+
+					if(isset($information['belongsTo'][$table['name']]) && isset($model_information['belongsTo']))
+						$model = preg_replace("/\n\t+(?=public \Sbelongs)([.\n\s\S]*?)(?<=;)\n/", $this->_model_belongsTo($information['belongsTo'][$table['name']]), $model);
+
+					if(isset($information['hasMany'][$table['name']]) && isset($model_information['hasMany']))
+						$model = preg_replace("/\n\t+(?=public \ShasMany)([.\n\s\S]*?)(?<=;)\n/", $this->_model_hasMany($information['hasMany'][$table['name']]), $model);
+
+					if(!empty($table['required']) && isset($model_information['required']))
+						$model = preg_replace("/(\n\t+?=public \Srequired)([.\n\s\S]*?)(?<=;)\n/", $this->_model_required($table['required']), $model);
+
+					if(!empty($table['cols']) && isset($model_information['rules']))
+						$model = preg_replace("/\n\t+(?=public \Srules)([.\n\s\S]*?)(?<=;)\n/", $this->_model_rules($table['cols']), $model);
+
+				}
+
+				file_put_contents($model_path, $model);
+
+			}
+
+			if(isset($info[$underscores]['view']))
+			{
+
+				// the folder for the views
+				$view_folder = SYSTEM_PATH."/views/".$underscores;
+
+				if(!is_dir($view_folder))
+				{
+
+					// create the directory
+					mkdir($view_folder);
+
+				}
+
+				$view_info = $info[$underscores]['view'];
+
+				if($view_info['index'])
+				{
+
+					$index = $this->_view_index($table['cols'],$underscores);
+
+					file_put_contents($view_folder."/index.php", $index);
+
+				}
+
+				if($view_info['get'])
+				{
+
+					$get = $this->_view_get($table['cols'],$underscores);
+
+					file_put_contents($view_folder."/get.php", $get);
+
+				}
+
+				if($view_info['post'])
+				{
+
+					$post = $this->_view_post($underscores);
+
+					file_put_contents($view_folder."/post.php", $post);
+
+				}
+
+				if($view_info['update'])
+				{
+
+					$update = $this->_view_update($underscores);
+
+					file_put_contents($view_folder."/update.php", $update);
+
+				}
+
+				if($view_info['form'])
+				{
+
+					$form = $this->_view_form($table['cols'],$underscores);
+
+					file_put_contents($view_folder."/_form.php", $form);
+
+				}
+
+			}
+		}
+	}
+
+	private function _createFolders()
+	{
 		if(!is_dir(SYSTEM_PATH."/controllers"))
 		{
 
@@ -125,234 +348,6 @@ Class AdminPanelScaffoldingController extends Controller
 			mkdir(SYSTEM_PATH."/views/layouts");
 
 		}
-
-		$layout = "<html>\n\t<head>\n\t\t<title>Scafolding Page</title>\n\t<style type='text/css'>.col{display:table-cell;border:1px solid #000;padding:5px;} .table{display:table;width:100%;border:1px solid #000;} .row{display:table-row;}</style>\n\t</head>\n\t<body>\n\t\t<?php echo ".'$content_for_layout'."?>\n\t</body>\n</html>";
-		//file_put_contents(SYSTEM_PATH."/views/layouts/scafolding.php", $layout);
-		foreach ($information['tables'] as $table)
-		{
-
-			// create the name with underscores
-			$underscores = Core::to_db($table['name']);
-
-			// if this table is not one that we want to build scaffolding stop the current iteration
-			if(!isset($info[$underscores])) continue;
-
-			// create the normal name for the database
-			$normal = Core::to_norm($table['name']);
-
-			// the path to the controller
-			$controller_path = SYSTEM_PATH."/controllers/".$table['name']."Controller.php";
-
-			// if we want to build the controller
-			if(isset($info[$underscores]["controller"]))
-			{
-
-				// if the controller file doesn't exist
-				if(!is_file($controller_path))
-				{
-					// set the basic top setup
-					$controller = $this->_controller_base($normal,$underscores,$table['name']);
-
-					// if we want the index function build and add it
-					if(isset($info[$underscores]['controller']['index'])) $controller .= $this->_controller_index($normal,$underscores,$table['name']);
-
-					// if we want the get function build and add it
-					if(isset($info[$underscores]['controller']['get'])) $controller .= $this->_controller_get($normal,$underscores,$table['name']);
-
-					// if we want the post function build and add it
-					if(isset($info[$underscores]['controller']['post'])) $controller .= $this->_controller_post($normal,$underscores,$table['name']);
-
-					// if we want the update function build and add it
-					if(isset($info[$underscores]['controller']['update'])) $controller .= $this->_controller_update($normal,$underscores,$table['name']);
-
-					// if we want the delete function build and add it
-					if(isset($info[$underscores]['controller']['delete'])) $controller .= $this->_controller_delete($normal,$underscores,$table['name']);
-
-					// close the class
-					$controller .= "\n}";
-
-				}
-				else
-				{
-
-
-					$controller = file_get_contents($controller_path);
-					$controller = preg_split("/(extends Controller\s+{\s+)/", $controller, NULL, PREG_SPLIT_DELIM_CAPTURE);
-					$controller[2] = substr(trim($controller[2]),0,-1);
-					$controller[3] = "\n}";
-					$function_split = preg_split("/(?=\/\*\*)([.\n\s\S]*?)(?=public func)/", $controller[2],NULL, PREG_SPLIT_DELIM_CAPTURE);
-
-					foreach ($function_split as $index=>$function) {
-
-						if(strpos($function, "public function ") === 0)
-						{
-
-
-							$function = str_replace("public function ", "", $function);
-
-							if(isset($info[$underscores]['controller']['index']) && strpos($function, "index(") === 0)
-								$function_split[$index] = $this->_controller_index($normal,$underscores,$table['name'],false);
-							if(isset($info[$underscores]['controller']['get']) && strpos($function, "get(") === 0)
-								$function_split[$index] = $this->_controller_get($normal,$underscores,$table['name'],false);
-							if(isset($info[$underscores]['controller']['post']) && strpos($function, "post(") === 0)
-								$function_split[$index] = $this->_controller_post($normal,$underscores,$table['name'],false);
-							if(isset($info[$underscores]['controller']['update']) && strpos($function, "update(") === 0)
-								$function_split[$index] = $this->_controller_update($normal,$underscores,$table['name'],false);
-							if(isset($info[$underscores]['controller']['delete']) && strpos($function, "delete(") === 0)
-								$function_split[$index] = $this->_controller_delete($normal,$underscores,$table['name'],false);
-
-							$function_split[$index] .= "\n\t";
-						}
-
-					}
-
-
-					$controller[2] = implode("", $function_split);
-
-					$controller = implode("", $controller);
-
-				}
-
-				// write the file
-				file_put_contents($controller_path,$controller);
-
-			}
-
-			$model = "<?php\nClass ".$table['name']." extends Model\n{\n";
-
-			if(isset($information['belongsTo'][$table['name']]))
-			{
-				$model .= "\n\tpublic ".'$belongsTo'." = array('";
-				$model .= implode("','", $information['belongsTo'][$table['name']]);
-				$model .= "');\n";
-			}
-			if(isset($information['hasMany'][$table['name']]))
-			{
-				$model .= "\n\tpublic ".'$hasMany'." = array('";
-				$model .= implode("','", $information['hasMany'][$table['name']]);
-				$model .= "');\n";
-			}
-			if(!empty($table['required']))
-			{
-				$model .= "\n\tpublic ".'$required'." = array('";
-				$model .= implode("','", $table['required']);
-				$model .= "');\n";
-			}
-
-			if(!empty($table['cols']))
-			{
-				$model .= "\n\tpublic ".'$rules = '."array(";
-				$form = "\n<form method='POST' action='".'<?=$_SERVER["REQUEST_URI"] ?>'."'>\n";
-				$index_titles =  "";
-				$index_row =  "";
-				$get = "";
-				foreach($table['cols'] as $col)
-				{
-					$model .= "\n\t\t'".$col['name']."' => array(";
-					$index_titles .= "\n\t\t<div class='col'>".$col['name']."</div>";
-					$index_row .= "\n\t\t\t<div class='col'>\n\t\t\t\t<?php echo $".$underscores."['".$col['name']."'] ?>\n\t\t\t</div>";
-					$get .= "<div class='row'>\n\t<div class='col'>".$col['name']."</div>\n\t<div class='col'><?php echo $".$underscores."['".$col['name']."'] ?></div>\n</div>\n";
-
-					if($col['name'] === 'id')
-					{
-						$model .= "'numeric',";
-						$form .= "\t".'<?php if(isset($id)):?>';
-						$form .= "\n\t\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
-						$form .= "\n\t\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
-						$form .= "\n\t\t<?php endif;?>";
-						$form .= "\n\t\t<div>\n\t\t\t<label for='".$col['name']."'>".$col['name']."</label>";
-						$form .= "\n\t\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-						$form .= "\t\t</div>";
-						$form .= "\n\t<?php endif;?>";
-					}
-					else {
-						$form .= "\n\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
-						$form .= "\n\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
-						$form .= "\n\t<?php endif;?>";
-						$form .= "\n\t<div>\n\t\t<label for='".$col['name']."'>".$col['name']."</label>";
-						switch ($col['type']) {
-							case 'int':
-								$model .= "'numeric',";
-								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-								break;
-
-							case 'varchar':
-								$model .= "'alphaNumeric',";
-								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-								break;
-
-							case 'timestamp':
-								$model .= "'timestamp',";
-								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-								break;
-							case 'text':
-								$model .= " ";
-								$form .="\n\t\t<textarea id='".$col['name']."' name='".$col['name']."'><?php if(isset($".$col['name'].")) echo $".$col['name']."; ?></textarea>\n";
-								break;
-							default:
-								$model .= " ";
-								$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
-								break;
-						}
-						$form .= "\t</div>";
-					}
-
-
-
-					if(isset($col['length']))
-					{
-						$model .= "'maxLength' =>".$col['length'].",";
-					}
-
-					$model = substr($model, 0,-1);
-					$model .= "), ";
-
-				}
-				$model = substr($model, 0, -2);
-				$model .= "\n\t\t);\n";
-				$form .= "\n\t<input type='submit' value='save' />\n</form>\n";
-			}
-
-			$model .= "\n\n}";
-
-
-			//file_put_contents(SYSTEM_PATH."/models/".$table['name'].".php", $model);
-
-			if(!is_dir(SYSTEM_PATH."/views/".$underscores))
-			{
-
-				// create the directory
-				mkdir(SYSTEM_PATH."/views/".$underscores);
-
-			}
-
-
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/_form.php", $form);
-
-			$index = "<div class='table'>";
-			$index .= "\n\t<div class='row'>".$index_titles."\n\t</div>";
-			$index .= "\n\t<?php foreach($".$underscores."s as ".'$'.$underscores."):?>\n\t\t<div class='row'>".$index_row."\n\t\t</div>\n\t<?php endforeach ?>";
-			$index .= "\n</div>";
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/index.php", $index);
-
-
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/get.php", trim($get));
-
-			$post = "<?php ";
-			$post .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
-			$post .= "\n\t".'if(isset($errors)) $params = array_merge($params, $errors);';
-			$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
-			$post .= "\n ?>";
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/post.php", $post);
-
-			$update ="<?php";
-			$update .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
-			$update .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
-			$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/update.php", $update);
-
-			//file_put_contents(SYSTEM_PATH."/views/".$underscores."/delete.php", "<h1>Hello World</h1>");
-		}
 	}
 
 	private function _controller_base($normal,$underscores,$name)
@@ -371,6 +366,7 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
+
 	private function _controller_index($normal, $underscores, $name, $comments=TRUE)
 	{
 		$controller = "";
@@ -402,8 +398,8 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t}";
 
 		return $controller;
-
 	}
+
 	private function _controller_get($normal, $underscores, $name,$comments=TRUE)
 	{
 		$controller = "";
@@ -441,6 +437,7 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
+
 	private function _controller_post($normal, $underscores, $name,$comments=TRUE)
 	{
 		$controller = "";
@@ -478,6 +475,7 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
+
 	private function _controller_update($normal, $underscores, $name,$comments=TRUE)
 	{
 		$controller = "";
@@ -520,6 +518,7 @@ Class AdminPanelScaffoldingController extends Controller
 
 		return $controller;
 	}
+
 	private function _controller_delete($normal,$underscores,$name,$comments=TRUE)
 	{
 		$controller = "";
@@ -551,5 +550,236 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t}";
 
 		return $controller;
+	}
+
+	private function _model_belongsTo($tables)
+	{
+		$model = "\n\tpublic ".'$belongsTo'." = array('";
+		$model .= implode("','", $tables);
+		$model .= "');\n";
+
+		return $model;
+	}
+
+	private function _model_hasMany($tables)
+	{
+		$model = "\n\tpublic ".'$hasMany'." = array('";
+		$model .= implode("','", $tables);
+		$model .= "');\n";
+
+		return $model;
+	}
+
+	private function _model_required($tables)
+	{
+		$model = "\n\tpublic ".'$required'." = array('";
+		$model .= implode("','", $tables);
+		$model .= "');\n";
+
+		return $model;
+	}
+
+	private function _model_rules($cols)
+	{
+		$model = "\n\tpublic ".'$rules = '."array(";
+
+		foreach($cols as $col)
+		{
+			$model .= "\n\t\t'".$col['name']."' => array(";
+
+			if($col['name'] === 'id')
+			{
+				$model .= "'numeric',";
+			}
+			else
+			{
+				switch ($col['type']) {
+					case 'int':
+						$model .= "'numeric',";
+						break;
+
+					case 'varchar':
+						$model .= "'alphaNumeric',";
+						break;
+
+					case 'timestamp':
+						$model .= "'timestamp',";
+						break;
+					case 'text':
+						$model .= " ";
+						break;
+					default:
+						$model .= " ";
+						break;
+				}
+			}
+
+			if(isset($col['length']))
+			{
+				$model .= "'maxLength' =>".$col['length'].",";
+			}
+
+			$model = substr($model, 0,-1);
+			$model .= "), ";
+		}
+
+		$model = substr($model, 0, -2);
+		$model .= "\n\t\t);\n";
+
+		return $model;
+	}
+
+	private function _view_layout()
+	{
+		$layout  = "<html>";
+		$layout .= "\n\t<head>";
+		$layout .= "\n\t\t<title>Scafolding Page</title>";
+		$layout .= "\n\t\t<style type='text/css'>";
+		$layout .= "\n\t\t\t.col";
+		$layout .= "\n\t\t\t{";
+		$layout .= "\n\t\t\t\tdisplay:table-cell;";
+		$layout .= "\n\t\t\t\tborder:1px solid #000;";
+		$layout .= "\n\t\t\t\tpadding:5px;";
+		$layout .= "\n\t\t\t}";
+		$layout .= "\n\t\t\t.table{";
+		$layout .= "\n\t\t\t\tdisplay:table;";
+		$layout .= "\n\t\t\t\twidth:100%;";
+		$layout .= "\n\t\t\t\tborder:1px solid #000;";
+		$layout .= "\n\t\t\t}";
+		$layout .= "\n\t\t\t.row";
+		$layout .= "\n\t\t\t{";
+		$layout .= "\n\t\t\t\tdisplay:table-row;";
+		$layout .= "\n\t\t\t}";
+		$layout .= "\n\t\t</style>";
+		$layout .= "\n\t</head>";
+		$layout .= "\n\t<body>";
+		$layout .= "\n\t\t<?php echo ".'$content_for_layout'."?>";
+		$layout .= "\n\t</body>";
+		$layout .= "\n</html>";
+
+		return $layout;
+	}
+
+	private function _view_index($cols, $underscores)
+	{
+
+		$index_titles =  "";
+		$index_row =  "";
+		if(!empty($cols))
+		{
+
+			foreach($cols as $col)
+			{
+
+				$index_titles .= "\n\t\t<div class='col'>".$col['name']."</div>";
+				$index_row .= "\n\t\t\t<div class='col'>\n\t\t\t\t<?php echo $".$underscores."['".$col['name']."'] ?>\n\t\t\t</div>";
+
+			}
+		}
+
+		$index = "<div class='table'>";
+		$index .= "\n\t<div class='row'>".$index_titles."\n\t</div>";
+		$index .= "\n\t<?php foreach($".$underscores."s as ".'$'.$underscores."):?>\n\t\t<div class='row'>".$index_row."\n\t\t</div>\n\t<?php endforeach ?>";
+		$index .= "\n</div>";
+
+		return $index;
+	}
+
+	private function _view_get($cols,$underscores)
+	{
+		if(!empty($cols))
+		{
+			$get = "";
+
+			foreach($cols as $col)
+			{
+
+				$get .= "<div class='row'>\n\t<div class='col'>".$col['name']."</div>\n\t<div class='col'><?php echo $".$underscores."['".$col['name']."'] ?></div>\n</div>\n";
+
+			}
+
+			return $get;
+
+		}
+
+		return "";
+	}
+
+	private function _view_post($underscores)
+	{
+
+		$post = "<?php ";
+		$post .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
+		$post .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
+		$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
+		$post .= "\n?>";
+
+		return $post;
+	}
+
+	private function _view_update($underscores)
+	{
+		$update ="<?php";
+		$update .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
+		$update .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
+		$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
+
+		return $update;
+	}
+
+	private function _view_form($cols,$underscores)
+	{
+		if(!empty($cols))
+		{
+			$form = "<form method='POST' action='".'<?=$_SERVER["REQUEST_URI"] ?>'."'>\n";
+
+			foreach($cols as $col)
+			{
+
+				if($col['name'] === 'id')
+				{
+					$form .= "\t".'<?php if(isset($id)):?>';
+					$form .= "\n\t\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
+					$form .= "\n\t\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
+					$form .= "\n\t\t<?php endif;?>";
+					$form .= "\n\t\t<div>\n\t\t\t<label for='".$col['name']."'>".$col['name']."</label>";
+					$form .= "\n\t\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+					$form .= "\t\t</div>";
+					$form .= "\n\t<?php endif;?>";
+				}
+				else {
+					$form .= "\n\t<?php if(isset(".'$fields) && isset($fields['."'".$col['name']."'])):?>";
+					$form .= "\n\t\t<p class='error'><?php echo ".'$fields['."'".$col['name']."']?></p>";
+					$form .= "\n\t<?php endif;?>";
+					$form .= "\n\t<div>\n\t\t<label for='".$col['name']."'>".$col['name']."</label>";
+					switch ($col['type']) {
+						case 'int':
+							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' size='".$col['length']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+							break;
+
+						case 'varchar':
+							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+							break;
+
+						case 'timestamp':
+							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+							break;
+						case 'text':
+							$form .="\n\t\t<textarea id='".$col['name']."' name='".$col['name']."'><?php if(isset($".$col['name'].")) echo $".$col['name']."; ?></textarea>\n";
+							break;
+						default:
+							$form .= "\n\t\t<input type='text' id='".$col['name']."' name='".$col['name']."' value='<?php if(isset($".$col['name'].")) echo $".$col['name']."; ?>' />\n";
+							break;
+					}
+					$form .= "\t</div>";
+				}
+			}
+			$form .= "\n\t<input type='submit' value='save' />\n</form>\n";
+
+			return $form;
+		}
+
+		return "";
+
 	}
 }

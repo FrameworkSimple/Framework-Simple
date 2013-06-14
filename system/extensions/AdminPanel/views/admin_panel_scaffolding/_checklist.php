@@ -47,11 +47,19 @@
 		</div>
 		<div>
 			<input type="checkbox" checked name="<?php echo $name ?>[view][get]" value="true" id="<?php echo $name ?>[view][get]" />
-			<label for="<?php echo $name ?>[view][get]">post</label>
+			<label for="<?php echo $name ?>[view][get]">get</label>
+		</div>
+		<div>
+			<input type="checkbox" checked name="<?php echo $name ?>[view][post]" value="true" id="<?php echo $name ?>[view][post]" />
+			<label for="<?php echo $name ?>[view][post]">post</label>
 		</div>
 		<div>
 			<input type="checkbox" checked name="<?php echo $name ?>[view][update]" value="true" id="<?php echo $name ?>[view][update]" />
 			<label for="<?php echo $name ?>[view][update]">update</label>
+		</div>
+		<div>
+			<input type="checkbox" checked name="<?php echo $name ?>[view][form]" value="true" id="<?php echo $name ?>[view][form]" />
+			<label for="<?php echo $name ?>[view][form]">_form</label>
 		</div>
 	</td>
 
