@@ -98,7 +98,7 @@ Class AdminPanelScaffoldingController extends Controller
 		// make sure there are folders for the models, controlers, and views
 		$this->_createFolders();
 
-		if($info['layout'])
+		if(isset($info['layout']))
 		{
 			$layout = $this->_view_layout();
 			file_put_contents(SYSTEM_PATH."/views/layouts/page.php", $layout);
@@ -116,17 +116,15 @@ Class AdminPanelScaffoldingController extends Controller
 			// create the normal name for the database
 			$normal = Core::to_norm($table['name']);
 
-			// the path to the controller
-			$controller_path = SYSTEM_PATH."/controllers/".$table['name']."Controller.php";
-
-			// the path to the model
-			$model_path = SYSTEM_PATH."/models/".$table['name'].".php";
-
 			// if we want to build the controller
 			if(isset($info[$underscores]["controller"]))
 			{
 
+				// the path to the controller
+				$controller_path = SYSTEM_PATH."/controllers/".$table['name']."Controller.php";
+
 				$controller_info = $info[$underscores]["controller"];
+
 				// if the controller file doesn't exist
 				if(!is_file($controller_path))
 				{
@@ -160,34 +158,59 @@ Class AdminPanelScaffoldingController extends Controller
 					$controller = preg_split("/(extends Controller\s+{\s+)/", $controller, NULL, PREG_SPLIT_DELIM_CAPTURE);
 					$controller[2] = substr(trim($controller[2]),0,-1);
 					$controller[3] = "\n}";
-					$function_split = preg_split("/(?=\/\*\*)([.\n\s\S]*?)(?=public func)/", $controller[2],NULL, PREG_SPLIT_DELIM_CAPTURE);
 
-					foreach ($function_split as $index=>$function) {
+					$functions = preg_split("/((?=\/\*\*)[.\n\s\S]*?(?<=\*\/))|(public function )|(private function )/", $controller[2],NULL,PREG_SPLIT_DELIM_CAPTURE);
 
-						if(strpos($function, "public function ") === 0)
+					foreach ($functions as $index=>$function) {
+
+						if(isset($controller_info['index']) && strpos($function, "index(") === 0)
 						{
+							$controller_info['index'] = false;
+							$functions[$index] = $this->_controller_index($normal,$underscores,$table['name'],false);
+							$functions[$index] .= "\n\t";
+						}
 
+						if(isset($controller_info['get']) && strpos($function, "get(") === 0)
+						{
+							$controller_info['get'] = false;
+							$functions[$index] = $this->_controller_get($normal,$underscores,$table['name'],false);
+							$functions[$index] .= "\n\t";
+						}
 
-							$function = str_replace("public function ", "", $function);
+						if(isset($controller_info['post']) && strpos($function, "post(") === 0)
+						{
+							$controller_info['post'] = false;
+							$functions[$index] = $this->_controller_post($normal,$underscores,$table['name'],false);
+							$functions[$index] .= "\n\t";
+						}
 
-							if(isset($controller_info['index']) && strpos($function, "index(") === 0)
-								$function_split[$index] = $this->_controller_index($normal,$underscores,$table['name'],false);
-							if(isset($controller_info['get']) && strpos($function, "get(") === 0)
-								$function_split[$index] = $this->_controller_get($normal,$underscores,$table['name'],false);
-							if(isset($controller_info['post']) && strpos($function, "post(") === 0)
-								$function_split[$index] = $this->_controller_post($normal,$underscores,$table['name'],false);
-							if(isset($controller_info['update']) && strpos($function, "update(") === 0)
-								$function_split[$index] = $this->_controller_update($normal,$underscores,$table['name'],false);
-							if(isset($icontroller_info['delete']) && strpos($function, "delete(") === 0)
-								$function_split[$index] = $this->_controller_delete($normal,$underscores,$table['name'],false);
+						if(isset($controller_info['update']) && strpos($function, "update(") === 0)
+						{
+							$controller_info['update'] = false;
+							$functions[$index] = $this->_controller_update($normal,$underscores,$table['name'],false);
+							$functions[$index] .= "\n\t";
+						}
 
-							$function_split[$index] .= "\n\t";
+						if(isset($controller_info['delete']) && strpos($function, "delete(") === 0)
+						{
+							$controller_info['delete'] = false;
+							$functions[$index] = $this->_controller_delete($normal,$underscores,$table['name'],false);
+							$functions[$index] .= "\n\t";
 						}
 
 					}
 
+					foreach($controller_info as $type=>$ran)
+					{
 
-					$controller[2] = implode("", $function_split);
+						if($ran)
+						{
+							$method_name = "_controller_".$type;
+							array_push($functions, $this->$method_name($normal,$underscores,$table['name']));
+						}
+					}
+
+					$controller[2] = implode("", $functions);
 
 					$controller = implode("", $controller);
 
@@ -201,12 +224,14 @@ Class AdminPanelScaffoldingController extends Controller
 			if(isset($info[$underscores]["model"]))
 			{
 
+				// the path to the model
+				$model_path = SYSTEM_PATH."/models/".$table['name'].".php";
+
 				// create the model
 				$model = "";
 
 				// model information
 				$model_information = $info[$underscores]["model"];
-
 
 				// if the model file doesn't already exist
 				if(!is_file($model_path))
@@ -233,17 +258,42 @@ Class AdminPanelScaffoldingController extends Controller
 				{
 					$model = file_get_contents($model_path);
 
+					$model = trim(substr(trim($model),0,-1));
+
 					if(isset($information['belongsTo'][$table['name']]) && isset($model_information['belongsTo']))
-						$model = preg_replace("/\n\t+(?=public \Sbelongs)([.\n\s\S]*?)(?<=;)\n/", $this->_model_belongsTo($information['belongsTo'][$table['name']]), $model);
-
+					{
+						$belongsTo = $this->_model_belongsTo($information['belongsTo'][$table['name']]);
+						if(strpos($model, '$belongsTo'))
+							$model = preg_replace("/\n\t+(?=public \Sbelongs)([.\n\s\S]*?)(?<=;)\n/", $belongsTo, $model);
+						else
+							$model .= $belongsTo;
+					}
 					if(isset($information['hasMany'][$table['name']]) && isset($model_information['hasMany']))
-						$model = preg_replace("/\n\t+(?=public \ShasMany)([.\n\s\S]*?)(?<=;)\n/", $this->_model_hasMany($information['hasMany'][$table['name']]), $model);
-
+					{
+						$hasMany = $this->_model_hasMany($information['hasMany'][$table['name']]);
+						if(strpos($model, '$hasMany'))
+							$model = preg_replace("/\n\t+(?=public \ShasMany)([.\n\s\S]*?)(?<=;)\n/", $hasMany, $model);
+						else
+							$model .= $hasMany;
+					}
 					if(!empty($table['required']) && isset($model_information['required']))
-						$model = preg_replace("/(\n\t+?=public \Srequired)([.\n\s\S]*?)(?<=;)\n/", $this->_model_required($table['required']), $model);
-
+					{
+						$required = $this->_model_required($table['required']);
+						if(strpos($model, '$required'))
+							$model = preg_replace("/(\n\t+?=public \Srequired)([.\n\s\S]*?)(?<=;)\n/", $required, $model);
+						else
+							$model .= $required;
+					}
 					if(!empty($table['cols']) && isset($model_information['rules']))
-						$model = preg_replace("/\n\t+(?=public \Srules)([.\n\s\S]*?)(?<=;)\n/", $this->_model_rules($table['cols']), $model);
+					{
+						$rules = $this->_model_rules($table['cols']);
+						if(strpos($model, '$rules'))
+							$model = preg_replace("/\n\t+(?=public \Srules)([.\n\s\S]*?)(?<=;)\n/", $rules, $model);
+						else
+							$model .= $rules;
+					}
+
+					$model .= "}";
 
 				}
 
@@ -375,9 +425,9 @@ Class AdminPanelScaffoldingController extends Controller
 			$controller = "\n\t/**";
 			$controller .= "\n\t * Get all the ".$normal."s";
 			$controller .= "\n\t * @return array all the ".$normal."s";
-			$controller .= "\n\t */\n\t";
+			$controller .= "\n\t */\n\tpublic function ";
 		}
-		$controller .= "public function index()";
+		$controller .= "index()";
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// load the model";
 		$controller .= "\n\t\t".'$this->loadModel("'.$name.'"'.");";
@@ -409,9 +459,9 @@ Class AdminPanelScaffoldingController extends Controller
 			$controller .= "\n\t * Get one ".$normal;
 			$controller .= "\n\t * @param  int the id of the ".$normal." to get";
 			$controller .= "\n\t * @return one ".$normal;
-			$controller .= "\n\t*/\n\t";
+			$controller .= "\n\t*/\n\tpublic function ";
 		}
-		$controller .= "public function get(".'$id'.")";
+		$controller .= "get(".'$id'.")";
 		$controller .= "\n\t{";
 		$controller .= "\n\t\tif(".'$id'.")";
 		$controller .= "\n\t\t{";
@@ -448,9 +498,9 @@ Class AdminPanelScaffoldingController extends Controller
 			$controller .= "\n\t * @param  array $".$underscores." all the information to save";
 			$controller .= "\n\t * @return boolean if it was successfull";
 			$controller .= "\n\t */";
-			$controller .= "\n\t";
+			$controller .= "\n\tpublic function ";
 		}
-		$controller .= "public function post($".$underscores."=NULL)";
+		$controller .= "post($".$underscores."=NULL)";
 		$controller .= "\n\t{";
 		$controller .= "\n\t\t//if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
@@ -486,9 +536,9 @@ Class AdminPanelScaffoldingController extends Controller
 			$controller .= "\n\t * @param  array $".$underscores." all the information to update, including id";
 			$controller .= "\n\t * @return boolean if it was successfull";
 			$controller .= "\n\t */";
-			$controller .= "\n\t";
+			$controller .= "\n\tpublic function ";
 		}
-		$controller .= "public function update($".$underscores."_id=NULL,$".$underscores."=NULL)";
+		$controller .= "update($".$underscores."_id=NULL,$".$underscores."=NULL)";
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
@@ -529,9 +579,9 @@ Class AdminPanelScaffoldingController extends Controller
 			$controller .= "\n\t * @param  int $".$underscores."_id id of the ".$normal." to delete";
 			$controller .= "\n\t * @return boolean if it was successfull";
 			$controller .= "\n\t */";
-			$controller .= "\n\t";
+			$controller .= "\n\tpublic function ";
 		}
-		$controller .= "public function delete($".$underscores."_id=NULL)";
+		$controller .= "delete($".$underscores."_id=NULL)";
 		$controller .= "\n\t{";
 		$controller .= "\n\t\t// if there was an id sent";
 		$controller .= "\n\t\tif($".$underscores."_id)";
@@ -554,34 +604,34 @@ Class AdminPanelScaffoldingController extends Controller
 
 	private function _model_belongsTo($tables)
 	{
-		$model = "\n\tpublic ".'$belongsTo'." = array('";
+		$model = "\tpublic ".'$belongsTo'." = array('";
 		$model .= implode("','", $tables);
-		$model .= "');\n";
+		$model .= "');\n\n";
 
 		return $model;
 	}
 
 	private function _model_hasMany($tables)
 	{
-		$model = "\n\tpublic ".'$hasMany'." = array('";
+		$model = "\tpublic ".'$hasMany'." = array('";
 		$model .= implode("','", $tables);
-		$model .= "');\n";
+		$model .= "');\n\n";
 
 		return $model;
 	}
 
 	private function _model_required($tables)
 	{
-		$model = "\n\tpublic ".'$required'." = array('";
+		$model = "\tpublic ".'$required'." = array('";
 		$model .= implode("','", $tables);
-		$model .= "');\n";
+		$model .= "');\n\n";
 
 		return $model;
 	}
 
 	private function _model_rules($cols)
 	{
-		$model = "\n\tpublic ".'$rules = '."array(";
+		$model = "\tpublic ".'$rules = '."array(";
 
 		foreach($cols as $col)
 		{
@@ -624,7 +674,7 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 
 		$model = substr($model, 0, -2);
-		$model .= "\n\t\t);\n";
+		$model .= "\n\t\t);\n\n";
 
 		return $model;
 	}
