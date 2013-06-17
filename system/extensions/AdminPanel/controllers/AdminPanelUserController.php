@@ -39,6 +39,8 @@
 
 							Session::set("AdminUser",true);
 
+							Session::set("AdminUserName",$user->username);
+
 							Core::redirect("AdminPanel","index");
 
 						}

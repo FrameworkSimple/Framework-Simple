@@ -22,4 +22,11 @@
 	);
 
 
+
+
+	var_dump(shell_exec("wget http://codeception.com/codecept.phar; php codecept.phar bootstrap"));
+
+
+//	echo SYSTEM_PATH."/extensions/Testing/codecept.phar bootstrap"
+
 ?>

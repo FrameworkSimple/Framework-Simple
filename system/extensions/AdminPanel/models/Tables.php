@@ -19,9 +19,9 @@ Class Tables extends Database
 
 			$tables = array();
 
-			foreach ($result as $table) {
+			foreach ($result as $table_name) {
 
-				$stmt = "SHOW CREATE TABLE ".$table;
+				$stmt = "SHOW CREATE TABLE ".$table_name;
 
 				// prepare statement
 				$stmt = $this->db->prepare($stmt);
@@ -33,11 +33,11 @@ Class Tables extends Database
 					$statement = $stmt->fetchAll();
 
 					$table = array(
-						"name"=> $table,
+						"name"=> $table_name,
 						"structure"=> $statement[0]['Create Table']
 					);
 
-					array_push($tables, $table);
+					$tables[$table_name] = $table;
 
 				}
 
@@ -48,6 +48,15 @@ Class Tables extends Database
 
 		}
 
+	}
+
+	public function run_migration($stmt)
+	{
+		// prepare statement
+		$stmt = $this->db->prepare($stmt);
+
+		// if the execution works
+		return $stmt->execute();
 
 	}
 

@@ -35,7 +35,12 @@
 				<a href="#check" class="uncheck">Uncheck All</a>
 			</td>
 		</tr>
-		<?php View::render("admin_panel_scaffolding/_checklist",$tables,array("path_to_views"=>"/extensions/AdminPanel/views/")) ?>
+		<?php
+			foreach($tables as $table)
+			{
+				View::render("admin_panel_scaffolding/_checklist",$table,array("path_to_views"=>"/extensions/AdminPanel/views/"));
+			}
+		?>
 	</table>
 	<div>
 		<input type="submit" value="Run">

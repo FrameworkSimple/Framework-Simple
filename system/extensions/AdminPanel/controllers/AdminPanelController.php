@@ -41,9 +41,11 @@
 						array(
 							"id"=>1,
 							"username"=>ADMIN_USERNAME,
-							"password"=>Core::encrypt(ADMIN_PASSWORD)
+							"password"=>Core::encrypt(ADMIN_PASSWORD),
+							'migrations'=> 0
 						)
-					)
+					),
+					"migrations" => array()
 				);
 
 				// get the tables model
@@ -94,7 +96,8 @@
 						array_push($data->users, array(
 							"id"=>$id + 1,
 							"username"=>ADMIN_USERNAME,
-							"password"=>Core::encrypt(ADMIN_PASSWORD)
+							"password"=>Core::encrypt(ADMIN_PASSWORD),
+							"migrations"=>0
 						));
 
 					}
@@ -104,6 +107,8 @@
 			}
 
 			file_put_contents( ADMIN_DB, json_encode($data));
+
+			Core::redirect('AdminPanel','index');
 
 		}
 

@@ -17,6 +17,7 @@
 		"AdminPanelSettingsController"	  =>"controllers/AdminPanelSettingsController.php",
 		"AdminPanelScaffoldingController" =>"controllers/AdminPanelScaffoldingController.php",
 		"AdminPanelMigrationsController"  =>"controllers/AdminPanelMigrationsController.php",
+		"dbStructUpdater" 				  =>"helpers/dbStruct.php",
 		"Tables"						  =>"models/Tables.php"
 		)
 	);
