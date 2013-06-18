@@ -364,6 +364,8 @@ Class AdminPanelScaffoldingController extends Controller
 
 			}
 		}
+
+		Core::redirect("AdminPanelScaffolding","index");
 	}
 
 	private function _createFolders()
