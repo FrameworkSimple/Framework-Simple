@@ -13,6 +13,7 @@
  * @link       http://rachelhigley.com/framework
  */
 
+require_once("../simpletest/autorun.php");
 class TestsController  extends Controller {
 
 	/**
