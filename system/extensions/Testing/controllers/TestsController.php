@@ -12,16 +12,27 @@
  * @license    http://www.opensource.org/licenses/mit-license.php MIT
  * @link       http://rachelhigley.com/framework
  */
+
 class TestsController  extends Controller {
 
 	/**
 	 * Run the tests
-	 * @return [type] [description]
+	 *
 	 */
 	public function run()
 	{
-		\Enhance\Core::discoverTests(SYSTEM_PATH."/extensions/Testing/tests", false);
 
-		\Enhance\Core::runTests();
+		$test_suite = new TestSuite();
+		$test_suite->TestSuite('All Tests');
+		$files = scandir(SYSTEM_PATH.'/extensions/Testing/tests');
+
+		foreach($files as $file)
+		{
+			if(strpos($file, ".php"))
+			{
+				$test_suite->addFile(SYSTEM_PATH.'/extensions/Testing/tests/'.$file);
+			}
+		}
+
 	}
 }

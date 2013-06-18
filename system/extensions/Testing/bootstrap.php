@@ -1,6 +1,10 @@
 <?php
 	/**
 	 * Initialize the testing extension
+	 *
+	 * This testing suite uses Simple Test (http://www.simpletest.org/)
+	 * Put all testing in the /tests/ package to be used
+	 *
 	 * @category Extensions
  	 * @package  Extensions
  	 * @subpackage Testing
@@ -11,22 +15,10 @@
 	 */
 	Core::add_classes("Testing",array(
 		"TestsController"     =>"controllers/TestsController.php",
-		"Enhance\Core" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\TestFixture" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\MockFactory" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\StubFactory" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\Expect" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\Assert" => "controllers/EnhanceTestFramework.php",
-
+		"SimpleBrowser"       =>"simpletest/Browser.php",
 		)
 	);
 
-
-
-
-	var_dump(shell_exec("wget http://codeception.com/codecept.phar; php codecept.phar bootstrap"));
-
-
-//	echo SYSTEM_PATH."/extensions/Testing/codecept.phar bootstrap"
+	require_once("simpletest/autorun.php");
 
 ?>
