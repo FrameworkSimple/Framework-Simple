@@ -320,7 +320,7 @@ Class AdminPanelScaffoldingController extends Controller
 				if($view_info['index'])
 				{
 
-					$index = $this->_view_index($table['cols'],$underscores);
+					$index = $this->_view_index($table['cols'],$underscores,$normal);
 
 					file_put_contents($view_folder."/index.php", $index);
 
@@ -431,6 +431,8 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 		$controller .= "index()";
 		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// set the title of the page";
+		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Index");';
 		$controller .= "\n\n\t\t// load the model";
 		$controller .= "\n\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t// only get this table";
@@ -465,6 +467,8 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 		$controller .= "get(".'$id'.")";
 		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// set the title of the page";
+		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Get");';
 		$controller .= "\n\t\tif(".'$id'.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\n\t\t\t// load the model";
@@ -504,6 +508,8 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 		$controller .= "post($".$underscores."=NULL)";
 		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// set the title of the page";
+		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Post");';
 		$controller .= "\n\t\t//if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
 		$controller .= "\n\t\t{";
@@ -542,6 +548,8 @@ Class AdminPanelScaffoldingController extends Controller
 		}
 		$controller .= "update($".$underscores."_id=NULL,$".$underscores."=NULL)";
 		$controller .= "\n\t{";
+		$controller .= "\n\n\t\t// set the title of the page";
+		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Update");';
 		$controller .= "\n\n\t\t// if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
 		$controller .= "\n\t\t{";
@@ -685,7 +693,7 @@ Class AdminPanelScaffoldingController extends Controller
 	{
 		$layout  = "<html>";
 		$layout .= "\n\t<head>";
-		$layout .= "\n\t\t<title>Scafolding Page</title>";
+		$layout .= "\n\t\t<title><?php echo $".'title'.".' - ".$_POST['application_name']."' ?></title>";
 		$layout .= "\n\t\t<style type='text/css'>";
 		$layout .= "\n\t\t\t.col";
 		$layout .= "\n\t\t\t{";
@@ -712,11 +720,11 @@ Class AdminPanelScaffoldingController extends Controller
 		return $layout;
 	}
 
-	private function _view_index($cols, $underscores)
+	private function _view_index($cols, $underscores,$normal)
 	{
 
 		$index_titles =  "";
-		$index_row =  "";
+		$index_rows =  "";
 		if(!empty($cols))
 		{
 
@@ -724,15 +732,28 @@ Class AdminPanelScaffoldingController extends Controller
 			{
 
 				$index_titles .= "\n\t\t<div class='col'>".$col['name']."</div>";
-				$index_row .= "\n\t\t\t<div class='col'>\n\t\t\t\t<?php echo $".$underscores."['".$col['name']."'] ?>\n\t\t\t</div>";
+				$index_rows .= "\n\t\t\t<div class='col'>\n\t\t\t\t<?php echo $".$underscores."['".$col['name']."'] ?>\n\t\t\t</div>";
 
 			}
 		}
-
-		$index = "<div class='table'>";
+		$index = "<p>".'<a href="<?php echo Asset::create_url("'.$normal.'","post")?>">Add New</a>'."</p>";
+		$index .= "<div class='table'>";
 		$index .= "\n\t<div class='row'>".$index_titles."\n\t</div>";
-		$index .= "\n\t<?php foreach($".$underscores."s as ".'$'.$underscores."):?>\n\t\t<div class='row'>".$index_row."\n\t\t</div>\n\t<?php endforeach ?>";
+		$index .= "\n\t<?php if(isset($".$underscores."s)): foreach($".$underscores."s as ".'$'.$underscores."):?>";
+		$index .= "\n\t\t<div class='row'>";
+		$index .= $index_rows;
+		$index .= "\n\t\t\t<div class='col'>";
+		$index .= "\n\t\t\t"."<a href='<?php echo Asset::create_url('" . $normal . "','get',array($" . $underscores . "['id']))?>'>View</a>";
+		$index .= "\n\t\t\t"."<a href='<?php echo Asset::create_url('" . $normal . "','update',array($" . $underscores . "['id']))?>'>Edit</a>";
+		$index .= "\n\t\t\t"."<a href='<?php echo Asset::create_url('" . $normal . "','delete',array($" . $underscores . "['id']))?>'>Delete</a>";
+		$index .= "\n\t\t\t</div>";
+		$index .= "\n\t\t</div>";
+		$index .= "\n\t<?php endforeach;?>";
 		$index .= "\n</div>";
+		$index .= "\n\t<?php else: ?>";
+		$index .= "\n</div>";
+		$index .= "\n\t\t<p>No Results Found</p>";
+		$index .= "\n\t<?php endif;?>";
 
 		return $index;
 	}
