@@ -441,14 +441,17 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t\t$".$underscores."s = ".'$this->'.$name."->findAll();";
 		$controller .= "\n\n\t\t//set the success";
 		$controller .= "\n\t\t".'$this->view_data('."'success',".'$this->'.$name."->success);";
-		$controller .= "\n\n\t\t// if the call was successful";
-		$controller .= "\n\t\tif(".'$this->'.$name."->success)";
+		$controller .= "\n\n\t\t// if the call was unsuccessful";
+		$controller .= "\n\t\tif(".'!$this->'.$name."->success)";
 		$controller .= "\n\t\t{";
-		$controller .= "\n\n\t\t\t// set the information for the view";
-		$controller .= "\n\t\t\t".'$this->view_data("'.$underscores.'s",$'.$underscores."s);";
-		$controller .= "\n\n\t\t\t// return the information";
-		$controller .= "\n\t\t\treturn $".$underscores."s;";
+		$controller .= "\n\n\t\t\t// send blank array";
+		$controller .= "\n\t\t\t$".$underscores."s = array();";
 		$controller .= "\n\n\t\t}";
+		$controller .= "\n\n\t\t// set the information for the view";
+		$controller .= "\n\t\t".'$this->view_data("'.$underscores.'s",$'.$underscores."s);";
+		$controller .= "\n\n\t\t// return the information";
+		$controller .= "\n\t\treturn $".$underscores."s;";
+
 		$controller .= "\n\t}";
 
 		return $controller;
@@ -469,7 +472,7 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// set the title of the page";
 		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Get");';
-		$controller .= "\n\t\tif(".'$id'.")";
+		$controller .= "\n\n\t\tif(".'$id'.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\n\t\t\t// load the model";
 		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
@@ -510,24 +513,31 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t{";
 		$controller .= "\n\n\t\t// set the title of the page";
 		$controller .= "\n\t\t".'$this->layout_data("title","'.$normal.' Post");';
-		$controller .= "\n\t\t//if information was sent";
+		$controller .= "\n\n\t\t//if information was sent";
 		$controller .= "\n\t\tif($".$underscores.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\t\t\t// load the model";
 		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
-		$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
+		$controller .= "\n\t\t\t$".$underscores.'_id = $this->'.$name."->save($".$underscores.");";
 		$controller .= "\n\n\t\t\t// set the success";
 		$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
-		$controller .= "\n\n\t\t\t".'if(!$this->'.$name.'->success)';
+		$controller .= "\n\n\t\t\t".'if($this->'.$name.'->success)';
+		$controller .= "\n\t\t\t{";
+		$controller .= "\n\n\t\t\t\t// set the ".$underscores." id if the save was successful";
+		$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'_id",$'.$underscores.'_id);';
+		$controller .= "\n\n\t\t\t\t// return the ".$name." id";
+		$controller .= "\n\t\t\t\t".'return $'.$underscores.'_id;';
+		$controller .= "\n\n\t\t\t}";
+		$controller .= "\n\t\t\telse";
 		$controller .= "\n\t\t\t{";
 		$controller .= "\n\n\t\t\t\t// set the errors because something went wrong";
 		$controller .= "\n\t\t\t\t".'$this->view_data("errors",$this->'.$name.'->error);';
 		$controller .= "\n\n\t\t\t\t// set the $normal so that you have the already inputed values";
 		$controller .= "\n\t\t\t\t".'$this->view_data("'.$underscores.'",$'.$underscores.");";
+		$controller .= "\n\n\t\t\t\t// return the success";
+		$controller .= "\n\t\t\t\t".'return $this->'.$name."->success;";
 		$controller .= "\n\t\t\t}";
-		$controller .= "\n\n\t\t\t// return the success";
-		$controller .= "\n\t\t\t".'return $this->'.$name."->success;";
 		$controller .= "\n\t\t}";
 		$controller .= "\n\t}";
 
@@ -574,6 +584,8 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t\t\t\n\t\t\t// get a ".$normal;
 		$controller .= "\n\t\t\t".'$this->get($'.$underscores."_id);";
 		$controller .= "\n\t\t\t\n\t\t}";
+		$controller .= "\n\n\t\t// return the success message";
+		$controller .= "\n\t\t".'return $this->'.$name.'->success;';
 		$controller .= "\n\n\n\t}";
 
 		return $controller;
@@ -604,8 +616,10 @@ Class AdminPanelScaffoldingController extends Controller
 		$controller .= "\n\t\t\t".'$this->view_data("success",$this->'.$name."->success);";
 		$controller .= "\n\n\t\t\t// set the success";
 		$controller .= "\n\t\t\t".'$this->'.$name."->success;";
-		$controller .= "\n\n\t\t\t//return to the page that called it";
-		$controller .= "\n\t\t\t".'header("Location: ".$_SERVER["HTTP_REFERER"]);';
+		$controller .= "\n\n\t\t\t//return to the page that called it if there is one";
+		$controller .= "\n\t\t\t".'if(isset($_SERVER["HTTP_REFERER"])) header("Location: ".$_SERVER["HTTP_REFERER"]);';
+		$controller .= "\n\n\t\t\t//else return the success";
+		$controller .= "\n\t\t\t else return ".'$this->'.$name.'->success;';
 		$controller .= "\n\n\t\t}";
 		$controller .= "\n\t}";
 
