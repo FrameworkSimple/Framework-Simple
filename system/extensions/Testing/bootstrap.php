@@ -19,4 +19,8 @@
 		)
 	);
 
+	Hook::register("before_find",array("TestsController","find"));
+	Hook::register("before_save",array("TestsController","save"));
+	Hook::register("before_delete",array("TestsController","delete"));
+
 ?>
