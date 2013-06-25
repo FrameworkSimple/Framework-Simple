@@ -13,8 +13,12 @@
  * @link       http://rachelhigley.com/framework
  */
 
-require_once("../simpletest/autorun.php");
+require_once(SYSTEM_PATH."/extensions/Testing/simpletest/autorun.php");
 class TestsController  extends Controller {
+
+	private $test_suite;
+
+	private $_test_db = array();
 
 	/**
 	 * Run the tests
@@ -23,17 +27,96 @@ class TestsController  extends Controller {
 	public function run()
 	{
 
-		$test_suite = new TestSuite();
-		$test_suite->TestSuite('All Tests');
-		$files = scandir(SYSTEM_PATH.'/extensions/Testing/tests');
+		$this->test_suite = new TestSuite();
+		$this->test_suite->TestSuite('All Tests');
+
+
+		$this->_add_tests(SYSTEM_PATH.'/extensions/Testing/tests');
+
+	}
+
+	private function _add_tests($folder)
+	{
+		$folder .= "/";
+		$files = scandir($folder);
+
 
 		foreach($files as $file)
 		{
+
 			if(strpos($file, ".php"))
 			{
-				$test_suite->addFile(SYSTEM_PATH.'/extensions/Testing/tests/'.$file);
+				$this->test_suite->addFile($folder.$file);
 			}
+
+			else if(is_dir($folder.$file) && $file !== "." && $file !== "..")
+			{
+				$this->_add_tests($folder.$file);
+			}
+
 		}
 
+	}
+
+	public function find(&$model)
+	{
+
+		$this->_create_table($model);
+	}
+
+	public function save(&$data,&$model)
+	{
+		$this->_create_table($model);
+	}
+
+	public function delete($id, $name, &$model)
+	{
+		$this->_create_table($model);
+	}
+
+	private function _create_table(&$model)
+	{
+
+		if(!isset($this->_test_db[$model->_name]) && Core::$info_of_url['controller'] == __CLASS__)
+		{
+			$table_name = Core::to_db($model->_name);
+			$stmt =  $model->db->prepare("CREATE DATABASE IF NOT EXISTS ".DB_NAME."_test");
+
+			// run the statement
+			if($stmt->execute())
+			{
+				$stmt = $model->db->prepare("DROP TABLE IF EXISTS ".DB_NAME."_test.".$table_name."; CREATE TABLE ".DB_NAME."_test.".$table_name." LIKE ".DB_NAME.".".$table_name);
+
+				if($stmt->execute())
+				{
+
+					$stmt = $model->db->prepare("INSERT INTO ".DB_NAME."_test.".$table_name." SELECT * from ".DB_NAME.".".$table_name);
+
+					if($stmt->execute())
+					{
+
+						$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
+						$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+						$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+
+						$model->db = $db;
+
+						$this->_test_db[$model->_name] = "created";
+
+					}
+				}
+			}
+
+		}
+
+		else
+		{
+
+			$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
+			$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+			$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+
+			$model->db = $db;
+		}
 	}
 }
