@@ -134,7 +134,7 @@ Class Core {
 				return;
 			}
 			else {
-				trigger_error("404: Controller: ".$classname." Not Found",E_USER_ERROR);
+				self::error("404: Controller: ".$classname." Not Found",E_USER_ERROR);
 				return;
 			}
 
@@ -147,7 +147,7 @@ Class Core {
 			return;
 		}
 		else {
-			trigger_error("404: ".$classname." Not Found",E_USER_NOTICE);
+			self::error("404: ".$classname." Not Found",E_USER_NOTICE);
 			return;
 		}
 	}
@@ -375,7 +375,7 @@ Class Core {
 			if(!method_exists(self::$info_of_url['controller'], self::$info_of_url['action']))
 			{
 
-				trigger_error("404: Action: ".self::$info_of_url['action']." Not Found",E_USER_ERROR);
+				self::error("404: Action: ".self::$info_of_url['action']." Not Found",E_USER_ERROR);
 				return;
 
 			}
@@ -456,7 +456,7 @@ Class Core {
 				if(!method_exists(self::$info_of_url['controller'], self::$info_of_url['action']))
 				{
 
-					trigger_error("404: Action: ".self::$info_of_url['action']." Not Found",E_USER_ERROR);
+					self::error("404: Action: ".self::$info_of_url['action']." Not Found",E_USER_ERROR);
 					return false;
 
 				}
@@ -528,6 +528,15 @@ Class Core {
 			// instatiate it and put it in the array and then return it
 			return self::$instantiated[$classname]['class'] = new $classname;
 		}
+
+	}
+
+	public static function error($message, $level=E_USER_NOTICE)
+	{
+		$backtrace = debug_backtrace();
+		$caller = next($backtrace);
+		if(isset($caller['file']) && $caller['function'] && $caller['line']) $message = $message.' in <strong>'.$caller['function'].'</strong> called from <strong>'.$caller['file'].'</strong> on line <strong>'.$caller['line'].'</strong>'."\n<br />error handler";
+		trigger_error($message, $level);
 
 	}
 

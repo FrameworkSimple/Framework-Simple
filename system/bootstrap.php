@@ -14,7 +14,6 @@
  *
  * the time that the script started running
  */
-
 define("START_TIME", microtime(true));
 
 include ('core/Core.php');
