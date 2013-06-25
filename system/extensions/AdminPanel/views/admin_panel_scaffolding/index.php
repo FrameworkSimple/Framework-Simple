@@ -17,9 +17,9 @@
 
 		<tr class="title">
 			<td>table</td>
-			<td>controller actions</td>
-			<td>models</td>
-			<td>views</td>
+			<td>controller actions <a href="" class="toggle" data-type="check" data-class="controller">Check</a> <a href="" class="toggle" data-type="uncheck" data-class="controller">Uncheck</a></td>
+			<td>models <a href="" class="toggle"  data-type="check" data-class="model">Check</a> <a href="" class="toggle" data-type="uncheck" data-class="model">Uncheck</a></td>
+			<td>views <a href="" class="toggle" data-type="check" data-class="view">Check</a> <a href="" class="toggle" data-type="uncheck" data-class="view">Uncheck</a></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -68,6 +68,24 @@
 		var link = $(this);
 
 		link.parent().parent().parent().find('input:checkbox').removeAttr('checked');
+	});
+
+	$(".toggle").on('click',function(e)
+	{
+		var link = $(this);
+		var link_class = link.data('class');
+		var type = link.data('type');
+
+		if(type === "check")
+		{
+			$("."+link_class).attr('checked','checked');
+		}
+		else if(type === "uncheck")
+		{
+			$("."+link_class).removeAttr('checked');
+		}
+
+		e.preventDefault()
 	})
 
 
