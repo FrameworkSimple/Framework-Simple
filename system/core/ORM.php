@@ -424,7 +424,7 @@ Class ORM extends Database {
 		if($valid === true) {
 
 			// run the before save function
-			if(Hook::call("before_save", array(&$this->_data)) === false) return;
+			if(Hook::call("before_save", array(&$this->_data,&$this)) === false) return;
 
 			// set the database name
 			$dbName = Core::to_db($this->_name);

@@ -1,6 +1,10 @@
 <?php
 	/**
 	 * Initialize the testing extension
+	 *
+	 * This testing suite uses Simple Test (http://www.simpletest.org/)
+	 * Put all testing in the /tests/ package to be used
+	 *
 	 * @category Extensions
  	 * @package  Extensions
  	 * @subpackage Testing
@@ -11,15 +15,12 @@
 	 */
 	Core::add_classes("Testing",array(
 		"TestsController"     =>"controllers/TestsController.php",
-		"Enhance\Core" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\TestFixture" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\MockFactory" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\StubFactory" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\Expect" => "controllers/EnhanceTestFramework.php",
-		"\Enhance\Assert" => "controllers/EnhanceTestFramework.php",
-
+		"SimpleBrowser"       =>"simpletest/Browser.php",
 		)
 	);
 
+	Hook::register("before_find",array("TestsController","find"));
+	Hook::register("before_save",array("TestsController","save"));
+	Hook::register("before_delete",array("TestsController","delete"));
 
 ?>

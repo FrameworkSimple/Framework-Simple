@@ -25,7 +25,7 @@
 		if(!mkdir(CACHE_PATH) || !is_writable(CACHE_PATH)){
 
 			// trigger an error
-			trigger_error("Make sure RDCache folder exists and is writable");
+			Core::error("Make sure RDCache folder exists and is writable");
 
 		}
 
