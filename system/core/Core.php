@@ -549,8 +549,12 @@ Class Core {
 	 */
 	public static function redirect($controller,$action,$params=array())
 	{
-		$url = Asset::create_url($controller,$action,$params);
-		header( "Location: $url" ) ;
+		// only redirect if it is coming from a real page
+		if(isset($_SERVER['HTTP_REFERER']))
+		{
+			$url = Asset::create_url($controller,$action,$params);
+			header( "Location: $url" ) ;
+		}
 	}
 
 	/**
