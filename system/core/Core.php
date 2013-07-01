@@ -104,6 +104,15 @@ Class Core {
 	public static $info_of_url = array("controller"=>"","action"=>"","params"=>array(),"ext"=>"");
 
 	/**
+	 * Redirect: boolean
+	 *
+	 * Allow the core to redirect pages.
+	 *
+	 * Can be turned off for testing purposes.
+	 */
+	public static $redirect = true;
+
+	/**
 	 * Autoload Classes using the name of the class
 	 *
 	 * @param  string $classname Name of the string to autoload
@@ -550,7 +559,7 @@ Class Core {
 	public static function redirect($controller,$action,$params=array())
 	{
 		// only redirect if it is coming from a real page
-		if(isset($_SERVER['HTTP_REFERER']))
+		if(self::$redirect)
 		{
 			$url = Asset::create_url($controller,$action,$params);
 			header( "Location: $url" ) ;
