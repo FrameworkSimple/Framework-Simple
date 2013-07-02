@@ -17,6 +17,8 @@
 
 		static public $layout = "admin_panel";
 
+		static public $allowed_actions = array('login','logout');
+
 		public function login($admin_user=NULL)
 		{
 

@@ -18,6 +18,8 @@ Class AdminPanelSettingsController extends Controller
 
 	static public $layout = "admin_panel";
 
+	static public $allowed_actions = array('index');
+
 	public function index($save_settings=NULL)
 	{
 

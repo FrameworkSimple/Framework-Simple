@@ -17,6 +17,8 @@ Class AdminPanelMigrationsController extends Controller
 {
 	static public $layout = "admin_panel";
 
+	static public $allowed_actions = array('index','create','run');
+
 	public function index()
 	{
 

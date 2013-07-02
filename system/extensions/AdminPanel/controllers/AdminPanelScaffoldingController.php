@@ -17,6 +17,8 @@ Class AdminPanelScaffoldingController extends Controller
 {
 	static public $layout = "admin_panel";
 
+	static public $allowed_actions = array('index','post');
+
 	public function index()
 	{
 

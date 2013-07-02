@@ -18,6 +18,8 @@ class TestsController  extends Controller {
 
 	private $test_suite;
 
+	static public $allowed_actions = array('run');
+
 	private $_test_db = array();
 
 	/**

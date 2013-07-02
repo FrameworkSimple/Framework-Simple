@@ -47,3 +47,4 @@ org.eclipse.*
 
 # Framework Simple
 Settings.php
+*/Settings*.php
