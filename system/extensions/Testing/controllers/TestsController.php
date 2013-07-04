@@ -12,8 +12,6 @@
  * @license    http://www.opensource.org/licenses/mit-license.php MIT
  * @link       http://rachelhigley.com/framework
  */
-
-require_once(SYSTEM_PATH."/extensions/Testing/simpletest/autorun.php");
 class TestsController  extends Controller {
 
 	private $test_suite;
@@ -32,8 +30,11 @@ class TestsController  extends Controller {
 		$this->test_suite = new TestSuite();
 		$this->test_suite->TestSuite('All Tests');
 
+		Core::$redirect = false;
 
 		$this->_add_tests(SYSTEM_PATH.'/extensions/Testing/tests');
+
+		$this->test_suite->run(new HtmlReporter());
 
 	}
 
@@ -79,46 +80,49 @@ class TestsController  extends Controller {
 	private function _create_table(&$model)
 	{
 
-		if(!isset($this->_test_db[$model->_name]) && Core::$info_of_url['controller'] == __CLASS__)
+		if( Core::$info_of_url['controller'] == __CLASS__)
 		{
-			$table_name = Core::to_db($model->_name);
-			$stmt =  $model->db->prepare("CREATE DATABASE IF NOT EXISTS ".DB_NAME."_test");
-
-			// run the statement
-			if($stmt->execute())
+			if(!isset($this->_test_db[$model->_name]))
 			{
-				$stmt = $model->db->prepare("DROP TABLE IF EXISTS ".DB_NAME."_test.".$table_name."; CREATE TABLE ".DB_NAME."_test.".$table_name." LIKE ".DB_NAME.".".$table_name);
+				$table_name = Core::to_db($model->_name);
+				$stmt =  $model->db->prepare("CREATE DATABASE IF NOT EXISTS ".DB_NAME."_test");
 
+				// run the statement
 				if($stmt->execute())
 				{
-
-					$stmt = $model->db->prepare("INSERT INTO ".DB_NAME."_test.".$table_name." SELECT * from ".DB_NAME.".".$table_name);
+					$stmt = $model->db->prepare("DROP TABLE IF EXISTS ".DB_NAME."_test.".$table_name."; CREATE TABLE ".DB_NAME."_test.".$table_name." LIKE ".DB_NAME.".".$table_name);
 
 					if($stmt->execute())
 					{
 
-						$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
-						$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-						$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+						$stmt = $model->db->prepare("INSERT INTO ".DB_NAME."_test.".$table_name." SELECT * from ".DB_NAME.".".$table_name);
 
-						$model->db = $db;
+						if($stmt->execute())
+						{
 
-						$this->_test_db[$model->_name] = "created";
+							$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
+							$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+							$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 
+							$model->db = $db;
+
+							$this->_test_db[$model->_name] = "created";
+
+						}
 					}
 				}
+
 			}
 
-		}
+			else
+			{
 
-		else
-		{
+				$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
+				$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+				$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
 
-			$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
-			$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-			$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
-
-			$model->db = $db;
+				$model->db = $db;
+			}
 		}
 	}
 }

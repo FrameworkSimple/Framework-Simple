@@ -16,6 +16,8 @@
 	Core::add_classes("Testing",array(
 		"TestsController"     =>"controllers/TestsController.php",
 		"SimpleBrowser"       =>"simpletest/Browser.php",
+		"TestSuite"			  =>"simpletest/test_case.php",
+		"UnitTestCase"        =>"simpletest/unit_tester.php"
 		)
 	);
 
