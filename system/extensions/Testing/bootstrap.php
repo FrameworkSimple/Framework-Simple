@@ -17,7 +17,9 @@
 		"TestsController"     =>"controllers/TestsController.php",
 		"SimpleBrowser"       =>"simpletest/Browser.php",
 		"TestSuite"			  =>"simpletest/test_case.php",
-		"UnitTestCase"        =>"simpletest/unit_tester.php"
+		"UnitTestCase"        =>"simpletest/unit_tester.php",
+		"WebTestCase"		  =>"simpletest/web_tester.php",
+		"Mock"				  =>"simpletest/mock_objects.php",
 		)
 	);
 
