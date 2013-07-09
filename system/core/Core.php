@@ -277,7 +277,7 @@ Class Core {
 		}
 
 		// render the page
-		if(AUTO_RENDER) View::render($file_name,$controller::$view_info,array("layout"=>$layout,"layout_info"=>$controller::$layout_info,"path_to_views"=>$path_to_views));
+		if(AUTO_RENDER) View::render($file_name,$controller->view_info,array("layout"=>$layout,"layout_info"=>$controller::$layout_info,"path_to_views"=>$path_to_views));
 
 		// output the debug information
 		if(!$controller->request['AJAX'])Debug::render();

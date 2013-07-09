@@ -75,7 +75,7 @@ class Controller {
 	 *
 	 * @var array
 	 */
-	static public $view_info = array();
+	public $view_info = array();
 
 	/**
 	 * request: array
@@ -140,7 +140,7 @@ class Controller {
 	 */
 	public function view_data($name, $data) {
 
-		self::$view_info[$name] = $data;
+		$this->view_info[$name] = $data;
 	}
 
 	/**
