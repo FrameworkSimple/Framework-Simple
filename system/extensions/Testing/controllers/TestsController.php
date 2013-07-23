@@ -82,47 +82,73 @@ class TestsController  extends Controller {
 
 		if( Core::$info_of_url['controller'] == __CLASS__)
 		{
+			$stmt =  $model->db->prepare("CREATE DATABASE IF NOT EXISTS ".DB_NAME."_test");
+
+			// run the statement
+			if(!$stmt->execute())
+			{
+				return;
+			}
+
 			if(!isset($this->_test_db[$model->_name]))
 			{
 				$table_name = Core::to_db($model->_name);
-				$stmt =  $model->db->prepare("CREATE DATABASE IF NOT EXISTS ".DB_NAME."_test");
 
-				// run the statement
-				if($stmt->execute())
+				$this->_set_table($model, $table_name,$model->_name);
+
+			}
+
+			if($model->options['recursive'] >= 2)
+			{
+				foreach($model->hasMany as $table)
 				{
-					$stmt = $model->db->prepare("DROP TABLE IF EXISTS ".DB_NAME."_test.".$table_name."; CREATE TABLE ".DB_NAME."_test.".$table_name." LIKE ".DB_NAME.".".$table_name);
 
-					if($stmt->execute())
-					{
+					if(!isset($this->_test_db[$table])) $this->_set_table($model,Core::to_db($table),$table);
 
-						$stmt = $model->db->prepare("INSERT INTO ".DB_NAME."_test.".$table_name." SELECT * from ".DB_NAME.".".$table_name);
+				}
 
-						if($stmt->execute())
-						{
+			}
+			if($model->options['recursive'] === 1 || $model->options['recursive'] === 3)
+			{
+				foreach($model->belongsTo as $table)
+				{
 
-							$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
-							$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-							$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+					if(!isset($this->_test_db[$table])) $this->_set_table($model,Core::to_db($table),$table);
 
-							$model->db = $db;
-
-							$this->_test_db[$model->_name] = "created";
-
-						}
-					}
 				}
 
 			}
 
-			else
+
+			$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
+			$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+			$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+
+			$model->db = $db;
+
+
+		}
+	}
+
+	private function _set_table($model, $table_name,$name)
+	{
+
+		$stmt = $model->db->prepare("DROP TABLE IF EXISTS ".DB_NAME."_test.".$table_name."; CREATE TABLE ".DB_NAME."_test.".$table_name." LIKE ".DB_NAME.".".$table_name);
+
+		if($stmt->execute())
+		{
+
+
+			$stmt = $model->db->prepare("INSERT INTO ".DB_NAME."_test.".$table_name." SELECT * from ".DB_NAME.".".$table_name);
+
+			if($stmt->execute())
 			{
 
-				$db = new \PDO("mysql:hostname=".DB_HOSTNAME.";dbname=".DB_NAME."_test",DB_USERNAME,DB_PASSWORD);
-				$db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
-				$db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);
+				$this->_test_db[$name] = "created";
 
-				$model->db = $db;
 			}
+
 		}
+
 	}
 }
