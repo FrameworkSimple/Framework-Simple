@@ -32,8 +32,11 @@ class TestsController  extends Controller {
 
 		Core::$redirect = false;
 
-		$this->_add_tests(SYSTEM_PATH.'/extensions/Testing/tests');
+		$this->_add_tests(SYSTEM_PATH.TESTS_FOLDER);
 
+		if (TextReporter::inCli()) {
+		    exit ($this->test_suite->run(new TextReporter()) ? 0 : 1);
+		}
 		$this->test_suite->run(new HtmlReporter());
 
 	}

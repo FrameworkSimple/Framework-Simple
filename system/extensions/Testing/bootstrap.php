@@ -13,6 +13,9 @@
 	 * @license    http://www.opensource.org/licenses/mit-license.php MIT
 	 * @link       http://rachelhigley.com/framework
 	 */
+
+	include "Settings.php";
+
 	Core::add_classes("Testing",array(
 		"TestsController"     =>"controllers/TestsController.php",
 		"SimpleBrowser"       =>"simpletest/Browser.php",
