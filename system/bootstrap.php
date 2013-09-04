@@ -17,7 +17,9 @@
 define("START_TIME", microtime(true));
 
 include ('core/Core.php');
-include ('Settings.php');
+include ('Settings-Application.php');
+include ('Settings-Environment.php');
+
 
 /**
  * system_path: string

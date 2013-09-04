@@ -1,6 +1,6 @@
 <?php
 	/**
-	 * All the settings for the application
+	 * Global settings for the application
 	 * @category   Core
 	 * @package    Core
 	 * @author     Rachel Higley <me@rachelhigley.com>
@@ -15,34 +15,6 @@
 	 * the title of the application
 	 */
 	const TITLE = "Framework Simple";
-
-	/**
-	 * Database Host: string
-	 *
-	 * the host of your database
-	 */
-	const DB_HOSTNAME = 'localhost';
-
-	/**
-	 * Database Name: string
-	 *
-	 * the name of the database you want to connect to
-	 */
-	const DB_NAME = 'simple';
-
-	/**
-	 * Database Username: string
-	 *
-	 * the username for the database
-	 */
-	const DB_USERNAME = 'root';
-
-	/**
-	 * Database Password: string
-	 *
-	 * the password for the database
-	 */
-	const DB_PASSWORD = 'root';
 
 	/**
 	 * Default Controller: string
@@ -78,27 +50,6 @@
 	 * if layouts are turned on
 	 */
 	const LAYOUTS = true;
-
-	/**
-	 * Debug: boolean
-	 *
-	 * if you want to show debug information
-	 */
-	const DEBUG = true;
-
-	/**
-	 * Salt: string
-	 *
-	 * the salt used for encrypting your data
-	 */
-	const SALT = "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p";
-
-	/**
-	 * Path To App: string
-	 *
-	 * url to the app relative to the index.php inside webroot
-	 */
-	const PATH_TO_APP = "../";
 
 	/**
 	 * Rest: boolean
