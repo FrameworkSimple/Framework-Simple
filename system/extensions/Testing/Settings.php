@@ -13,6 +13,7 @@
 /**
  * tests_folder: strng
  *
- * the place where the tests are stored
+ * the place where the tests are stored, relative to the system path
  */
-CONST TESTS_FOLDER = SYSTEM_PATH.'/extensions/Testing/tests';
+CONST TESTS_FOLDER = '/extensions/Testing/tests';
+

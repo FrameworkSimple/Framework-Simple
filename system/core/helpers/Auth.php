@@ -112,7 +112,7 @@ Class Auth {
 		{
 
 			// load the model
-			$model = Core::instantiate(AUTH_TABLE);
+			$model = Core::instantiate(Core::to_cam(AUTH_TABLE));
 
 			// we only want the user table nothing associatied to it
 			$model->options = array("recursive"=>0);
