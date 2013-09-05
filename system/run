@@ -1,0 +1,12 @@
+<?php
+
+	if(isset($_SERVER['argv'][1]) )
+	{
+		if(!@include("core/scripts/".$_SERVER['argv'][1]))
+		{
+			print "This method does not exist\n";
+		}
+	}
+
+	include "bootstrap.php";
+?>
