@@ -556,13 +556,21 @@ Class Core {
 	 * @param  string $action     the action name
 	 * @param  array  $params     the params to pass to the new url
 	 */
-	public static function redirect($controller,$action,$params=array())
+	public static function redirect($controller,$action=null,$params=array())
 	{
 		// only redirect if it is coming from a real page
 		if(self::$redirect)
 		{
-			$url = Asset::create_url($controller,$action,$params);
-			header( "Location: $url" ) ;
+			if($action)
+			{
+				$url = Asset::create_url($controller,$action,$params);
+				header( "Location: $url" ) ;
+			}
+			else
+			{
+				header( "Location: $controller" ) ;
+			}
+
 		}
 	}
 
