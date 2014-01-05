@@ -47,11 +47,20 @@ Class Auth {
 	public static function is_authorized()
 	{
 
+
 		// get the controller and action
 		$url = Core::$info_of_url;
 
+		// if the user is logged in then they have permission
+		if(Session::get('logged_in'))
+		{
+
+			// return true because user is logged in
+			return true;
+
+		}
 		// check if controller is in allowed controllers
-		if(in_array($url['controller'], self::$controllers))
+		else if(in_array($url['controller'], self::$controllers))
 		{
 
 			// return true because it is allowed
@@ -75,26 +84,9 @@ Class Auth {
 			return true;
 		}
 
-		// if it isn't in any of the allowed settings
-		else
-		{
-
-			if(Session::get('logged_in'))
-			{
-
-				// return true because user is logged in
-				return true;
-
-			}
-			else
-			{
-
-				// redirect to a new page
-				Core::redirect(AUTH_REDIRECT_CONTROLLER,AUTH_REDIRECT_ACTION);
-
-			}
-
-		}
+		Core::error('User is not authorized',E_USER_WARNING,'401');
+		Core::redirect(AUTH_REDIRECT_CONTROLLER,AUTH_REDIRECT_ACTION);
+		return false;
 
 	}
 
@@ -157,6 +149,7 @@ Class Auth {
 
 		// set logged in to false
 		Session::set('logged_in',false);
+		Session::set('user',false);
 
 	}
 

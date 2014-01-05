@@ -1,17 +1,17 @@
-<?
-/**
-TODO: make it work even without ';' delimiters or at least warn about that
-TODO: better parse error reporting
-TODO: accept empty datetime value and 0000-00-00 00:00:00 are equal, similar with date and time, also enum('0','1') [default 0], what's with floats?(float(10,2) NOT NULL default '0.00'); text,mediumtext,etc;
-TODO: option to add database name with dot before the table names
-TODO: add option "order does matter"
-DONE: breaks table definition on commas and brackets, not newlines
-DONE: handles `database`.`table` in CREATE TABLE string (but does not add database to result sql for a while - and if it
-should? as same tables struct in 2 DBs compared is also a case)
-DONE: handles double (and more) spaces in CREATE TABLE string
-DONE: add filter option (fields: MODIFY, ADD, DROP, tables: CREATE, DROP)
-DONE: make it work also with comments
-DONE: move all options to $this->config
+<?php
+/*
+* TODO: make it work even without ';' delimiters or at least warn about that
+* TODO: better parse error reporting
+* TODO: accept empty datetime value and 0000-00-00 00:00:00 are equal, similar with date and time, also enum('0','1') [default 0], what's with floats?(float(10,2) NOT NULL default '0.00'); text,mediumtext,etc;
+* TODO: option to add database name with dot before the table names
+* TODO: add option "order does matter"
+* DONE: breaks table definition on commas and brackets, not newlines
+* DONE: handles `database`.`table` in CREATE TABLE string (but does not add database to result sql for a while - and if it
+* should? as same tables struct in 2 DBs compared is also a case)
+* DONE: handles double (and more) spaces in CREATE TABLE string
+* DONE: add filter option (fields: MODIFY, ADD, DROP, tables: CREATE, DROP)
+* DONE: make it work also with comments
+* DONE: move all options to $this->config
 */
 /**
 * The class provides ability to compare 2 database structure dumps and compile a set of sql statements to update
@@ -42,13 +42,13 @@ DONE: move all options to $this->config
 * the column with the old name and one to create column with the new name, so if there is a data in the dropped
 * column, it will be lost.
 * Usage example:
-  $updater = new dbStructUpdater();
-  $res = $updater->getUpdates($struct1, $struct2);
-  -----
-  $res == array (
-  	[0]=>"ALTER TABLE `b` MODIFY `name` varchar(255) NOT NULL",
-  	...
-  )
+*  $updater = new dbStructUpdater();
+*  $res = $updater->getUpdates($struct1, $struct2);
+* -----
+* $res == array (
+* 	[0]=>"ALTER TABLE `b` MODIFY `name` varchar(255) NOT NULL",
+* 	...
+* )
 */
 class dbStructUpdater
 {

@@ -175,42 +175,46 @@ Class Core {
 
 		}
 
-		// get all the information
-		self::_get_url();
-
-
-		// create the controller
-		$controller = self::instantiate(ucfirst(self::$info_of_url['controller']));
 
 		// set up the request on the controller for later use
-		$controller->request = array(
-										"GET" => $_GET,
-										"POST" => $_POST,
-										"SERVER" => $_SERVER,
-										"TYPE" => $_SERVER['REQUEST_METHOD'],
-										"AJAX" => !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-									);
+		$request = array(
+						"GET" => $_GET,
+						"POST" => $_POST,
+						"SERVER" => $_SERVER,
+						"TYPE" => $_SERVER['REQUEST_METHOD'],
+						"AJAX" => !empty($_SERVER['HTTP_X_REQUESTED_WITH']) || strpos($_SERVER['HTTP_ACCEPT'],"application/json") !== false
+					);
+
+		// turn off redirection for ajax requests
+		if($request['AJAX']) self::$redirect = false;
 
 		// if rest is on and the request type was json
 		if(REST)
 		{
 
-			if(isset($controller->request['SERVER']['CONTENT_TYPE']) && $controller->request['SERVER']['CONTENT_TYPE'] === "application/json")
+			if($request['AJAX'])
 			{
 
-				// set the request type's data to the php input stream
-				$controller->request[$controller->request['TYPE']] = json_decode(file_get_contents("php://input"));
+				//the php input stream
+				$stream = json_decode(file_get_contents("php://input"),true);
+
+				// set the request type's data to the php input stream if there is content
+				if($stream) $request[$request['TYPE']] = $stream;
 
 			}
-			$request_data = $controller->request[$controller->request['TYPE']];
-
+			$request_data = $request[$request['TYPE']];
 
 			// if there is request data add it to the params
 			if(!empty($request_data)) array_push(self::$info_of_url['params'], $request_data);
 
-
 		}
+		// get all the information
+		self::_get_url();
 
+		// create the controller
+		$controller = self::instantiate(ucfirst(self::$info_of_url['controller']));
+
+		$controller->request = $request;
 
 		//TODO: Add XML and other format support
 
@@ -225,7 +229,6 @@ Class Core {
 			if(!$controller->request['AJAX'])Debug::render();
 			return;
 		}
-
 		// if params is not an array
 		if(!empty(self::$info_of_url['params'][0]))
 		{
@@ -355,20 +358,19 @@ Class Core {
 
 					// set the params
 					// url: /controller/action/param
-					self::$info_of_url['params'] = $request;
+
+					self::$info_of_url['params'] = array_merge(self::$info_of_url['params'], $request);
 
 				}
 				else
 				{
 					// set the params
 					// url: /controller/action/param
-					self::$info_of_url['params'] = $request;
+					self::$info_of_url['params'] = array_merge(self::$info_of_url['params'], $request);
 
 					// set the action
 					self::_set_action($method);
 				}
-
-
 
 
 			}
@@ -459,12 +461,15 @@ Class Core {
 
 				self::$info_of_url['params'] = $params;
 
+
 				if(empty(self::$info_of_url['action'])) isset($info[1])? self::$info_of_url['action'] = $info[1]:self::_set_action($method);
 
 				// if the method doesn't exist
 				if(!method_exists(self::$info_of_url['controller'], self::$info_of_url['action']))
 				{
 
+					self::$info_of_url['action'] = "";
+					self::$info_of_url['params'] = array();
 					self::error("404: Action: ".self::$info_of_url['action']." Not Found",E_USER_ERROR);
 					return false;
 
@@ -473,8 +478,7 @@ Class Core {
 				return true;
 			}
 
-				self::$info_of_url['action'] = "";
-				self::$info_of_url['params'] = array();
+
 
 		}
 
@@ -540,12 +544,28 @@ Class Core {
 
 	}
 
-	public static function error($message, $level=E_USER_NOTICE)
+	public static function error($message, $level=E_USER_NOTICE,$header='404')
 	{
 		$backtrace = debug_backtrace();
 		$caller = next($backtrace);
+		switch ($header) {
+			case '400':
+				header("HTTP/1.1 400 Bad Request");
+				break;
+			case '401':
+				header("HTTP/1.1 401 Unauthorized");
+				break;
+			case '404':
+				header("HTTP/1.1 404 Not Found");
+				break;
+
+			default:
+				header("HTTP/1.1 400 Bad Request");
+				break;
+		}
 		if(isset($caller['file']) && $caller['function'] && $caller['line']) $message = $message.' in <strong>'.$caller['function'].'</strong> called from <strong>'.$caller['file'].'</strong> on line <strong>'.$caller['line'].'</strong>'."\n<br />error handler";
 		trigger_error($message, $level);
+
 
 	}
 

@@ -9,7 +9,7 @@
 	 * @license    http://www.opensource.org/licenses/mit-license.php MIT
 	 * @link       http://rachelhigley.com/framework
 	 */
-	include "Settings.php";
+	include "Settings-Environment.php";
 
 	Core::add_classes("AdminPanel",array(
 		"AdminPanelController"			  =>"controllers/AdminPanelController.php",

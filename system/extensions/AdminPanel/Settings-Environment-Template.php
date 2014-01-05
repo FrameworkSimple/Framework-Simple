@@ -15,11 +15,11 @@
  *
  * the username for the admin panel
  */
-const ADMIN_USERNAME = 'admin';
+const ADMIN_USERNAME = 'username';
 
 /**
  * Admin Password: string
  *
  * the password for the admin panel
  */
-const ADMIN_PASSWORD = 'admin';
+const ADMIN_PASSWORD = 'password';

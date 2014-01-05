@@ -169,7 +169,7 @@ class Controller {
 		{
 
 			// run the authorization
-			Auth::is_authorized();
+			return Auth::is_authorized();
 
 		}
 

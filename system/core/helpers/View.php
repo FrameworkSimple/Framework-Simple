@@ -59,6 +59,10 @@ Class View
 			{
 				switch ($ext) {
 					case 'json':
+
+						// add debug information if debug is turned on
+						if(DEBUG) $data['debug'] = Core::$debug;
+
 						// render the json object using the data
 						$json = Asset::json($data,false);
 
