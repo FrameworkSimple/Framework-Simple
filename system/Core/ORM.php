@@ -16,32 +16,20 @@
 Class Core_ORM extends Database {
 
 	/**
-	 * The options you want to use for this call
-	 * @var array
-	 */
-	public $options = array();
-
-	/**
 	 * The default options that will be overwritten by $options
 	 * @var array
 	 */
-	private $_defaultOptions = array(
-		"recursive"=>3,
-		"fields"=>array(),
+	public $_default_options = array(
+		"recursive"=>0,
+		"columns"=>array(),
 		"limit"=>"",
-		"addToEnd"=>"",
+		"add_to_end"=>"",
 		"joins"=>array(),
 		"where"=>array(),
-		"returnSaved"=>false,
-		"byCol"=>false,
-		"orderBy"=> "",
+		"return_saved"=>false,
+		"order_by"=> "",
 		"key"=>array()
 		);
-	/**
-	 * the name of this model
-	 * @var string
-	 */
-	public $_name = "";
 
 	/**
 	 * An array of all the tables we are using with their columns
@@ -54,6 +42,12 @@ Class Core_ORM extends Database {
 	 * @var array
 	 */
 	private $_data = array();
+
+	/**
+	 * the name of this model
+	 * @var string
+	 */
+	public $_name = "";
 
 	/**
 	 * What tables to associate with
@@ -74,6 +68,81 @@ Class Core_ORM extends Database {
 	public $recursive = 0;
 
 	/**
+	 * Limit returned result
+	 * array(START:Integer, LENGTH:Integer);
+	 * @example
+	 * 	array(0,50);
+	 * @var array
+	 */
+	public $limit = array();
+
+	/**
+	 * The colmns to pull back
+	 *
+	 * array('TABLE_NAME:string'=>LIST_OF_COLUMNS:array)
+	 * @example
+	 *  array("User"=>array("id","email","name"));
+	 * @var array
+	 */
+	public $columns = array();
+
+	/**
+	 * String to add to the end of the query
+	 * @var string
+	 */
+	public $add_to_end = "";
+
+	/**
+	 * Extra Joins to this table outside the relationships
+	 *
+	 * array('HAS_MANY:string','BELONGS_TO:strin',[$DIRECTION:string,$MANY_TO_MANY:boolean])<br />
+	 * @example
+	 *  array('ShiftMember','Member','LEFT',true)
+	 * @var array
+	 */
+	public $joins = array();
+
+	/**
+	 * Custom where statements for the query<br /><br />
+	 *
+	 * array('COLUMN:sting"=>array( 'VALUE:string','TABLE:string'));<br />
+	 * or<br />
+	 * array('WHERE STRING');
+	 * @example
+	 *  array('grouping_id'=>array($info['group'],'GroupingMember'));<br />
+	 *  or<br />
+	 * 	array("GroupingMember.grouping_id = ".$info['group']);
+	 * @var array
+	 */
+	public $where = array();
+
+	/**
+	 * When saving info you can choose to return the saved object. By Default it returns the id.
+	 * @var boolean
+	 */
+	public $return_saved = false;
+
+	/**
+	 * What column to order by and the direction to order. Default orders by id
+	 *
+	 *  array('TABLE:string','COLUMN:String',['DIRECTION':String])
+	 * @example
+	 *  array('Users','user_type_id','ASC')
+	 * @var array
+	 */
+	public $order_by = array();
+
+	/**
+	 * What to put as the key for the returned array. Default is an zero-based index but you can use the value of column.
+	 *
+	 * array('TABLE'=>'COLUMN:string')
+	 * @example
+	 * 	array('Users','id');
+	 * @var array
+	 */
+	public $key= array();
+
+	/**
 	 * This is called whenever a call is made on this model
 	 * @param  string $method the method that was called
 	 * @param  object $value  the params that were passed
@@ -82,9 +151,6 @@ Class Core_ORM extends Database {
 	public function _call($method, $value)
 	{
 		$this->_name = get_called_class();
-
-		// set all the options for this call
-		$this->options = array_merge($this->_defaultOptions,$this->options);
 
 		// set the default of success to true
 		$this->success = true;
@@ -112,7 +178,7 @@ Class Core_ORM extends Database {
 			foreach($cols as $index=>$col)
 			{
 				// push the column and the value to the where array
-				$this->options['where']["$col"] = array($vals[$index],$this->_name);
+				$this->where["$col"] = array($vals[$index],$this->_name);
 			}
 			// set the call to "_findBy"
 			$call = "_find";
@@ -138,7 +204,9 @@ Class Core_ORM extends Database {
 		$response = $this->$call($this->_data);
 
 		// reset all the options to the default
-		$this->options = array_merge($this->options,$this->_defaultOptions);
+		foreach ($this->default_options as $prop => $value) {
+			$this->{$prop} = $value;
+		}
 
 		// clear all the data
 		$this->_data = array();
@@ -178,7 +246,7 @@ Class Core_ORM extends Database {
 		$limit = $this->_createLimit();
 
 		// create statement
-		$statement = "SELECT $select FROM $dbName AS $this->_name $joins $where ".$this->options['addToEnd']." $order $limit";
+		$statement = "SELECT $select FROM $dbName AS $this->_name $joins $where ".$this->add_to_end." $order $limit";
 
 		// send statement to the debugger
 		array_push(Core::$debug['statements'],$statement);
@@ -224,7 +292,7 @@ Class Core_ORM extends Database {
 			$current_result = array();
 
 			// set up the previous id so that we can group rows together
-			$prev_id = $this->options['recursive'] <= 1?false:$results[0][$this->_name.'$id'];
+			$prev_id = $this->recursive <= 1?false:$results[0][$this->_name.'$id'];
 
 			// loop through the results
 			foreach($results as $i=>$result)
@@ -239,7 +307,7 @@ Class Core_ORM extends Database {
 					$col = $info[1];
 
 					// if there are no joins then don't worry about the table data because it is all from the same table
-					if($this->options['recursive'] === 0)
+					if($this->recursive === 0)
 					{
 						//set the column
 						$current_result[$col] = $val;
@@ -297,7 +365,7 @@ Class Core_ORM extends Database {
 								{
 									$ids[$table] = array($val);
 									$current[$table] = array("set"=>true,"index"=>0,"id"=>$val);
-									if(isset($this->options['key'][$table]))$current[$table]['index'] = $result[$table."$".$this->options['key'][$table]];
+									if(isset($this->key[$table]))$current[$table]['index'] = $result[$table."$".$this->key[$table]];
 
 								}
 								// if we already had this id stop set
@@ -311,7 +379,7 @@ Class Core_ORM extends Database {
 									$current[$table]['set'] = true;
 									$current[$table]['id'] = $val;
 									$current[$table]['index']++;
-									if(isset($this->options['key'][$table]))$current[$table]['index'] = $result[$table."$".$this->options['key'][$table]];
+									if(isset($this->key[$table]))$current[$table]['index'] = $result[$table."$".$this->key[$table]];
 									array_push($ids[$table], $val);
 								}
 
@@ -326,7 +394,7 @@ Class Core_ORM extends Database {
 						}
 
 						// if the key is set or if it is a has many and set is turned on then add this info
-						if($current[$table]['set'] && ( isset($this->options['key'][$table]) || in_array($table, $this->has_many) ) )
+						if($current[$table]['set'] && ( isset($this->key[$table]) || in_array($table, $this->has_many) ) )
 						{
 							// if we haven't set up this index to have an array
 							if(!isset($current_result[$table][$current[$table]['index']]))
@@ -519,7 +587,7 @@ if($stmt->execute($evaulate))
 		$id = $insert?$this->db->lastinsertid():$this->_data['id'];
 
 
-		if($this->options['returnSaved'])
+		if($this->return_saved)
 		{
 
 			$this->_data = array();
@@ -655,7 +723,7 @@ else
 	}
 
 	/**
-	 * create the select statement with all the fields
+	 * create the select statement with all the columns
 	 * @return string the select statement
 	 */
 	private function _createSelect()
@@ -667,8 +735,8 @@ else
 
 		foreach($this->_tables as $table)
 		{
-			// if no fields then get all the fields
-			if(empty($this->options['fields']))
+			// if no columns then get all the columns
+			if(empty($this->columns))
 			{
 				// set the table structure
 				if($this->_setTable($table))
@@ -686,21 +754,16 @@ else
 
 			}
 
-			// only add the fields in the fields option
-			else
+			// / if the table is in the columns
+			elseif(isset($this->columns[$table]))
 			{
 
-				// if the table is in the fields
-				if(isset($this->options['fields'][$table]))
+					// loop through the table
+				foreach($this->columns[$table] as $col)
 				{
 
-					// loop through the table
-					foreach($this->options['fields'][$table] as $col)
-					{
-
 						// create a select statement for each field with an alias
-						$selectStatement .= $table.".".$col." AS '".$table."$".$col."', ";
-					}
+					$selectStatement .= $table.".".$col." AS '".$table."$".$col."', ";
 				}
 			}
 		}
@@ -780,34 +843,34 @@ else
 	private function _setJoins()
 	{
 			// reverse the order so that later they will be the right order
-		$this->options['joins'] = array_reverse($this->options['joins']);
+		$this->joins = array_reverse($this->joins);
 
 			// if the recursive is 2 or 3 then push the tables for the has many in to the joins
-		if($this->options['recursive'] >= 2 && !empty($this->has_many))
+		if($this->recursive >= 2 && !empty($this->has_many))
 		{
 				// loop through each has many
 			foreach($this->has_many as $table)
 			{
 
 					// push the table into joins
-				array_push($this->options['joins'], array($table,$this->_name));
+				array_push($this->joins, array($table,$this->_name));
 			}
 
 		}
 
 			// if the recursive is 1 or 3 then pish the tables for the belongs_to into the joins
-		if(($this->options['recursive'] == 3 || $this->options['recursive'] == 1) && !empty($this->belongs_to))
+		if(($this->recursive == 3 || $this->recursive == 1) && !empty($this->belongs_to))
 		{
 				// loop thrugh each belongs_to
 			foreach($this->belongs_to as $table)
 			{
 					// push the table into the joins
-				array_push($this->options['joins'],array($this->_name,$table));
+				array_push($this->joins,array($this->_name,$table));
 			}
 		}
 
 			// reverse the orde so that they go in the right order
-		$this->options['joins'] = array_reverse($this->options['joins']);
+		$this->joins = array_reverse($this->joins);
 
 			// call and retrun the createJoins function
 		return $this->_createjoins();
@@ -817,10 +880,10 @@ else
 	 * create all the join statements
 	 * @return string the join statement
 	 */
-	private function _createjoins()
+	private function _createJoins()
 	{
 		// get all the joins
-		$joins = $this->options['joins'];
+		$joins = $this->joins;
 
 		// set empty variable
 		$statement = "";
@@ -895,12 +958,12 @@ else
 	 */
 	private function _createWhere()
 	{
-		if(!empty($this->options['where'])) {
+		if(!empty($this->where)) {
 	 		// start where statement
 			$where = "WHERE ";
 
 	 		// loop through the where options
-			foreach($this->options['where'] as $col=>$val)
+			foreach($this->where as $col=>$val)
 			{
 
 	 			// if there is no column name
@@ -945,10 +1008,10 @@ else
  		$limit = "";
 
 		// if there is a limit
- 		if(!empty($this->options['limit']))  {
+ 		if(!empty($this->limit))  {
 
 			// create the limit clause
- 			$limit = "LIMIT ".$this->options['limit'][0].", ".$this->options['limit'][1];
+ 			$limit = "LIMIT ".$this->limit[0].", ".$this->limit[1];
 
  		}
 
@@ -966,7 +1029,7 @@ else
  		$order = "ORDER BY ";
 
  		// if the options haven't been set
- 		if(empty($this->options['orderBy']))
+ 		if(empty($this->order_by))
  		{
  			// set the order by statement
  			$order .= "$this->_name.id";
@@ -976,13 +1039,13 @@ else
  		else
  		{
 			// set the table name
- 			$table = $this->options['orderBy'][0];
+ 			$table = $this->order_by[0];
 
 			// set the col name
- 			$col = $this->options['orderBy'][1];
+ 			$col = $this->order_by[1];
 
 			// set the direction to sort
- 			$direction = isset($this->options['orderBy'][2])?$this->options['orderBy'][2]:"DESC";
+ 			$direction = isset($this->order_by[2])?$this->order_by[2]:"DESC";
 
 			// set the statement
  			$order .= "$table.$col $direction";
