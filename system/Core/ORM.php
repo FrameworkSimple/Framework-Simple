@@ -160,22 +160,22 @@ Class Core_ORM extends Database {
 		if(Hook::call("beforeFind", array(&$this)) === false) return;
 
 		// set all the joins to be added
-		$joins = $this->_setjoins();
+		$joins = $this->_setJoins();
 
 		// create the select statement
-		$select = $this->_createselect();
+		$select = $this->_createSelect();
 
 		// create order by statement
-		$order = $this->_createorder();
+		$order = $this->_createOrder();
 
 		// the dabase name for this model
 		$dbName = Core::toDb($this->_name);
 
 		// create the where statement
-		$where = $this->_createwhere();
+		$where = $this->_createWhere();
 
 		// create the limit statement
-		$limit = $this->_createlimit();
+		$limit = $this->_createLimit();
 
 		// create statement
 		$statement = "SELECT $select FROM $dbName AS $this->_name $joins $where ".$this->options['addToEnd']." $order $limit";
@@ -438,7 +438,7 @@ Class Core_ORM extends Database {
 			$dbName = Core::toDb($this->_name);
 
 			// set up the table
-			$this->_settable($dbName);
+			$this->_setTable($dbName);
 
 			// empty array to run the statement on
 			$evaulate = array();
@@ -658,7 +658,7 @@ else
 	 * create the select statement with all the fields
 	 * @return string the select statement
 	 */
-	private function _createselect()
+	private function _createSelect()
 	{
 		// set the blank statement
 		$selectStatement = "";
@@ -671,7 +671,7 @@ else
 			if(empty($this->options['fields']))
 			{
 				// set the table structure
-				if($this->_settable($table))
+				if($this->_setTable($table))
 				{
 
 					// loop through the parent tables
@@ -714,7 +714,7 @@ else
 	 * set the table structure in the $_tables
 	 * @param string $table the table we need to set up
 	 */
-	private function _settable($table)
+	private function _setTable($table)
 	{
 
 		// if we don't already have the table then get it
@@ -777,7 +777,7 @@ else
 	/**
 	 * set up all the joins in the options
 	 */
-	private function _setjoins()
+	private function _setJoins()
 	{
 			// reverse the order so that later they will be the right order
 		$this->options['joins'] = array_reverse($this->options['joins']);
@@ -893,7 +893,7 @@ else
 	 * create the where statement
 	 * @return string the where statement
 	 */
-	private function _createwhere()
+	private function _createWhere()
 	{
 		if(!empty($this->options['where'])) {
 	 		// start where statement
@@ -939,7 +939,7 @@ else
  	 * create a limit statement if needed
  	 * @return string the limit statement
  	 */
- 	private function _createlimit()
+ 	private function _createLimit()
  	{
  		// set the limit string
  		$limit = "";
@@ -959,7 +959,7 @@ else
  	 * create the order by statement
  	 * @return string the order by statement
  	 */
- 	private function _createorder()
+ 	private function _createOrder()
  	{
 
  		// blank statement for order

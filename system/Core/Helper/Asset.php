@@ -37,7 +37,7 @@ Class Core_Helper_Asset {
 	 * @api
 	 * @return string the base url
 	 */
-	public static function getbase()
+	public static function getBase()
 	{
 		// create base url variable
 		$base_url = '';
@@ -66,7 +66,7 @@ Class Core_Helper_Asset {
 	 * @api
 	 * @return string the relative url
 	 */
-	public static function relativeurl()
+	public static function relativeUrl()
 	{
 
 		$url = str_replace('\\', '/', dirname($_SERVER["SCRIPT_NAME"]));
@@ -83,7 +83,7 @@ Class Core_Helper_Asset {
 	 * @param  array  $params     the params you want to pass
 	 * @return string             to controller/action/params
 	 */
-	public static function createurl($controller,$action='',$params=array())
+	public static function createUrl($controller,$action='',$params=array())
 	{
 		// get the url
 		$url = self::getBase();
@@ -253,7 +253,7 @@ Class Core_Helper_Asset {
 					$attr['href'] = $path.$file.'.css';
 
 					// create a link tag and put it in the html
-					$html .= self::_htmltag('link',$attr);
+					$html .= self::_htmlTag('link',$attr);
 
 				break;
 
@@ -267,7 +267,7 @@ Class Core_Helper_Asset {
 					$attr['src'] = $path.$file.'.js';
 
 					// create a script tag and put in the html
-					$html .= self::_htmltag('script',$attr," ");
+					$html .= self::_htmlTag('script',$attr," ");
 
 				break;
 
@@ -278,7 +278,7 @@ Class Core_Helper_Asset {
 					$attr['src'] = $path.$file;
 
 					// create a img tag and out it in the html
-					$html .= self::_htmltag('img',$attr);
+					$html .= self::_htmlTag('img',$attr);
 
 				break;
 			}
@@ -295,7 +295,7 @@ Class Core_Helper_Asset {
 	 * @param  boolean/string $content any content you want inside the tag, default = false
 	 * @return string           the html tag
 	 */
-	private static function _htmltag($tag, $attr = array(), $content = false)
+	private static function _htmlTag($tag, $attr = array(), $content = false)
 	{
 		// if the tag has content or if it is self closing
 		$has_content = (bool) ($content !== false and $content !== null);
@@ -304,7 +304,7 @@ Class Core_Helper_Asset {
 		$html = '<'.$tag;
 
 		// if the array of attributes is not empty then create a string and add it
-		$html .= ( ! empty($attr))?' '.self::_arraytoattr($attr):'';
+		$html .= ( ! empty($attr))?' '.self::_arrayToAttr($attr):'';
 
 		// if it has content close the tag with > add the content and closing tag if it is self closing then close it with />
 		$html .= $has_content ? '>'.$content.'</'.$tag.'>' : ' />';
@@ -318,7 +318,7 @@ Class Core_Helper_Asset {
 	 * @param  array $attr an array of attributes
 	 * @return string       a string of attributes
 	 */
-	private static function _arraytoattr($attr)
+	private static function _arrayToAttr($attr)
 	{
 		// string for the attribute
 		$attr_str = '';

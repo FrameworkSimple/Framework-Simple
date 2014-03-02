@@ -23,7 +23,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 	{
 
 		// get the tables model
-		$this->loadmodel("Tables");
+		$this->loadModel("Tables");
 
 		// get all the tables witht their create statements
 		$tables = $this->Tables->getStatements();
@@ -436,7 +436,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n\n\t\t// set the title of the page";
 		$controller .= "\n\t\t".'$this->layoutData("title","'.$normal.' Index");';
 		$controller .= "\n\n\t\t// load the model";
-		$controller .= "\n\t\t".'$this->loadmodel("'.$name.'"'.");";
+		$controller .= "\n\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t// only get this table";
 		$controller .= "\n\t\t".'$this->'.$name."->options['recursive'] = 0;";
 		$controller .= "\n\n\t\t// get all the ".$normal."s";
@@ -477,7 +477,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n\n\t\tif(".'$id'.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\n\t\t\t// load the model";
-		$controller .= "\n\t\t\t".'$this->loadmodel("'.$name.'"'.");";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// only get this table";
 		$controller .= "\n\t\t\t".'$this->'.$name."->options['recursive'] = 0;";
 		$controller .= "\n\n\t\t\t// get all the ".$normal."s";
@@ -519,7 +519,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n\t\tif($".$underscores.")";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\t\t\t// load the model";
-		$controller .= "\n\t\t\t".'$this->loadmodel("'.$name.'"'.");";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
 		$controller .= "\n\t\t\t$".$underscores.'_id = $this->'.$name."->save($".$underscores.");";
 		$controller .= "\n\n\t\t\t// set the success";
@@ -568,7 +568,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n\n\t\t\t// if there is no id in the form set it from the url";
 		$controller .= "\n\t\t\tif(!isset($".$underscores."['id'])) $".$underscores."['id'] = $".$underscores."_id;";
 		$controller .= "\n\n\t\t\t// load the model";
-		$controller .= "\n\t\t\t".'$this->loadmodel("'.$name.'"'.");";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
 		$controller .= "\n\t\t\t".'$this->'.$name."->save($".$underscores.");";
 		$controller .= "\n\n\t\t\t// set the success";
@@ -611,7 +611,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n\t\tif($".$underscores."_id)";
 		$controller .= "\n\t\t{";
 		$controller .= "\n\n\t\t\t// load the model";
-		$controller .= "\n\t\t\t".'$this->loadmodel("'.$name.'"'.");";
+		$controller .= "\n\t\t\t".'$this->loadModel("'.$name.'"'.");";
 		$controller .= "\n\n\t\t\t// save the new ".$normal;
 		$controller .= "\n\t\t\t".'$this->'.$name."->delete($".$underscores."_id);";
 		$controller .= "\n\n\t\t\t// set the success";

@@ -147,7 +147,7 @@ abstract class Core_Controller {
 	 * instantiate a model
 	 * @param  string $name model name
 	 */
-	public function loadmodel($name)
+	public function loadModel($name)
 	{
 
 		$model = Core::instantiate($name);

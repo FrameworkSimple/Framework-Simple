@@ -133,7 +133,7 @@ class Core_Validation {
 				else if(empty($this->data[$col]) && in_array($col, $this->required))
 				{
 
-					$this->_createerror($col,"can not be empty");
+					$this->_createError($col,"can not be empty");
 				}
 
 			}
@@ -156,9 +156,9 @@ class Core_Validation {
 		$bool =  preg_match($regex, $check);
 		if(!$bool && $col) {
 			if($errorString) {
-				$this->_createerror($col,$errorString);
+				$this->_createError($col,$errorString);
 			}else {
-				$this->_createerror($col,"has an error");
+				$this->_createError($col,"has an error");
 			}
 			return $bool;
 		}
@@ -172,7 +172,7 @@ class Core_Validation {
 	 * @param  boolean $bool        if there needs to be an array
 	 * @return boolean               if a error was added
 	 */
-	private function _createerror($col,$errorString,$bool=FALSE) {
+	private function _createError($col,$errorString,$bool=FALSE) {
 		if(!$bool) {
 			$this->errors[$col] = Core::toNorm($col)." ".$errorString;
 			unset($this->data[$col]);
@@ -229,7 +229,7 @@ class Core_Validation {
 		$max = $value[1];
 		$length = mb_strlen($val);
 		$bool = ($length >= $min && $length <= $max);
-		return $this->_createerror($col,$errorString,$bool);
+		return $this->_createError($col,$errorString,$bool);
 	}
 
 	/**
@@ -245,7 +245,7 @@ class Core_Validation {
 	private function _boolean($val,$col,$value = NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a boolean";
 		$booleanList = array(0, 1, '0', '1', true, false);
-		return $this->_createerror($col,$errorString,in_array($val, $booleanList, true));
+		return $this->_createError($col,$errorString,in_array($val, $booleanList, true));
 	}
 
 	/**
@@ -295,7 +295,7 @@ class Core_Validation {
 					$number = $val[$position] * 2;
 					$sum += ($number < 10) ? $number : $number - 9;
 				}
-				return $this->_createerror($col,$errorString,($sum % 10 == 0));
+				return $this->_createError($col,$errorString,($sum % 10 == 0));
 			}
 		}
 	}
@@ -377,9 +377,9 @@ class Core_Validation {
 	 * @param  array $value  holds the error string and the string to check against
 	 * @return boolean       if the data was valid
 	 */
-	private function _equalto($val,$col,$value) {
+	private function _equalTo($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"does not match";
-		return $this->_createerror($col,$errorString,($val === $value));
+		return $this->_createError($col,$errorString,($val === $value));
 	}
 
 	/**
@@ -426,7 +426,7 @@ class Core_Validation {
 				return true;
 			}
 		}
-		return $this->_createerror($col,$errorString);
+		return $this->_createError($col,$errorString);
 	}
 	/**
 	 * Checks to see if the valid is in a list, pass the list of items to check against
@@ -446,7 +446,7 @@ class Core_Validation {
 			$errorString = "is not a valid file format";
 		}
 		$list = $value;
-		return $this->_createerror($col,$errorString,in_array($val, $list));
+		return $this->_createError($col,$errorString,in_array($val, $list));
 	}
 	/**
 	 * Checks if value is a valid IP address in either ipv4 or ipv6
@@ -474,7 +474,7 @@ class Core_Validation {
 			$flags[] = FILTER_FLAG_IPV6;
 		}
 		$bool = (boolean)filter_var($check, FILTER_VALIDATE_IP, array('flags' => $flags));
-		return $this->_createerror($col,$errorString,$bool);
+		return $this->_createError($col,$errorString,$bool);
 	}
 
 	/**
@@ -487,12 +487,12 @@ class Core_Validation {
 	 * @param  array $value  holds the error string, and the minimum length
 	 * @return boolean       if the data was valid
 	 */
-	private function _minlength($val,$col,$value) {
+	private function _minLength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too short";
 		$min = isset($value[0])?$value["error"]:$value;
 
 		$bool = mb_strlen($val) >= $min;
-		return $this->_createerror($col,$errorString,$bool);
+		return $this->_createError($col,$errorString,$bool);
 	}
 
 	/**
@@ -505,11 +505,11 @@ class Core_Validation {
 	 * @param  array $value  holds the error string, and the maximum length
 	 * @return boolean       if the data was valid
 	 */
-	private function _maxlength($val,$col,$value) {
+	private function _maxLength($val,$col,$value) {
 		$errorString = isset($value["error"])?$value["error"]:"is too long";
 		$min = isset($value[0])?$value["error"]:$value;
 		$bool = mb_strlen($val) <= $min;
-		return $this->_createerror($col,$errorString,$bool);
+		return $this->_createError($col,$errorString,$bool);
 	}
 
 	/**
@@ -549,7 +549,7 @@ class Core_Validation {
 	private function _numeric($val,$col,$value=NULL) {
 		$errorString = isset($value["error"])?$value["error"]:"is not a number";
 		$bool = is_numeric($val);
-		return $this->_createerror($col,$errorString,$bool);
+		return $this->_createError($col,$errorString,$bool);
 	}
 
 	/**
@@ -627,12 +627,12 @@ class Core_Validation {
 		$lower = $value[0];
 		$upper = $value[1];
 		if (!is_numeric($check)) {
-			$this->_createerror($col,$errorString);
+			$this->_createError($col,$errorString);
 		}
 		if (isset($lower) && isset($upper)) {
-			return $this->_createerror($col,$errorString,($check > $lower && $check < $upper));
+			return $this->_createError($col,$errorString,($check > $lower && $check < $upper));
 		}
-		return $this->_createerror($col,$errorString,is_finite($check));
+		return $this->_createError($col,$errorString,is_finite($check));
 
 	}
 
@@ -757,7 +757,7 @@ class Core_Validation {
 			if($stmt -> execute(array($col=>$val))) {
 				$query = $stmt -> fetchAll();
 
-				return $this->_createerror($col,$errorString, empty($query));
+				return $this->_createError($col,$errorString, empty($query));
 			}
 		}
 		return true;

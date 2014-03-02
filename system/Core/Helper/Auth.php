@@ -43,7 +43,7 @@ Class Core_Helper_Auth {
 	 * @api
 	 * @return boolean if authorized
 	 */
-	public static function isauthorized()
+	public static function isAuthorized()
 	{
 
 

@@ -91,7 +91,7 @@ Class Extension_AdminPanel_Controller_AdminPanelMigrations extends Controller
 				$this->_runMigrations(array($migration));
 
 				// get the tables model
-				$this->loadmodel("Tables");
+				$this->loadModel("Tables");
 
 				// get all the tables witht their create statements
 				$db['tables'] = $this->Tables->getStatements();
@@ -140,7 +140,7 @@ Class Extension_AdminPanel_Controller_AdminPanelMigrations extends Controller
 	private function _getDiff($data)
 	{
 		// get the tables model
-		$this->loadmodel("Tables");
+		$this->loadModel("Tables");
 
 		// get the current tables
 		$tables = $this->Tables->getStatements();
@@ -173,7 +173,7 @@ Class Extension_AdminPanel_Controller_AdminPanelMigrations extends Controller
 
 	private function _runMigrations($migrations)
 	{
-		$this->loadmodel("Tables");
+		$this->loadModel("Tables");
 
 		foreach ($migrations as $migration)
 		{

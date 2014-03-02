@@ -51,7 +51,7 @@ Class Extension_AdminPanel_Controller_AdminPanel extends Controller {
 				);
 
 			// get the tables model
-			$this->loadmodel("Tables");
+			$this->loadModel("Tables");
 
 			// get all the tables witht their create statements
 			$data['tables'] = $this->Tables->getStatements();
