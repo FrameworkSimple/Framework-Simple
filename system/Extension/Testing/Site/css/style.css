@@ -1,0 +1,163 @@
+
+body {
+	background: url('../assets/background.jpg');
+	min-width: 640px;
+	min-height: 960px;
+	font-family: 'Arial', sans-serif;
+	font-size: 26px;
+}
+
+span {
+	display: block;
+}
+
+input {
+	font-size: 34px;
+	padding: 0;
+}
+
+input:active {
+	padding:0;
+}
+
+input.button {
+	color: #fff;
+}
+
+input.full {
+	border: 0px;
+	height: 100px;
+	width: 98%;
+	margin: 0 1%;
+	padding: 0 0 0 20px;
+}
+
+input.half {
+	border: 0px;
+	height: 100px;
+	width: 49%;
+	float: left;
+}
+
+input.half:first-child {
+	margin: 0 0 0 1%;
+}
+input.half:last-child {
+	margin: 0 1% 0 0;
+}
+
+input.first {
+	border-bottom: 1px solid #000;
+	border-radius: 20px 20px 0 0;
+}
+
+input:focus {
+	transition: box-shadow .2s;
+	box-shadow: 0 0 8px 8px rgba(73,206,255,.7) inset;
+	/*box-shadow: 0 0 8px 8px rgba(112,194,81,.7) inset;*/
+}
+
+input.register 			{background-color: #afafaf; transition: background-color .1s;}
+input.register:active 	{background-color: #797979;}
+
+input.sign 			{background-color: #70C251; transition: background-color .1s;}
+input.sign:active 	{background-color: #3a851e;}
+
+.homeForm div input {
+	float: left;
+}
+
+
+
+.form-controls {
+	width: 98%;
+	height: 100px;
+	margin: 20px 1%;
+	border-radius: 20px;
+	background-color: #fff;
+}
+
+.form-controls section {
+	height: 100px;
+	width: 49.9%;
+	float: left;
+}
+
+.form-controls section:first-child {
+	border-right: 1px solid #000;
+}
+
+.form-controls p {
+	width: 200px;
+	margin: 35px 0;
+	float: left;
+}
+
+.form-controls section span {
+	width: 80px;
+	height: 80px;
+	float: left;
+	margin: 9px;
+	border-radius: 15px;
+	border: 1px solid rgba(0,0,0,.4);
+}
+
+.form-controls section span:active {
+	transition: box-shadow .1s, border .1s;
+	box-shadow: 0 0 8px 8px rgba(73,206,255,.7) inset;
+	border: 1px solid rgba(73,206,255,.7);
+}
+
+
+
+button {
+	margin: 0 1%;
+	width: 50%;
+	height: 70px;
+	float: right;
+	border: 0;
+	border-radius: 5px;
+	padding: 10px;
+	color: #fff;
+	background-color: rgba(255,255,255,.15);
+	font-size: 34px;
+}
+button:active {
+	transition: background-color .15;
+	background-color: rgba(100,100,100,1);
+}
+
+.productList {
+	margin: 0;
+	padding: 0;
+	width: 98%;
+	margin: 10px 1%;
+	min-height: 600px;
+	background-color: #fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

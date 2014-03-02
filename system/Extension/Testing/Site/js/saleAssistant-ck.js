@@ -1,0 +1,1 @@
+var saleAssistant=angular.module("saleAssistant",["firebase","ngRoute"]);saleAssistant.config(["$routeProvider",function(e){}]);saleAssistant.run(["$rootScope","$firebaseAuth","$firebase",function(e,t,n){var r=new Firebase("https://mdd-project.firebaseio.com");e.auth=t(r);console.log("done")}]);

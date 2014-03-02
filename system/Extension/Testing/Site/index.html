@@ -1,0 +1,52 @@
+<DOCTYPE html>
+
+	<head>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+	</head>
+
+<html ng-app="saleAssistant">
+<body>
+
+	<form name="homeForm" ng-controller="user">
+
+		<input class="full first" ng-model="userForm.user" name="user" type="text" placeholder="Username" ng-required>
+
+		<input class="full" ng-model="userForm.pass" name="pass" type="text" placeholder="Password" ng-required>
+
+		<div>
+			<input ng-click="register()" class="half register button" type="submit" value="Register">
+
+			<input ng-click="login()" class="half sign button" type="submit" value="Sign In">
+		</div>
+
+		<div style="clear: both"></div>
+
+		<section class="form-controls">
+			<section>
+				<span></span>
+				<p>Show Password</p>
+			</section>
+			<section>
+				<span></span>
+				<p>Agree to <a href="#">Terms</a></p>
+			</section>
+		</section>
+
+	</form>
+
+	<script src="http://code.angularjs.org/1.2.4/angular.min.js"></script>
+	<script src="http://code.angularjs.org/1.2.4/angular-route.js"></script>
+
+	<script type='text/javascript' src='https://cdn.firebase.com/v0/firebase.js'></script>
+
+	<script type='text/javascript' src='https://cdn.firebase.com/v0/firebase-simple-login.js'></script>
+
+	<script src="https://cdn.firebase.com/libs/angularfire/0.5.0-rc1/angularfire.js"></script>
+
+
+	<script type="text/javascript" src="js/saleAssistant.js"></script>
+
+	<script type="text/javascript" src="js/user.js"></script>
+
+</body>
+</html>
