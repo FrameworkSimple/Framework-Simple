@@ -150,7 +150,7 @@ abstract class Core_Controller {
 	public function loadModel($name)
 	{
 
-		$model = Core::instantiate($name);
+		$model = Core::instantiate("Model_".$name);
 
 		$this->{$name} = $model;
 
