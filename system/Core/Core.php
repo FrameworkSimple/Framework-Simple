@@ -491,7 +491,7 @@ Class Core_Core {
 	 * @api
 	 * @param  string $classname the name of the class to instatinate
 	 */
-	public static function instantiate($classname)
+	public static function instantiate($classname,$param=null)
 	{
 		// if it has already been instantiated
 		if(isset(self::$instantiated[$classname]['class']))
@@ -509,9 +509,7 @@ Class Core_Core {
 			// push the name into array for debugging
 			array_push(self::$debug['instantiated'],$classname);
 
-			self::$instantiated[$classname]['class'] = new $classname;
-
-			if(method_exists(self::$instantiated[$classname]['class'], "init")) self::$instantiated[$classname]['class']->init();
+			self::$instantiated[$classname]['class'] = new $classname($param);
 
 			// instatiate it and put it in the array and then return it
 			return self::$instantiated[$classname]['class'];

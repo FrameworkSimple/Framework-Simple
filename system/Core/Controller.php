@@ -108,7 +108,7 @@ abstract class Core_Controller {
 	/**
 	 * set up this controller with hooks and names
 	 */
-	public function init() {
+	public function __construct() {
 
 		// set the controller to the name of this class
 		self::$controller = get_class($this);
@@ -147,10 +147,10 @@ abstract class Core_Controller {
 	 * instantiate a model
 	 * @param  string $name model name
 	 */
-	public function loadModel($name)
+	public function loadModel($name,$server)
 	{
 
-		$model = Core::instantiate("Model_".$name);
+		$model = Core::instantiate("Model_".$name,$server);
 
 		$this->{$name} = $model;
 

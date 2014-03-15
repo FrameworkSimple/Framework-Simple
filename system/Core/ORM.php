@@ -148,9 +148,9 @@ Class Core_ORM extends Database {
 	 * @param  object $value  the params that were passed
 	 * @return object         the response we got from the database
 	 */
-	public function _call($method, $value)
+	public function __call($method, $value)
 	{
-		$this->_name = get_called_class();
+		$this->_name = preg_split("/Model_/", get_called_class())[1];
 
 		// set the default of success to true
 		$this->success = true;
@@ -204,7 +204,7 @@ Class Core_ORM extends Database {
 		$response = $this->$call($this->_data);
 
 		// reset all the options to the default
-		foreach ($this->default_options as $prop => $value) {
+		foreach ($this->_default_options as $prop => $value) {
 			$this->{$prop} = $value;
 		}
 
