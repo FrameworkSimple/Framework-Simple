@@ -38,7 +38,7 @@
 		<?php
 			foreach($tables as $table)
 			{
-				View::render("admin_panel_scaffolding/_checklist",$table,array("path_to_views"=>"/extensions/AdminPanel/views/"));
+				View::render("admin_panel_scaffolding/_checklist",$table,array("path_to_views"=>"/Extension/AdminPanel/View/"));
 			}
 		?>
 	</table>

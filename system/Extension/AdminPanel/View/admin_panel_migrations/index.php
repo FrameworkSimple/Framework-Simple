@@ -15,5 +15,5 @@
 	<?php endif;?>
 	<a href="<?php echo Asset::createUrl('AdminPanelMigrations','create')?>" class="button">Create Custom Migration</a>
 
-	<?php if(!empty($migrations)) View::render("admin_panel_migrations/_row",$migrations,array("path_to_views"=>"/extensions/AdminPanel/views/")); ?>
+	<?php if(!empty($migrations)) View::render("admin_panel_migrations/_row",$migrations,array("path_to_views"=>"/Extension/AdminPanel/View/")); ?>
 </table>

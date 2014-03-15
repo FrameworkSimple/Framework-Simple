@@ -13,7 +13,7 @@
  * @license    http://www.opensource.org/licenses/mit-license.php MIT
  * @link       http://rachelhigley.com/framework
  */
-Class Extension_AdminPanel_Models_Tables extends Database
+Class Extension_AdminPanel_Model_Tables extends Database
 {
 
 	public function getStatements()

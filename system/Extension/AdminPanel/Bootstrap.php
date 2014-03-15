@@ -11,6 +11,6 @@
  */
 
 Core::addNamespace('Extension_AdminPanel');
-define('ADMIN_DB',  dirname( __FILE__ ) . "/models/db.json");
+define('ADMIN_DB',  dirname( __FILE__ ) . "/Model/db.json");
 
 ?>

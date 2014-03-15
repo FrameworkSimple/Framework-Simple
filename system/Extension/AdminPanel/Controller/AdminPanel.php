@@ -35,7 +35,7 @@ Class Extension_AdminPanel_Controller_AdminPanel extends Controller {
 	{
 
 		// if the database doesn't exist
-		if(!is_file( dirname( dirname( __FILE__ ) )."/models/db.json" ) )
+		if(!is_file( dirname( dirname( __FILE__ ) )."/Model/db.json" ) )
 		{
 			// setup the user
 			$data = array(

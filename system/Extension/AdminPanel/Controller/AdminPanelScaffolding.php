@@ -33,9 +33,8 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 
 	public function post($info=NULL) {
 
-		$model = Core::instantiate("Tables");
-
-		$tables = $model->getStatements();
+		$this->loadModel("Tables");
+		$tables = $this->Tables->getStatements();
 
 		$information = array();
 		$information['has_many'] = array();
@@ -103,7 +102,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		if(isset($info['layout']))
 		{
 			$layout = $this->_viewLayout();
-			file_put_contents(SYSTEM_PATH."views/layouts/page.php", $layout);
+			file_put_contents(SYSTEM_PATH."View/Layout/page.php", $layout);
 		}
 
 		foreach ($information['tables'] as $table)
@@ -123,7 +122,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 			{
 
 				// the path to the controller
-				$controller_path = SYSTEM_PATH."controllers/".$table['name']."Controller.php";
+				$controller_path = SYSTEM_PATH."Controller/".$table['name'].".php";
 
 				$controller_info = $info[$underscores]["controller"];
 
@@ -227,7 +226,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 			{
 
 				// the path to the model
-				$model_path = SYSTEM_PATH."models/".$table['name'].".php";
+				$model_path = SYSTEM_PATH."Model/".$table['name'].".php";
 
 				// create the model
 				$model = "";
@@ -238,7 +237,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 				// if the model file doesn't already exist
 				if(!is_file($model_path))
 				{
-					$model = "<?php\nClass ".$table['name']." extends Model\n{\n";
+					$model = "<?php\nClass Model_".$table['name']." extends Model\n{\n";
 
 
 					if(isset($information['belongs_to'][$table['name']]) && isset($model_information["belongs_to"]))
@@ -307,7 +306,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 			{
 
 				// the folder for the views
-				$view_folder = SYSTEM_PATH."views/".$underscores;
+				$view_folder = SYSTEM_PATH."View/".$table['name'];
 
 				if(!is_dir($view_folder))
 				{
@@ -319,87 +318,86 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 
 				$view_info = $info[$underscores]['view'];
 
-				if($view_info['index'])
+				if(isset($view_info['index']))
 				{
 
 					$index = $this->_viewIndex($table['cols'],$underscores,$normal);
 
-					file_put_contents($view_folder."/index.php", $index);
+					file_put_contents($view_folder."/Index.php", $index);
 
 				}
 
-				if($view_info['get'])
+				if(isset($view_info['get']))
 				{
 
 					$get = $this->_viewGet($table['cols'],$underscores);
 
-					file_put_contents($view_folder."/get.php", $get);
+					file_put_contents($view_folder."/Get.php", $get);
 
 				}
 
-				if($view_info['post'])
+				if(isset($view_info['post']))
 				{
 
-					$post = $this->_viewPost($underscores);
+					$post = $this->_viewPost($table['name']);
 
-					file_put_contents($view_folder."/post.php", $post);
+					file_put_contents($view_folder."/Post.php", $post);
 
 				}
 
-				if($view_info['update'])
+				if(isset($view_info['update']))
 				{
 
-					$update = $this->_viewUpdate($underscores);
+					$update = $this->_viewUpdate($table['name']);
 
-					file_put_contents($view_folder."/update.php", $update);
+					file_put_contents($view_folder."/Update.php", $update);
 
 				}
 
-				if($view_info['form'])
+				if(isset($view_info['form']))
 				{
 
 					$form = $this->_viewForm($table['cols'],$underscores);
 
-					file_put_contents($view_folder."/_form.php", $form);
+					file_put_contents($view_folder."/_Form.php", $form);
 
 				}
 
 			}
 		}
-
 		Core::redirect("AdminPanelScaffolding","index");
 	}
 
 	private function _createFolders()
 	{
-		if(!is_dir(SYSTEM_PATH."controllers"))
+		if(!is_dir(SYSTEM_PATH."Controller"))
 		{
 
 			// create the directory
-			mkdir(SYSTEM_PATH."controllers");
+			mkdir(SYSTEM_PATH."Controller");
 
 		}
 
-		if(!is_dir(SYSTEM_PATH."models"))
+		if(!is_dir(SYSTEM_PATH."Model"))
 		{
 
 			// create the directory
-			mkdir(SYSTEM_PATH."models");
+			mkdir(SYSTEM_PATH."Model");
 
 		}
-		if(!is_dir(SYSTEM_PATH."views"))
+		if(!is_dir(SYSTEM_PATH."View"))
 		{
 
 			// create the directory
-			mkdir(SYSTEM_PATH."views");
+			mkdir(SYSTEM_PATH."View");
 
 		}
 
-		if(!is_dir(SYSTEM_PATH."views/layouts"))
+		if(!is_dir(SYSTEM_PATH."View/Layout"))
 		{
 
 			// create the directory
-			mkdir(SYSTEM_PATH."views/layouts");
+			mkdir(SYSTEM_PATH."View/Layout");
 
 		}
 	}
@@ -415,7 +413,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$controller .= "\n * @package    ".$_POST['application_name'];
 		$controller .= "\n * @subpackage Controllers\n * @author     ".$_POST['name'];
 		$controller .= "\n */";
-		$controller .= "\n Class ".$name."Controller extends Controller";
+		$controller .= "\n Class Controller_".$name." extends Controller";
 		$controller .= "\n{";
 
 		return $controller;
@@ -800,7 +798,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$post = "<?php ";
 		$post .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
 		$post .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
-		$post .= "\n\tView::render('".$underscores."/_form',".'$params'.");";
+		$post .= "\n\tView::render('".$underscores."/_Form',".'$params'.");";
 		$post .= "\n?>";
 
 		return $post;
@@ -811,7 +809,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		$update ="<?php";
 		$update .= "\n\t".'$params = isset($'.$underscores.')?$'.$underscores.':array();';
 		$update .= "\n\t".'if(isset($errors))$params = array_merge($params, $errors);';
-		$update .= "\n\tView::render('".$underscores."/_form',".'$params'.");\n?>";
+		$update .= "\n\tView::render('".$underscores."/_Form',".'$params'.");\n?>";
 
 		return $update;
 	}

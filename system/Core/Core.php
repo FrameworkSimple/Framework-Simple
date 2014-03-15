@@ -511,7 +511,7 @@ Class Core_Core {
 
 			self::$instantiated[$classname]['class'] = new $classname;
 
-			if(method_exists(self::$instantiated[$classname]['class'], "Init")) self::$instantiated[$classname]['class']->init();
+			if(method_exists(self::$instantiated[$classname]['class'], "init")) self::$instantiated[$classname]['class']->init();
 
 			// instatiate it and put it in the array and then return it
 			return self::$instantiated[$classname]['class'];

@@ -125,6 +125,13 @@ const AUTH_REDIRECT_CONTROLLER = "home";
 const AUTH_REDIRECT_ACTION = "index";
 
 /**
+ * Salt: string
+ *
+ * the salt used for encrypting your data
+ */
+const SALT = "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p";
+
+/**
  * Extensions: array
  *
  * an array list of extensions you are using
