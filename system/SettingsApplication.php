@@ -81,7 +81,6 @@ const AJAX_RETURN_TYPE = 'json';
  */
 const SESSION = false;
 
-
 /**
  * Authorize: boolean
  *

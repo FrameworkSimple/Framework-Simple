@@ -12,7 +12,6 @@
 *~
 ~*
 *.tmp
-*.json
 # Eclipse
 .project
 settings.xml
@@ -48,3 +47,13 @@ org.eclipse.*
 # Framework Simple
 SettingsEnvironment.php
 */SettingsEnvironment.php
+*db.json
+
+# Grunt + Bower
+
+node_modules
+dist
+.tmp
+.sass-cache
+bower_components
+*.patch
