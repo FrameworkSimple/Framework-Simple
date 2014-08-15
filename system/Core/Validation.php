@@ -79,7 +79,7 @@ class Core_Validation {
 	 * @return array/boolean    true if no errors and errors array if errors
 	 */
 	public function validate($table_name,$data,$required,$rules,$new=true) {
-		$this->tableName = Core::toDb($table_name);
+		$this->tableName = Utilities::toDb($table_name);
 		$this->name = $table_name;
 		$this->data = $data;
 		$this->errors = array();
@@ -90,7 +90,7 @@ class Core_Validation {
 			foreach($this->required as $col) {
 				if(!isset($this->data[$col]) || (empty($this->data[$col]) || !self::_check($this->data[$col],'/[^\s]+/m',$col))) {
 					unset($this->data[$col]);
-					$this->errors[$col] = Core::toNorm($col)." is required";
+					$this->errors[$col] = Utilities::toNorm($col)." is required";
 				}
 			}
 		}
@@ -174,7 +174,7 @@ class Core_Validation {
 	 */
 	private function _createError($col,$errorString,$bool=FALSE) {
 		if(!$bool) {
-			$this->errors[$col] = Core::toNorm($col)." ".$errorString;
+			$this->errors[$col] = Utilities::toNorm($col)." ".$errorString;
 			unset($this->data[$col]);
 			return false;
 		}

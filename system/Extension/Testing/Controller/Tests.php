@@ -95,7 +95,7 @@ class Extension_Testing_Controller_Tests extends Controller {
 
 			if(!isset($this->_test_db[$model->_name]))
 			{
-				$table_name = Core::toDb($model->_name);
+				$table_name = Utilities::toDb($model->_name);
 
 				$this->_setTable($model, $table_name,$model->_name);
 
@@ -106,7 +106,7 @@ class Extension_Testing_Controller_Tests extends Controller {
 				foreach($model->has_many as $table)
 				{
 
-					if(!isset($this->_test_db[$table])) $this->_setTable($model,Core::toDb($table),$table);
+					if(!isset($this->_test_db[$table])) $this->_setTable($model,Utilities::toDb($table),$table);
 
 				}
 
@@ -116,7 +116,7 @@ class Extension_Testing_Controller_Tests extends Controller {
 				foreach($model->belongs_to as $table)
 				{
 
-					if(!isset($this->_test_db[$table])) $this->_setTable($model,Core::toDb($table),$table);
+					if(!isset($this->_test_db[$table])) $this->_setTable($model,Utilities::toDb($table),$table);
 
 				}
 

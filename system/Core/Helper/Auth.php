@@ -43,7 +43,7 @@ Class Core_Helper_Auth {
 	 * @api
 	 * @return boolean if authorized
 	 */
-	public static function isAuthorized()
+	public static function isAuthorized($logged_in=NULL)
 	{
 
 
@@ -51,7 +51,7 @@ Class Core_Helper_Auth {
 		$url = Core::$info_of_url;
 
 		// if the user is logged in then they have permission
-		if(Session::get('logged_in'))
+		if(Session::get('logged_in') || $logged_in)
 		{
 
 			// return true because user is logged in
@@ -103,7 +103,7 @@ Class Core_Helper_Auth {
 		{
 
 			// load the model
-			$model = Core::instantiate("Model_".Core::tocam(AUTH_TABLE));
+			$model = Core::instantiate("Model_".Utilities::toCam(AUTH_TABLE));
 
 			// we only want the user table nothing associatied to it
 			$model->options = array("recursive"=>0);

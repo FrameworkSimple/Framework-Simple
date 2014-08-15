@@ -45,17 +45,17 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 			$table_info = explode(") ENGINE", $table['structure'])[0];
 			$table = array();
 			$table['cols_info'] = explode("\n", $table_info);
-			$information['tables'][$index]['name'] = Core::toCam(str_replace("` (", "", $table['cols_info'][0]));
+			$information['tables'][$index]['name'] = Utilities::toCam(str_replace("` (", "", $table['cols_info'][0]));
 			unset($table['cols_info'][0]);
 			$information['tables'][$index]['cols'] = array();
 			foreach($table['cols_info'] as $col) {
 				if(strpos($col, "FOREIGN KEY")) {
 					$key_info = explode("REFERENCES `", $col);
-					$key_table = Core::toCam(explode("` ", $key_info[1])[0]);
+					$key_table = Utilities::toCam(explode("` ", $key_info[1])[0]);
 					if(!isset($information['has_many'][$key_table])) $information['has_many'][$key_table] = array();
 					if(!isset($information['belongs_to'][$information['tables'][$index]['name']])) $information['belongs_to'][$information['tables'][$index]['name']] = array();
 					array_push($information['has_many'][$key_table],$information['tables'][$index]['name']);
-					array_push($information['belongs_to'][$information['tables'][$index]['name']],Core::toCam($key_table));
+					array_push($information['belongs_to'][$information['tables'][$index]['name']],Utilities::toCam($key_table));
 
 				}
 				else if(strpos($col, "UNIQUE KEY"))
@@ -109,13 +109,13 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 		{
 
 			// create the name with underscores
-			$underscores = Core::toDb($table['name']);
+			$underscores = Utilities::toDb($table['name']);
 
 			// if this table is not one that we want to build scaffolding stop the current iteration
 			if(!isset($info[$underscores])) continue;
 
 			// create the normal name for the database
-			$normal = Core::toNorm($table['name']);
+			$normal = Utilities::toNorm($table['name']);
 
 			// if we want to build the controller
 			if(isset($info[$underscores]["controller"]))
@@ -206,7 +206,7 @@ Class Extension_AdminPanel_Controller_AdminPanelScaffolding extends Controller
 
 						if($ran)
 						{
-							$method_name = "_controller_".$type;
+							$method_name = "_controller".ucfirst($type);
 							array_push($functions, $this->$method_name($normal,$underscores,$table['name']));
 						}
 					}

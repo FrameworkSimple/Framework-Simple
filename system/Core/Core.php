@@ -159,13 +159,16 @@ Class Core_Core {
 			{
 
 				//the php input stream
-				$stream = json_decode(file_get_contents("php://input"),true);
+				$stream = !empty($_REQUEST)?$_REQUEST: json_decode(file_get_contents("php://input"),true);
+
+				// remove the php input
+				if(isset($stream["PHPSESSID"])) unset($stream["PHPSESSID"]);
 
 				// set the request type's data to the php input stream if there is content
 				if($stream) $request[$request['TYPE']] = $stream;
 
 			}
-			$request_data = $request[$request['TYPE']];
+			$request_data = isset($request[$request['TYPE']])?$request[$request['TYPE']]:array();
 
 			// if there is request data add it to the params
 			if(!empty($request_data)) array_push(self::$info_of_url['params'], $request_data);
@@ -193,7 +196,7 @@ Class Core_Core {
 			return;
 		}
 		// if params is not an array
-		if(!empty(self::$info_of_url['params'][0]))
+		if(isset(self::$info_of_url['params'][0]) && (!empty(self::$info_of_url['params'][0]) || self::$info_of_url['params'][0] === "0"))
 		{
 			// call the action
 			call_user_func_array(array($controller,self::$info_of_url['action']),self::$info_of_url['params']);
@@ -218,7 +221,7 @@ Class Core_Core {
 
 		// the name of the controller with out Controller
 
-		$controller_name = self::toDb(str_replace("Controller_", "", self::$info_of_url['controller']));
+		$controller_name = Utilities::toDb(str_replace("Controller_", "", self::$info_of_url['controller']));
 
 		// path to view
 		$file_name= "{$controller_name}/{$controller::$view_name}$extension";
@@ -304,8 +307,9 @@ Class Core_Core {
 				array_shift($request);
 
 			}
+
 			// if there is an second value
-			if (isset($request[0]) && !empty($request[0]))
+			if (isset($request[0]) && (!empty($request[0]) || $request[0] === "0"))
 			{
 
 
@@ -491,10 +495,10 @@ Class Core_Core {
 	 * @api
 	 * @param  string $classname the name of the class to instatinate
 	 */
-	public static function instantiate($classname,$param=null)
+	public static function instantiate($classname,$params=array())
 	{
 		// if it has already been instantiated
-		if(isset(self::$instantiated[$classname]['class']))
+		if(isset(self::$instantiated[$classname]['class']) && self::$instantiated[$classname]['params'] === $params)
 		{
 
 			//return that one
@@ -506,10 +510,14 @@ Class Core_Core {
 		else
 		{
 
+			if(empty($params)) $params = array();
+
 			// push the name into array for debugging
 			array_push(self::$debug['instantiated'],$classname);
 
-			self::$instantiated[$classname]['class'] = new $classname($param);
+			$reflector = new ReflectionClass($classname);
+			self::$instantiated[$classname]['params'] = $params;
+			self::$instantiated[$classname]['class'] = $reflector->newInstanceArgs($params);
 
 			// instatiate it and put it in the array and then return it
 			return self::$instantiated[$classname]['class'];
@@ -566,66 +574,6 @@ Class Core_Core {
 
 		}
 	}
-
-	/**
-	 * encrypt sensitive data using this function
-	 * @api
-	 * @param  string $value string you want to encrypt
-	 * @return string        The encrypted string
-	 */
-	public static function encrypt($value)
-	{
-
-		if(SALT == "1a2b3c4d5e6f7g8h9i10j11k12l13m14n15o16p") {
-
-			echo "Please change the salt in your settings to a unique set of characters";
-
-		}else {
-
-			return md5($value.SALT);
-		}
-	}
-
-
-	/**
-	 * split on caps, add underscores and then convert it to lowercase
-	 * @api
-	 * @param  string $string the string to convert
-	 * @return string         the converted string
-	 */
-	public static function toDb($string){
-
-		$string = preg_replace('/\B([A-Z])/', '_$1', $string);
-    	return strtolower($string);
-	}
-
-
-	/**
-	 * replace underscores with spaces and capitalize first letter
-	 * @api
-	 * @param  string $string the string to convert
-	 * @return string         the converted string
-	 */
-	public static function toNorm($string)
-	{
-		$string = str_replace("_", " ", $string);
-		return ucfirst($string);
-	}
-
-
-	/**
-	 * find the underscores and convert the following letter to and uppercase
-	 * @api
-	 * @param  string $string the string to convert
-	 * @return string         the converted string
-	 */
-	public static function toCam($string)
-	{
-		$func = create_function('$c', 'return strtoupper($c[1]);');
-    	$string = preg_replace_callback('/_([a-z])/', $func, $string);
-		return ucfirst($string);
-	}
-
 
 	/**
 	 * add classes to be autoloaded

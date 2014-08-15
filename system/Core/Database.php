@@ -34,9 +34,28 @@ class Core_Database {
 	public static $tables;
 
 	/**
+	 * db_host: string
+	 *
+	 * The database host name
+	 * @var string
+	 */
+	public $db_host;
+
+	/**
+	 * db_name: string
+	 *
+	 * The database name
+	 * @var string
+	 */
+	public $db_name;
+
+
+	/**
 	 * Set up PDO
 	 */
 	public function __construct($DB_HOSTNAME=DB_HOSTNAME,$DB_NAME=DB_NAME,$DB_USERNAME=DB_USERNAME,$DB_PASSWORD=DB_PASSWORD) {
+		$this -> db_host = $DB_HOSTNAME;
+		$this -> db_name = $DB_NAME;
 		$this -> db = new \PDO("mysql:hostname=".$DB_HOSTNAME.";dbname=".$DB_NAME,$DB_USERNAME,$DB_PASSWORD);
 		$this -> db -> setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 		$this -> db -> setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_SILENT);

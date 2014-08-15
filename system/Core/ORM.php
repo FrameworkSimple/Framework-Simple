@@ -166,7 +166,7 @@ Class Core_ORM extends Database {
 		else if(strstr($method,"findBy"))
 		{
 			// remove "findBy" and then make the db version of the columns
-			$cols = Core::toDb(str_replace("findBy","",$method));
+			$cols = Utilities::toDb(str_replace("findBy","",$method));
 
 			// seperate the columns into an array
 			$cols = explode("_and_", $cols);
@@ -237,7 +237,7 @@ Class Core_ORM extends Database {
 		$order = $this->_createOrder();
 
 		// the dabase name for this model
-		$dbName = Core::toDb($this->_name);
+		$dbName = Utilities::toDb($this->_name);
 
 		// create the where statement
 		$where = $this->_createWhere();
@@ -503,7 +503,7 @@ Class Core_ORM extends Database {
 			if(Hook::call("beforeSave", array(&$this->_data,&$this)) === false) return;
 
 			// set the database name
-			$dbName = Core::toDb($this->_name);
+			$dbName = Utilities::toDb($this->_name);
 
 			// set up the table
 			$this->_setTable($dbName);
@@ -527,7 +527,7 @@ Class Core_ORM extends Database {
 				foreach($this->_data as $col=>$val) {
 
 				// check if the column is in this table
-					if(isset(parent::$tables[$dbName][$col]))
+					if(isset(parent::$tables[$this->db_host][$this->db_name][$dbName][$col]))
 					{
 
 					// set the value into the array to be evaulated
@@ -656,7 +656,7 @@ else
 	{
 
 		// set the database name
-		$dbName = Core::toDb($this->_name);
+		$dbName = Utilities::toDb($this->_name);
 
 		// call the before delete function
 		if(Hook::call("beforeDelete",array($id, $dbName, &$this)) === false) return;
@@ -735,6 +735,7 @@ else
 
 		foreach($this->_tables as $table)
 		{
+			$tableName = substr($table, ($pos = strpos($table, '.')) !== false ? $pos + 1 : 0);
 			// if no columns then get all the columns
 			if(empty($this->columns))
 			{
@@ -743,11 +744,11 @@ else
 				{
 
 					// loop through the parent tables
-					foreach(parent::$tables[$table] as $col=>$val)
+					foreach(parent::$tables[$this->db_host][$this->db_name][$table] as $col=>$val)
 					{
 
 						// create a select statement with an alias
-						$selectStatement .= $table.".".$col." AS '".$table."$".$col."', ";
+						$selectStatement .= $tableName.".".$col." AS '".$tableName."$".$col."', ";
 
 					}
 				}
@@ -763,7 +764,7 @@ else
 				{
 
 						// create a select statement for each field with an alias
-					$selectStatement .= $table.".".$col." AS '".$table."$".$col."', ";
+					$selectStatement .= $tableName.".".$col." AS '".$tableName."$".$col."', ";
 				}
 			}
 		}
@@ -781,10 +782,10 @@ else
 	{
 
 		// if we don't already have the table then get it
-		if(!isset(parent::$tables[$table]))
+		if(!isset(parent::$tables[$this->db_host][$this->db_name][$table]))
 		{
 			// the database name
-			$dbName = Core::toDb($table);
+			$dbName = Utilities::toDb($table);
 
 			// the statement to get all the columns
 			$statement = "SHOW COLUMNS from ".$dbName;
@@ -814,7 +815,7 @@ else
 				}
 
 				// set the temp array to the parent array
-				parent::$tables[$table] = $tableArray;
+				parent::$tables[$this->db_host][$this->db_name][$table] = $tableArray;
 
 				// everything worked and table was set up
 				return true;
@@ -908,28 +909,35 @@ else
 			if(isset($tables[3]) && is_string($tables[3])) $direction = $tables[3];
 			elseif(isset($tables[3]) && is_bool($tables[3])) $ManyToMany = $tables[3];
 
-			$dbTable1 = Core::toDb($table1);
-			$dbTable2 = Core::toDb($table2);
+			$dbTable1 = Utilities::toDb($table1);
+			$dbTable2 = Utilities::toDb($table2);
 
-			if(!in_array($table1, $this->has_many) && $table1 != $this->_name)
+			$table1Name = substr($table1, ($pos = strpos($table1, '.')) !== false ? $pos + 1 : 0);
+			$table2Name = substr($table2, ($pos = strpos($table2, '.')) !== false ? $pos + 1 : 0);
+			$dbTable1Name = substr($dbTable1, ($pos = strpos($dbTable1, '.')) !== false ? $pos + 1 : 0);
+			$dbTable2Name = substr($dbTable2, ($pos = strpos($dbTable2, '.')) !== false ? $pos + 1 : 0);
+
+			if(!in_array($table1Name, $this->has_many) && $table1Name != $this->_name)
 			{
-				array_push($this->has_many, $table1);
+				array_push($this->has_many, $table1Name);
 			}
-			if(!in_array($table2, $this->belongs_to) && !$ManyToMany)
+			if(!in_array($table2Name, $this->belongs_to) && !$ManyToMany)
 			{
-				array_push($this->belongs_to, $table2);
+				array_push($this->belongs_to, $table2Name);
 			}
-			else if(!in_array($table2, $this->has_many) && $ManyToMany)
+			else if(!in_array($table2Name, $this->has_many) && $ManyToMany)
 			{
-				array_push($this->has_many, $table2);
+				array_push($this->has_many, $table2Name);
 			}
+
+
 
 			// if the alias is already created then use the other table
 			if(in_array($table1, $this->_tables))
 			{
 
 				// create the join statement
-				$statement .= " $direction JOIN $dbTable2 AS $table2 ON $table1.".$dbTable2."_id = $table2.id";
+				$statement .= " $direction JOIN $dbTable2 AS $table2Name ON $table1Name.".$dbTable2Name."_id = $table2Name.id";
 
 				// push the table into the alias
 				array_push($this->_tables, $table2);
@@ -940,7 +948,7 @@ else
 			{
 
 				// create the join table
-				$statement .= " $direction JOIN $dbTable1 AS $table1 ON $table1.".$dbTable2."_id = $table2.id";
+				$statement .= " $direction JOIN $dbTable1 AS $table1Name ON $table1Name.".$dbTable2Name."_id = $table2Name.id";
 
 				// push the table into the alias
 				array_push($this->_tables, $table1);

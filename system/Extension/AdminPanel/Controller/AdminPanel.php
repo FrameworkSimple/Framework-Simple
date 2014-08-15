@@ -43,7 +43,7 @@ Class Extension_AdminPanel_Controller_AdminPanel extends Controller {
 					array(
 						"id"=>1,
 						"username"=>ADMIN_USERNAME,
-						"password"=>Core::encrypt(ADMIN_PASSWORD),
+						"password"=>Utilities::encrypt(ADMIN_PASSWORD),
 						'migrations'=> 0
 						)
 					),
@@ -83,7 +83,7 @@ Class Extension_AdminPanel_Controller_AdminPanel extends Controller {
 						$id = $user->id;
 
 						// set the username
-						$user->password = Core::encrypt(ADMIN_PASSWORD);
+						$user->password = Utilities::encrypt(ADMIN_PASSWORD);
 
 						// the user exists
 						$user_exists = true;
@@ -98,7 +98,7 @@ Class Extension_AdminPanel_Controller_AdminPanel extends Controller {
 					array_push($data->users, array(
 						"id"=>$id + 1,
 						"username"=>ADMIN_USERNAME,
-						"password"=>Core::encrypt(ADMIN_PASSWORD),
+						"password"=>Utilities::encrypt(ADMIN_PASSWORD),
 						"migrations"=>0
 						));
 

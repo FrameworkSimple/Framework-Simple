@@ -36,7 +36,7 @@ Class Extension_AdminPanel_Controller_AdminPanelUser extends Controller {
 				{
 
 					// if the username exists
-					if($user->username === $admin_user['username'] && $user->password === Core::encrypt($admin_user['password']) )
+					if($user->username === $admin_user['username'] && $user->password === Utilities::encrypt($admin_user['password']) )
 					{
 
 						Session::set("AdminUser",true);
