@@ -51,8 +51,10 @@ Class Core_Helper_Hook {
 			// loop through the hook and get the function information
 			foreach($hook as $fun) {
 
+				if(!isset($fun[2])) $fun[2] = array();
+
 				// create a new instance of the class
-				$class = Core::instantiate($fun[0]);
+				$class = Core::instantiate($fun[0],$fun[2]);
 
 				// call the function inside the class with the arguments
 				$return = call_user_func_array(array($class,$fun[1]),$args);

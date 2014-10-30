@@ -497,31 +497,39 @@ Class Core_Core {
 	 */
 	public static function instantiate($classname,$params=array())
 	{
-		// if it has already been instantiated
-		if(isset(self::$instantiated[$classname]['class']) && self::$instantiated[$classname]['params'] === $params)
+
+		if(isset(self::$instantiated[$classname]['classes']))
 		{
+			foreach (self::$instantiated[$classname]['classes'] as $class) {
+				// if it has already been instantiated
+				if(isset($class['class']) && $class['params'] === $params)
+				{
+					//return that one
+					return $class['class'];
+				}
 
-			//return that one
-			return self::$instantiated[$classname]['class'];
-
+			}
 		}
 
-		// if it hasn't been instantiated
-		else
-		{
 
-			if(empty($params)) $params = array();
+		// push the name into array for debugging
+		array_push(self::$debug['instantiated'],$classname);
 
-			// push the name into array for debugging
-			array_push(self::$debug['instantiated'],$classname);
+		$reflector = new ReflectionClass($classname);
 
-			$reflector = new ReflectionClass($classname);
-			self::$instantiated[$classname]['params'] = $params;
-			self::$instantiated[$classname]['class'] = $reflector->newInstanceArgs($params);
+		if(!isset(self::$instantiated[$classname])) self::$instantiated[$classname] = array();
+		if(!isset(self::$instantiated[$classname]['classes'])) self::$instantiated[$classname]['classes'] = array();
 
-			// instatiate it and put it in the array and then return it
-			return self::$instantiated[$classname]['class'];
-		}
+		if(!$params) $params = array();
+		$class = array();
+		$class['params'] = $params;
+		$class['class'] = $reflector->newInstanceArgs($params);
+
+		array_push(self::$instantiated[$classname]['classes'], $class);
+
+
+		return $class['class'];
+
 
 	}
 

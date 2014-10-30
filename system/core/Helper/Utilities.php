@@ -58,7 +58,19 @@ class Core_Helper_Utilities {
   public static function toNorm($string)
   {
     $string = str_replace("_", " ", $string);
-    return ucfirst($string);
+    return strtolower($string);
+  }
+
+ /**
+ * replace underscores with spaces and capitalize first letter
+ * @api
+ * @param  string $string the string to convert
+ * @return string         the converted string
+ */
+  public static function toUnder($string)
+  {
+    $string = str_replace(" ", "_", $string);
+    return strtolower($string);
   }
 
 

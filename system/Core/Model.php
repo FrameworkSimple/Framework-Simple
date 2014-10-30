@@ -71,19 +71,20 @@ abstract class Core_Model extends ORM {
 	 */
 	public $error = array();
 
+
 	/**
 	 * Register all of the hooks for the model
 	 */
 	public function __construct($DB_HOSTNAME=DB_HOSTNAME,$DB_NAME=DB_NAME,$DB_USERNAME=DB_USERNAME,$DB_PASSWORD=DB_PASSWORD)
 	{
 		// call the before validation function
-		Hook::register("beforeValidation",array(get_called_class(),"beforeValidation"));
+		Hook::register("beforeValidation",array(get_called_class(),"beforeValidation",func_get_args()));
 
 		// call the before save function
-		Hook::register("beforeSave",array(get_called_class(),"beforeSave"));
+		Hook::register("beforeSave",array(get_called_class(),"beforeSave",func_get_args()));
 
 		// call the before delete function
-		Hook::register("beforeDelete",array(get_called_class(),"beforeDelete"));
+		Hook::register("beforeDelete",array(get_called_class(),"beforeDelete",func_get_args()));
 
 		parent::__construct($DB_HOSTNAME,$DB_NAME,$DB_USERNAME,$DB_PASSWORD);
 

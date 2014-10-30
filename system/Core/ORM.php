@@ -28,7 +28,7 @@ Class Core_ORM extends Database {
 		"where"=>array(),
 		"return_saved"=>false,
 		"order_by"=> "",
-		"key"=>array()
+		"key"=>array(),
 		);
 
 	/**
@@ -298,6 +298,7 @@ Class Core_ORM extends Database {
 			foreach($results as $i=>$result)
 			{
 
+
 				// loop through this result
 				foreach($result as $col=>$val)
 				{
@@ -311,6 +312,8 @@ Class Core_ORM extends Database {
 					{
 						//set the column
 						$current_result[$col] = $val;
+
+
 
 					}
 					// if we have has many joins then we have to worry about multiple rows
@@ -380,6 +383,7 @@ Class Core_ORM extends Database {
 									$current[$table]['id'] = $val;
 									$current[$table]['index']++;
 									if(isset($this->key[$table]))$current[$table]['index'] = $result[$table."$".$this->key[$table]];
+
 									array_push($ids[$table], $val);
 								}
 
@@ -417,6 +421,9 @@ Class Core_ORM extends Database {
 				// if there are no previous ids or this the last row
 				if($prev_id === false || $i === $length -1)
 				{
+
+					if(!empty($this->key) && $this->recursive === 0) $return_results_index = Utilities::toUnder($current_result[$this->key[1]]);
+					if(!empty($this->key) && $this->recursive !== 0) $return_results_index = Utilities::toUnder($current_result[$this->key[0]][$this->key[1]]);
 
 					// set the current result
 					$return_results[$return_results_index] = $current_result;
@@ -562,91 +569,91 @@ Class Core_ORM extends Database {
 				$insertStmt2 = substr($insertStmt2, 0, -2).")";
 
 			// remove the comma and space at the end
-$updateStmt1 = substr($updateStmt1, 0,-2);
+			$updateStmt1 = substr($updateStmt1, 0,-2);
 
 			// creat the statement
-$statement = $insert?$insertStmt1.$insertStmt2:$updateStmt1.$updateStmt2;
+			$statement = $insert?$insertStmt1.$insertStmt2:$updateStmt1.$updateStmt2;
 
 			// push the statement into the debug
-array_push(Core::$debug['statements'], $statement);
+			array_push(Core::$debug['statements'], $statement);
 
 			// prepare the statement for the call
-$stmt = $this->db->prepare($statement);
+			$stmt = $this->db->prepare($statement);
 
 			// if statement ran correctly
-if($stmt->execute($evaulate))
-{
+			if($stmt->execute($evaulate))
+			{
 				// if a row was saved
-	if($stmt->rowcount() > 0)
-	{
+				if($stmt->rowcount() > 0)
+				{
 
 					// set success to true
-		$this->success = true;
+					$this->success = true;
 
 					// get the id of the inserted
-		$id = $insert?$this->db->lastinsertid():$this->_data['id'];
+					$id = $insert?$this->db->lastinsertid():$this->_data['id'];
 
 
-		if($this->return_saved)
-		{
+					if($this->return_saved)
+					{
 
-			$this->_data = array();
-			return call_user_func(array(get_called_class(),"findById"),$id);
-		}
+						$this->_data = array();
+						return call_user_func(array(get_called_class(),"findById"),$id);
+					}
 
 					// return the id
-		return $id;
-	}
+					return $id;
+				}
 				// if no rows were saved
-	else
-	{
+				else
+				{
 					// set success to false
-		$this->success = false;
+					$this->success = false;
 
 					// set the error message and code
-		$this->error = array("msg"=>"ID not found in database or nothing changed","code"=>3);
-	}
-}
+					$this->error = array("msg"=>"ID not found in database or nothing changed","code"=>3);
+				}
+			}
 			// if the statement didn't run
-else
-{
+			else
+			{
 
 				// set success equal to false
-	$this->success = false;
+				$this->success = false;
 
 				// check if we can get errorInfo
-	if($stmt->errorinfo() && ($info=$stmt->errorinfo()) && $info[2])
-	{
+				if($stmt->errorinfo() && ($info=$stmt->errorinfo()) && $info[2])
+				{
 
 					// set the error message and code
-		$this->error = array("msg"=>$info[2],"code"=>3);
+					$this->error = array("msg"=>$info[2],"code"=>3);
 
-	}
+				}
 
 				// if we can't get the error info
-	else
-	{
+				else
+				{
 
 					// set the error message and code
-		$this->error = array("msg"=>"There was an error in the call","code"=>3);
+					$this->error = array("msg"=>"There was an error in the call","code"=>3);
 
-	}
-}
+				}
+			}
 
 
-}
+		}
 		// if data did not validate
-else
-{
+		else
+		{
 			// set success to false
-	$this->success = false;
+			$this->success = false;
 
 			// set the error
-	$this->error = array("msg"=>"Data did not pass validation", "code"=>2,"fields"=>$valid);
+			$this->error = array("msg"=>"Data did not pass validation", "code"=>2,"fields"=>$valid);
 
-}
+		}
 
-}
+	}
 
 	/**
 	 * delete information from the database

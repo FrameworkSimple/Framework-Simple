@@ -20,10 +20,26 @@ Class Extension_JWT_Controller_JWTUser {
 
   public function before_action()
   {
-   if(isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'])
+
+    $headers = array('Authorization'=>false);
+
+    if(function_exists('apache_request_headers')) $headers = apache_request_headers();
+    $token = false;
+
+    if(isset($headers['Authorization']) && $headers['Authorization'])
     {
-      self::$token = $_SERVER['HTTP_AUTHORIZATION'];
-      self::$token = str_replace('Bearer ', '', self::$token);
+      $token = $headers['Authorization'];
+    }
+    else
+    {
+      foreach ($headers as $header => $value) {
+        if($header =="Authorization") $token = $value;
+      }
+    }
+
+    if($token)
+    {
+      self::$token = str_replace('Bearer ', '', $token);
 
       self::$user = JWT::decode(self::$token,SALT);
 
@@ -31,6 +47,7 @@ Class Extension_JWT_Controller_JWTUser {
     }
 
     return Auth::isAuthorized(false);
+
 
   }
  /**
@@ -101,6 +118,7 @@ Class Extension_JWT_Controller_JWTUser {
   public static function logout()
   {
 
+    self::$user = array();
     self::$user['logged_in'] = false;
 
     // set the session user

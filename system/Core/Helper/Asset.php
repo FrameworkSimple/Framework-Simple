@@ -343,6 +343,8 @@ Class Core_Helper_Asset {
 	public static function json($object,$echo=true)
 	{
 
+		$object = self::encode($object);
+
 		// json encode the object
 		$json = json_encode($object);
 
@@ -352,4 +354,112 @@ Class Core_Helper_Asset {
 		// return the object
 		return $json;
 	}
+
+	/**
+   * @param array $data
+   * @param int $options
+   * @return array
+   */
+  public static function encode(array $data)
+  {
+      foreach ($data as $key=>$val) {
+          if (is_array($val)) {
+              $data[$key] = self::encode($val);
+          } else {
+            $data[$key] = self::_clean(mb_convert_encoding(self::_convert_smart_quotes($val),"HTML-ENTITIES","UTF-8"));
+          }
+      }
+
+      return $data;
+  }
+
+  private static function _convert_smart_quotes($string)
+	{
+	    $search = array(chr(145),
+	                    chr(146),
+	                    chr(147),
+	                    chr(148),
+	                    chr(151));
+
+	    $replace = array("'",
+	                     "'",
+	                     '"',
+	                     '"',
+	                     '-');
+
+	    return str_replace($search, $replace, $string);
+	}
+
+	private static function _clean($string)
+	{
+		if (get_magic_quotes_gpc()) {
+				$string = stripslashes($stringIn);
+			}
+
+			// var_dump($string);
+
+			// $string = kses($string, $allowedTags); // For kses {@see http://sourceforge.net/projects/kses/}
+
+			// ============
+			// Remove MS Word Special Characters
+			// ============
+
+      $search  = array(
+      	'&acirc;€“','&acirc;&euro;&ldquo;',
+      	'&acirc;€œ','&acirc;&euro;&oelig;','&acirc;&euro;&#2013265925;"',
+      	'&acirc;€˜','&acirc;&euro;&tilde;',
+      	'&acirc;€™','&acirc;&euro;&trade;','&acirc;&euro;&#157;',
+      	'&Acirc;&pound;',
+      	'&Acirc;&not;',
+      	'&acirc;„&cent;',
+      	'&Acirc;');
+      $replace = array(
+      	'-','-',
+      	'&ldquo;','&ldquo;','&ldquo;',
+      	'&lsquo;','&lsquo;',
+      	'&rsquo;','&rsquo;','&rsquo;',
+      	'&pound;',
+      	'&not;',
+      	'&#8482;',
+      	'',
+      	);
+
+      $string = str_replace($search, $replace, $string);
+      $string = str_replace('&acirc;€', '&rdquo;', $string);
+
+      $search = array("&#39;", "\xc3\xa2\xc2\x80\xc2\x99", "\xc3\xa2\xc2\x80\xc2\x93", "\xc3\xa2\xc2\x80\xc2\x9d", "\xc3\xa2\x3f\x3f");
+      $resplace = array("'", "'", ' - ', '"', "'");
+
+      $string = str_replace($search, $replace, $string);
+
+			$quotes = array(
+				"\xC2\xAB"     => '"',
+				"\xC2\xBB"     => '"',
+				"\xE2\x80\x98" => "'",
+				"\xE2\x80\x99" => "'",
+				"\xE2\x80\x9A" => "'",
+				"\xE2\x80\x9B" => "'",
+				"\xE2\x80\x9C" => '"',
+				"\xE2\x80\x9D" => '"',
+				"\xE2\x80\x9E" => '"',
+				"\xE2\x80\x9F" => '"',
+				"\xE2\x80\xB9" => "'",
+				"\xE2\x80\xBA" => "'",
+				"\xe2\x80\x93" => "-",
+				"\xc2\xb0"	   => "°",
+				"\xc2\xba"     => "°",
+				"\xc3\xb1"	   => "&#241;",
+				"\x96"		   => "&#241;",
+				"\xe2\x81\x83" => '&bull;',
+				"\xd5" => "'"
+			);
+
+			$string = strtr($string, $quotes);
+
+			return $string;
+	}
+
+
+
+
 }
